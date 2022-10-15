@@ -8,7 +8,7 @@
 ### 01.10.22
 - Added guidelines
 - Might be necessary: 
-    - Contact *once again* a professor, for a possible topic.
+    - Contact a professor, for a possible topic.
 
 
 ### 07.10.22
@@ -60,7 +60,7 @@
       - [LightGuider: Guiding Interactive Lighting Design using Suggestions, Provenance, and Quality Visualization](https://doi.org/10.1109/TVCG.2019.2934658) (**done**)
       - [Procedural Design of Exterior Lighting for Buildings with Complex Constraints](https://doi.org/10.1145/2629573)
       - [Narrow-Band Topology Optimization on a Sparsely Populated Grid](https://doi.org/10.1145/3272127.3275012)
-    - [Material parameter estimation](https://rgl.s3.eu-central-1.amazonaws.com/media/papers/Zeltner2021MonteCarlo.pdf)
+    - [Material parameter estimation](https://rgl.s3.eu-central-1.amazonaws.com/media/papers/Zeltner2021MonteCarlo.pdf) (**done**)
       - Try out in [Mitsuba](https://github.com/mitsuba-renderer/mitsuba3)
       - Use mitsuba and set up experimental situation, like box and material in the middle
         - give material parameters so we can achieve original image from real life
@@ -69,3 +69,27 @@
       - how much data does one neeeds for a neuiral structure
       - make a comparision w/ different renderers
     - half page or full page: abstract and when you want to finish
+
+### 15.10.22
+- Prof Moeller, David (see also emails from 14.10):
+  - Torsten
+    > great. yes, let us meet. I am on conference next week, however. May I
+  suggest to find a time the week after? E.g. Mon, Oct 24th 12:30-3pm would
+  be possible for me. May I kindly ask you, Saip-Can, to create some slide
+  (ppt or keynote or beamer or whatever you like) to detail:
+    > - the problem/research question
+    > - approach
+    > - milestones
+
+  - David
+    > Sure, 24th afternoon works for me. I like the idea of having a summary slide.
+    > Saip-Can, maybe you can summarize what we discussed yesterday (and also which direction seems most interesting to you), and let me know in case any further questions come up until then.
+
+  - Can
+    - Arrange meeting for 24.10.22, 14:00-15:00 (**done**)
+  
+- Read:
+  - [Material parameter estimation](https://rgl.s3.eu-central-1.amazonaws.com/media/papers/Zeltner2021MonteCarlo.pdf) (**done**)
+    - notes about the paper (**done**, see docs)
+  - drjit quick start tutorial (**done**)
+  - Work on *Material parameter estimation* until at the end of 18.10.22
