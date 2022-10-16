@@ -91,5 +91,16 @@
 - Read:
   - [Material parameter estimation](https://rgl.s3.eu-central-1.amazonaws.com/media/papers/Zeltner2021MonteCarlo.pdf) (**done**)
     - notes about the paper (**done**, see docs)
-  - drjit quick start tutorial (**done**)
-  - Work on *Material parameter estimation* until at the end of 18.10.22
+- drjit quick start tutorial (**done**)
+- Work on *Material parameter estimation* until at the end of 18.10.22
+
+### 16.10.22
+- Ideas:
+  - As mentioned on the future work section of the paper *material parameter estimation*, one could add NEE that targets differentiates gradients specifically
+    - Implementation of NEE
+    - Comparision of NEE vs other methodologies
+  - Inverse rendering + inverse modelling:
+    1. Real world image
+    2. Inverse rendering (using mitsuba 3)
+    3. Inverse modelling (mitsuba scene params to CAD app, e.g.)
+    4. Compare results, user test (?)
