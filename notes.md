@@ -6,24 +6,25 @@
 ## Notes
 
 ### 01.10.22
-- Added guidelines
-- Might be necessary: 
-    - Contact a professor, for a possible topic.
 
+- Added guidelines
+- Might be necessary:
+  - Contact a professor, for a possible topic.
 
 ### 07.10.22
+
 - [Slides](https://bit.ly/3Cm4xX1) available for the 07.10.22
 - Bis abmeldefrist: topic necessary 14. Oct
 - 4 Milestones:
   1. concrete Milestone identification
   2. 1.5th Month: prototype
   3. 3th Month: final impl. and tested
-  4. 31.01: submission thesis  + presentation
+  4. 31.01: submission thesis + presentation
 - Verification:
   - Presentation: 10%
     - Required: > 5%
   - Design & Code: 45%
-    - Required: > 22.5% 
+    - Required: > 22.5%
   - Thesis: 45%
     - Required: > 22.5%
 - Submission:
@@ -47,6 +48,7 @@
     - wentrup: 12.10, 16:45-20.00
 
 ### 13.10.22
+
 - See email traffic w/ Prof. Hlavacs, for another thesis topic possiblity (**not relevant**)
 - See email traffic w/ Prof. Moeller, David Hahn for thesis arrangements
   - Send email for a meeting w/ David and Torsten regarding clarifiying thesis timeline(**done**)
@@ -70,33 +72,49 @@
       - make a comparision w/ different renderers
     - half page or full page: abstract and when you want to finish
 
+### 14.10.22
+
+- Done following mitsuba tutorials:
+  - [Mitsuba 3: Youtube tutorials](https://www.youtube.com/watch?v=9Ja9buZx0Cs)
+  - [Mitsuba 3: Read the tocs tutorial, until Cuastics Opimization](https://mitsuba.readthedocs.io/en/stable/src/inverse_rendering/caustics_optimization.html)
+- References:
+  - Diederik P Kingma and Jimmy Ba. Adam: a method for stochastic optimization. arXiv preprint arXiv:1412.6980, 2014.
+  - Stochastic Gradient Descent
+    - Ilya Sutskever, James Martens, George Dahl, and Geoffrey Hinton. On the importance of initialization and momentum in deep learning. In International conference on machine learning, 1139?1147. 2013
+
 ### 15.10.22
+
 - Prof Moeller, David (see also emails from 14.10):
+
   - Torsten
+
     > great. yes, let us meet. I am on conference next week, however. May I
-  suggest to find a time the week after? E.g. Mon, Oct 24th 12:30-3pm would
-  be possible for me. May I kindly ask you, Saip-Can, to create some slide
-  (ppt or keynote or beamer or whatever you like) to detail:
+    > suggest to find a time the week after? E.g. Mon, Oct 24th 12:30-3pm would
+    > be possible for me. May I kindly ask you, Saip-Can, to create some slide
+    > (ppt or keynote or beamer or whatever you like) to detail:
+    >
     > - the problem/research question
     > - approach
     > - milestones
 
   - David
+
     > Sure, 24th afternoon works for me. I like the idea of having a summary slide.
     > Saip-Can, maybe you can summarize what we discussed yesterday (and also which direction seems most interesting to you), and let me know in case any further questions come up until then.
 
   - Can
     - Arrange meeting for 24.10.22, 14:00-15:00 (**done**)
-  
+
 - Read:
   - [Material parameter estimation](https://rgl.s3.eu-central-1.amazonaws.com/media/papers/Zeltner2021MonteCarlo.pdf) (**done**)
     - notes about the paper (**done**, see docs)
 - drjit quick start tutorial (**done**)
-- Work on *Material parameter estimation* until at the end of 18.10.22
+- Work on _Material parameter estimation_ until at the end of 18.10.22
 
 ### 16.10.22
+
 - Ideas:
-  - As mentioned on the future work section of the paper *material parameter estimation*, one could add NEE that targets differentiates gradients specifically
+  - As mentioned on the future work section of the paper _material parameter estimation_, one could add NEE that targets differentiates gradients specifically
     - Implementation of NEE
     - Comparision of NEE vs other methodologies
   - Inverse rendering + inverse modelling:
@@ -104,3 +122,7 @@
     2. Inverse rendering (using mitsuba 3)
     3. Inverse modelling (mitsuba scene params to CAD app, e.g.)
     4. Compare results, user test (?)
+
+### 17/18.10.22
+
+- Worked on optimizing multiple scene parameters, see _optimization-test.ipynb_
