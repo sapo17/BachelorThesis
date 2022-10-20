@@ -132,11 +132,13 @@
   - See highlights on the paper for additional repetition
 - See notes on ReLU
   -  See highlights on the paper for additional repetition
-- Read Morreale et al 21
-  - 3D shape encoded as a mesh in the form of surface map
-- Read regarding hybrid approaches that combine fast to evaluate data structures w/ cooordinate-based MLPs(optional)
-  - Mueller et al 2022
+- Read regarding hybrid approaches that combine fast to evaluate data structures w/ cooordinate-based MLPs (optional, find references on ReLU paper)
+  - Mueller et al 2022 [July 7th 2022] Paper won the SIGGRAPH Best Paper Award. (must read)
   - Martel et al 2021
+- Read regarding: 3D shape can be encoded as an occupancy field (optional, find references on ReLU paper)
+  - [Chen and Zhang 2019; Mescheder et al. 2019], 
+  - a signed distance field [Park et al. 2019]
+  - or directly as a mesh in the form of a surface map Morreale et al 21
 
 - Idea:
   1. Construct and render very simple models (i.e. very rough approximations of target/real world image)
