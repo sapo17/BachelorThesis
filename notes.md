@@ -117,7 +117,7 @@
   - As mentioned on the future work section of the paper _material parameter estimation_, one could add NEE that targets differentiates gradients specifically
     - Implementation of NEE
     - Comparision of NEE vs other methodologies
-  - Inverse rendering + inverse modelling:
+  - Inverse rendering, scene reconstruction from real world images:
     1. Real world image
     2. Inverse rendering (using mitsuba 3)
     3. Inverse modelling (mitsuba scene params to CAD app, e.g.)
