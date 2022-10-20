@@ -126,3 +126,20 @@
 ### 17/18.10.22
 
 - Worked on optimizing multiple scene parameters, see _optimization-test.ipynb_
+
+### 20.10.22
+- See notes on NeRFs
+  - See highlights on the paper for additional repetition
+- See notes on ReLU
+  -  See highlights on the paper for additional repetition
+- Read Morreale et al 21
+  - 3D shape encoded as a mesh in the form of surface map
+- Read regarding hybrid approaches that combine fast to evaluate data structures w/ cooordinate-based MLPs(optional)
+  - Mueller et al 2022
+  - Martel et al 2021
+
+- Idea:
+  1. Construct and render very simple models (i.e. very rough approximations of target/real world image)
+  2. Optimize the constructed image through target/real-world images
+      - The optimization step can be achieved through different approaches like:
+        - *Material parameter estimation*
