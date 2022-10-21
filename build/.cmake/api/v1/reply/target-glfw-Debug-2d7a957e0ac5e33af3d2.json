@@ -1,0 +1,213 @@
+{
+	"artifacts" : 
+	[
+		{
+			"path" : "dependencies/glfw/src/Debug/glfw3.dll"
+		},
+		{
+			"path" : "dependencies/glfw/src/Debug/glfw3dll.lib"
+		},
+		{
+			"path" : "dependencies/glfw/src/Debug/glfw3.pdb"
+		}
+	],
+	"backtrace" : 1,
+	"backtraceGraph" : 
+	{
+		"commands" : 
+		[
+			"add_library",
+			"target_include_directories",
+			"set_target_properties"
+		],
+		"files" : 
+		[
+			"dependencies/glfw/src/CMakeLists.txt"
+		],
+		"nodes" : 
+		[
+			{
+				"file" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 96,
+				"parent" : 0
+			},
+			{
+				"command" : 1,
+				"file" : 0,
+				"line" : 112,
+				"parent" : 0
+			},
+			{
+				"command" : 2,
+				"file" : 0,
+				"line" : 103,
+				"parent" : 0
+			}
+		]
+	},
+	"dependencies" : 
+	[
+		{
+			"id" : "glfw_objects::@e43ad0a4af27ecc346ee"
+		},
+		{
+			"id" : "ZERO_CHECK::@6890427a1f51a3e7e1df"
+		}
+	],
+	"folder" : 
+	{
+		"name" : "GLFW3"
+	},
+	"id" : "glfw::@e43ad0a4af27ecc346ee",
+	"link" : 
+	{
+		"commandFragments" : 
+		[
+			{
+				"fragment" : "/machine:x64 /debug /INCREMENTAL",
+				"role" : "flags"
+			},
+			{
+				"fragment" : "kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib",
+				"role" : "libraries"
+			}
+		],
+		"language" : "C"
+	},
+	"name" : "glfw",
+	"nameOnDisk" : "glfw3.dll",
+	"paths" : 
+	{
+		"build" : "dependencies/glfw/src",
+		"source" : "dependencies/glfw/src"
+	},
+	"sourceGroups" : 
+	[
+		{
+			"name" : "Object Libraries",
+			"sourceIndexes" : 
+			[
+				0,
+				1,
+				2,
+				3,
+				4,
+				5,
+				6,
+				7,
+				8,
+				9,
+				10,
+				11,
+				12,
+				13,
+				14,
+				15
+			]
+		}
+	],
+	"sources" : 
+	[
+		{
+			"backtrace" : 1,
+			"isGenerated" : true,
+			"path" : "C:/UserData/z0047hfn/OneDrive - Siemens AG/Documents/Thesis/BachelorThesis/build/dependencies/glfw/src/glfw_objects.dir/$(Configuration)/context.obj",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"isGenerated" : true,
+			"path" : "C:/UserData/z0047hfn/OneDrive - Siemens AG/Documents/Thesis/BachelorThesis/build/dependencies/glfw/src/glfw_objects.dir/$(Configuration)/init.obj",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"isGenerated" : true,
+			"path" : "C:/UserData/z0047hfn/OneDrive - Siemens AG/Documents/Thesis/BachelorThesis/build/dependencies/glfw/src/glfw_objects.dir/$(Configuration)/input.obj",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"isGenerated" : true,
+			"path" : "C:/UserData/z0047hfn/OneDrive - Siemens AG/Documents/Thesis/BachelorThesis/build/dependencies/glfw/src/glfw_objects.dir/$(Configuration)/monitor.obj",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"isGenerated" : true,
+			"path" : "C:/UserData/z0047hfn/OneDrive - Siemens AG/Documents/Thesis/BachelorThesis/build/dependencies/glfw/src/glfw_objects.dir/$(Configuration)/vulkan.obj",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"isGenerated" : true,
+			"path" : "C:/UserData/z0047hfn/OneDrive - Siemens AG/Documents/Thesis/BachelorThesis/build/dependencies/glfw/src/glfw_objects.dir/$(Configuration)/window.obj",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"isGenerated" : true,
+			"path" : "C:/UserData/z0047hfn/OneDrive - Siemens AG/Documents/Thesis/BachelorThesis/build/dependencies/glfw/src/glfw_objects.dir/$(Configuration)/win32_init.obj",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"isGenerated" : true,
+			"path" : "C:/UserData/z0047hfn/OneDrive - Siemens AG/Documents/Thesis/BachelorThesis/build/dependencies/glfw/src/glfw_objects.dir/$(Configuration)/win32_joystick.obj",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"isGenerated" : true,
+			"path" : "C:/UserData/z0047hfn/OneDrive - Siemens AG/Documents/Thesis/BachelorThesis/build/dependencies/glfw/src/glfw_objects.dir/$(Configuration)/win32_monitor.obj",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"isGenerated" : true,
+			"path" : "C:/UserData/z0047hfn/OneDrive - Siemens AG/Documents/Thesis/BachelorThesis/build/dependencies/glfw/src/glfw_objects.dir/$(Configuration)/win32_time.obj",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"isGenerated" : true,
+			"path" : "C:/UserData/z0047hfn/OneDrive - Siemens AG/Documents/Thesis/BachelorThesis/build/dependencies/glfw/src/glfw_objects.dir/$(Configuration)/win32_thread.obj",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"isGenerated" : true,
+			"path" : "C:/UserData/z0047hfn/OneDrive - Siemens AG/Documents/Thesis/BachelorThesis/build/dependencies/glfw/src/glfw_objects.dir/$(Configuration)/win32_window.obj",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"isGenerated" : true,
+			"path" : "C:/UserData/z0047hfn/OneDrive - Siemens AG/Documents/Thesis/BachelorThesis/build/dependencies/glfw/src/glfw_objects.dir/$(Configuration)/wgl_context.obj",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"isGenerated" : true,
+			"path" : "C:/UserData/z0047hfn/OneDrive - Siemens AG/Documents/Thesis/BachelorThesis/build/dependencies/glfw/src/glfw_objects.dir/$(Configuration)/egl_context.obj",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"isGenerated" : true,
+			"path" : "C:/UserData/z0047hfn/OneDrive - Siemens AG/Documents/Thesis/BachelorThesis/build/dependencies/glfw/src/glfw_objects.dir/$(Configuration)/osmesa_context.obj",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"isGenerated" : true,
+			"path" : "C:/UserData/z0047hfn/OneDrive - Siemens AG/Documents/Thesis/BachelorThesis/build/dependencies/glfw/src/glfw_objects.dir/$(Configuration)/glfw.res",
+			"sourceGroupIndex" : 0
+		}
+	],
+	"type" : "SHARED_LIBRARY"
+}

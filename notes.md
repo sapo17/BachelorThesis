@@ -128,20 +128,31 @@
 - Worked on optimizing multiple scene parameters, see _optimization-test.ipynb_
 
 ### 20.10.22
+
 - See notes on NeRFs
   - See highlights on the paper for additional repetition
 - See notes on ReLU
-  -  See highlights on the paper for additional repetition
+  - See highlights on the paper for additional repetition
 - Read regarding hybrid approaches that combine fast to evaluate data structures w/ cooordinate-based MLPs (optional, find references on ReLU paper)
   - Mueller et al 2022 [July 7th 2022] Paper won the SIGGRAPH Best Paper Award. (must read)
   - Martel et al 2021
 - Read regarding: 3D shape can be encoded as an occupancy field (optional, find references on ReLU paper)
-  - [Chen and Zhang 2019; Mescheder et al. 2019], 
+
+  - [Chen and Zhang 2019; Mescheder et al. 2019],
   - a signed distance field [Park et al. 2019]
   - or directly as a mesh in the form of a surface map Morreale et al 21
 
 - Idea:
   1. Construct and render very simple models (i.e. very rough approximations of target/real world image)
   2. Optimize the constructed image through target/real-world images
-      - The optimization step can be achieved through different approaches like:
-        - *Material parameter estimation*
+     - The optimization step can be achieved through different approaches like:
+       - _Material parameter estimation_
+
+### 21.10.22
+
+- Notes on Instant Neural Graphics Primitives with a Multiresolution Hash Encoding:
+  - Goals
+    - Taking an image -> creating a compact representation
+    - Being able to query and train it quickly
+- fully fused cuda kernels:
+- something in the direction of _instant neural grahpics primitives with a Multiresolution Hash Encoding_

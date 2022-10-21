@@ -1,0 +1,468 @@
+{
+	"artifacts" : 
+	[
+		{
+			"path" : "dependencies/glfw/src/glfw_objects.dir/Release/context.obj"
+		},
+		{
+			"path" : "dependencies/glfw/src/glfw_objects.dir/Release/init.obj"
+		},
+		{
+			"path" : "dependencies/glfw/src/glfw_objects.dir/Release/input.obj"
+		},
+		{
+			"path" : "dependencies/glfw/src/glfw_objects.dir/Release/monitor.obj"
+		},
+		{
+			"path" : "dependencies/glfw/src/glfw_objects.dir/Release/vulkan.obj"
+		},
+		{
+			"path" : "dependencies/glfw/src/glfw_objects.dir/Release/window.obj"
+		},
+		{
+			"path" : "dependencies/glfw/src/glfw_objects.dir/Release/win32_init.obj"
+		},
+		{
+			"path" : "dependencies/glfw/src/glfw_objects.dir/Release/win32_joystick.obj"
+		},
+		{
+			"path" : "dependencies/glfw/src/glfw_objects.dir/Release/win32_monitor.obj"
+		},
+		{
+			"path" : "dependencies/glfw/src/glfw_objects.dir/Release/win32_time.obj"
+		},
+		{
+			"path" : "dependencies/glfw/src/glfw_objects.dir/Release/win32_thread.obj"
+		},
+		{
+			"path" : "dependencies/glfw/src/glfw_objects.dir/Release/win32_window.obj"
+		},
+		{
+			"path" : "dependencies/glfw/src/glfw_objects.dir/Release/wgl_context.obj"
+		},
+		{
+			"path" : "dependencies/glfw/src/glfw_objects.dir/Release/egl_context.obj"
+		},
+		{
+			"path" : "dependencies/glfw/src/glfw_objects.dir/Release/osmesa_context.obj"
+		},
+		{
+			"path" : "dependencies/glfw/src/glfw_objects.dir/Release/glfw.res"
+		}
+	],
+	"backtrace" : 1,
+	"backtraceGraph" : 
+	{
+		"commands" : 
+		[
+			"add_library",
+			"target_compile_options",
+			"target_compile_definitions",
+			"target_include_directories",
+			"target_sources"
+		],
+		"files" : 
+		[
+			"dependencies/glfw/src/CMakeLists.txt"
+		],
+		"nodes" : 
+		[
+			{
+				"file" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 2,
+				"parent" : 0
+			},
+			{
+				"command" : 1,
+				"file" : 0,
+				"line" : 148,
+				"parent" : 0
+			},
+			{
+				"command" : 2,
+				"file" : 0,
+				"line" : 157,
+				"parent" : 0
+			},
+			{
+				"command" : 2,
+				"file" : 0,
+				"line" : 180,
+				"parent" : 0
+			},
+			{
+				"command" : 2,
+				"file" : 0,
+				"line" : 101,
+				"parent" : 0
+			},
+			{
+				"command" : 2,
+				"file" : 0,
+				"line" : 93,
+				"parent" : 0
+			},
+			{
+				"command" : 3,
+				"file" : 0,
+				"line" : 116,
+				"parent" : 0
+			},
+			{
+				"command" : 3,
+				"file" : 0,
+				"line" : 120,
+				"parent" : 0
+			},
+			{
+				"command" : 4,
+				"file" : 0,
+				"line" : 15,
+				"parent" : 0
+			},
+			{
+				"command" : 4,
+				"file" : 0,
+				"line" : 89,
+				"parent" : 0
+			},
+			{
+				"command" : 4,
+				"file" : 0,
+				"line" : 94,
+				"parent" : 0
+			}
+		]
+	},
+	"compileGroups" : 
+	[
+		{
+			"compileCommandFragments" : 
+			[
+				{
+					"fragment" : "/DWIN32 /D_WINDOWS /O2 /Ob2 /DNDEBUG -MD"
+				},
+				{
+					"backtrace" : 2,
+					"fragment" : "/W3"
+				}
+			],
+			"defines" : 
+			[
+				{
+					"backtrace" : 3,
+					"define" : "UNICODE"
+				},
+				{
+					"backtrace" : 4,
+					"define" : "_CRT_SECURE_NO_WARNINGS"
+				},
+				{
+					"backtrace" : 5,
+					"define" : "_GLFW_BUILD_DLL"
+				},
+				{
+					"backtrace" : 6,
+					"define" : "_GLFW_USE_CONFIG_H"
+				},
+				{
+					"backtrace" : 3,
+					"define" : "_UNICODE"
+				}
+			],
+			"includes" : 
+			[
+				{
+					"backtrace" : 7,
+					"path" : "C:/UserData/z0047hfn/OneDrive - Siemens AG/Documents/Thesis/BachelorThesis/instant-ngp/dependencies/glfw/include"
+				},
+				{
+					"backtrace" : 8,
+					"path" : "C:/UserData/z0047hfn/OneDrive - Siemens AG/Documents/Thesis/BachelorThesis/instant-ngp/dependencies/glfw/src"
+				},
+				{
+					"backtrace" : 8,
+					"path" : "C:/UserData/z0047hfn/OneDrive - Siemens AG/Documents/Thesis/BachelorThesis/build/dependencies/glfw/src"
+				}
+			],
+			"language" : "C",
+			"sourceIndexes" : 
+			[
+				4,
+				5,
+				6,
+				7,
+				8,
+				9,
+				15,
+				16,
+				17,
+				18,
+				19,
+				20,
+				21,
+				22,
+				23
+			]
+		},
+		{
+			"compileCommandFragments" : 
+			[
+				{
+					"fragment" : "-DWIN32"
+				}
+			],
+			"defines" : 
+			[
+				{
+					"backtrace" : 3,
+					"define" : "UNICODE"
+				},
+				{
+					"backtrace" : 4,
+					"define" : "_CRT_SECURE_NO_WARNINGS"
+				},
+				{
+					"backtrace" : 5,
+					"define" : "_GLFW_BUILD_DLL"
+				},
+				{
+					"backtrace" : 6,
+					"define" : "_GLFW_USE_CONFIG_H"
+				},
+				{
+					"backtrace" : 3,
+					"define" : "_UNICODE"
+				}
+			],
+			"includes" : 
+			[
+				{
+					"backtrace" : 7,
+					"path" : "C:/UserData/z0047hfn/OneDrive - Siemens AG/Documents/Thesis/BachelorThesis/instant-ngp/dependencies/glfw/include"
+				},
+				{
+					"backtrace" : 8,
+					"path" : "C:/UserData/z0047hfn/OneDrive - Siemens AG/Documents/Thesis/BachelorThesis/instant-ngp/dependencies/glfw/src"
+				},
+				{
+					"backtrace" : 8,
+					"path" : "C:/UserData/z0047hfn/OneDrive - Siemens AG/Documents/Thesis/BachelorThesis/build/dependencies/glfw/src"
+				}
+			],
+			"language" : "RC",
+			"sourceIndexes" : 
+			[
+				24
+			]
+		}
+	],
+	"dependencies" : 
+	[
+		{
+			"id" : "ZERO_CHECK::@6890427a1f51a3e7e1df"
+		}
+	],
+	"id" : "glfw_objects::@e43ad0a4af27ecc346ee",
+	"name" : "glfw_objects",
+	"paths" : 
+	{
+		"build" : "dependencies/glfw/src",
+		"source" : "dependencies/glfw/src"
+	},
+	"sourceGroups" : 
+	[
+		{
+			"name" : "Header Files",
+			"sourceIndexes" : 
+			[
+				0,
+				1,
+				2,
+				3,
+				10,
+				11,
+				12,
+				13,
+				14,
+				25
+			]
+		},
+		{
+			"name" : "Source Files",
+			"sourceIndexes" : 
+			[
+				4,
+				5,
+				6,
+				7,
+				8,
+				9,
+				15,
+				16,
+				17,
+				18,
+				19,
+				20,
+				21,
+				22,
+				23,
+				24
+			]
+		}
+	],
+	"sources" : 
+	[
+		{
+			"backtrace" : 1,
+			"path" : "dependencies/glfw/include/GLFW/glfw3.h",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"path" : "dependencies/glfw/include/GLFW/glfw3native.h",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"path" : "dependencies/glfw/src/internal.h",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"path" : "dependencies/glfw/src/mappings.h",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "dependencies/glfw/src/context.c",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "dependencies/glfw/src/init.c",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "dependencies/glfw/src/input.c",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "dependencies/glfw/src/monitor.c",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "dependencies/glfw/src/vulkan.c",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "dependencies/glfw/src/window.c",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 9,
+			"path" : "dependencies/glfw/src/win32_platform.h",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 9,
+			"path" : "dependencies/glfw/src/win32_joystick.h",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 9,
+			"path" : "dependencies/glfw/src/wgl_context.h",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 9,
+			"path" : "dependencies/glfw/src/egl_context.h",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 9,
+			"path" : "dependencies/glfw/src/osmesa_context.h",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 9,
+			"compileGroupIndex" : 0,
+			"path" : "dependencies/glfw/src/win32_init.c",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 9,
+			"compileGroupIndex" : 0,
+			"path" : "dependencies/glfw/src/win32_joystick.c",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 9,
+			"compileGroupIndex" : 0,
+			"path" : "dependencies/glfw/src/win32_monitor.c",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 9,
+			"compileGroupIndex" : 0,
+			"path" : "dependencies/glfw/src/win32_time.c",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 9,
+			"compileGroupIndex" : 0,
+			"path" : "dependencies/glfw/src/win32_thread.c",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 9,
+			"compileGroupIndex" : 0,
+			"path" : "dependencies/glfw/src/win32_window.c",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 9,
+			"compileGroupIndex" : 0,
+			"path" : "dependencies/glfw/src/wgl_context.c",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 9,
+			"compileGroupIndex" : 0,
+			"path" : "dependencies/glfw/src/egl_context.c",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 9,
+			"compileGroupIndex" : 0,
+			"path" : "dependencies/glfw/src/osmesa_context.c",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 10,
+			"compileGroupIndex" : 1,
+			"path" : "C:/UserData/z0047hfn/OneDrive - Siemens AG/Documents/Thesis/BachelorThesis/build/dependencies/glfw/src/glfw.rc",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 11,
+			"path" : "C:/UserData/z0047hfn/OneDrive - Siemens AG/Documents/Thesis/BachelorThesis/build/dependencies/glfw/src/glfw_config.h",
+			"sourceGroupIndex" : 0
+		}
+	],
+	"type" : "OBJECT_LIBRARY"
+}

@@ -1,0 +1,227 @@
+{
+	"archive" : 
+	{
+		"commandFragments" : 
+		[
+			{
+				"fragment" : "/machine:x64",
+				"role" : "flags"
+			}
+		]
+	},
+	"artifacts" : 
+	[
+		{
+			"path" : "dependencies/tiny-cuda-nn/dependencies/fmt/MinSizeRel/fmt.lib"
+		}
+	],
+	"backtrace" : 1,
+	"backtraceGraph" : 
+	{
+		"commands" : 
+		[
+			"add_library",
+			"target_include_directories"
+		],
+		"files" : 
+		[
+			"dependencies/tiny-cuda-nn/dependencies/fmt/CMakeLists.txt"
+		],
+		"nodes" : 
+		[
+			{
+				"file" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 231,
+				"parent" : 0
+			},
+			{
+				"command" : 1,
+				"file" : 0,
+				"line" : 246,
+				"parent" : 0
+			}
+		]
+	},
+	"compileGroups" : 
+	[
+		{
+			"compileCommandFragments" : 
+			[
+				{
+					"fragment" : "/DWIN32 /D_WINDOWS /GR /EHsc /D_CRT_SECURE_NO_WARNINGS /MP24 /D_CRT_SECURE_NO_WARNINGS /MP /O1 /Ob1 /DNDEBUG -MD"
+				},
+				{
+					"fragment" : "-std:c++14"
+				}
+			],
+			"includes" : 
+			[
+				{
+					"backtrace" : 2,
+					"path" : "C:/UserData/z0047hfn/OneDrive - Siemens AG/Documents/Thesis/BachelorThesis/instant-ngp/dependencies/tiny-cuda-nn/dependencies/fmt/include"
+				}
+			],
+			"language" : "CXX",
+			"languageStandard" : 
+			{
+				"backtraces" : 
+				[
+					1
+				],
+				"standard" : "14"
+			},
+			"sourceIndexes" : 
+			[
+				0,
+				1
+			]
+		}
+	],
+	"dependencies" : 
+	[
+		{
+			"id" : "ZERO_CHECK::@6890427a1f51a3e7e1df"
+		}
+	],
+	"id" : "fmt::@d83c10a472d296e6d475",
+	"name" : "fmt",
+	"nameOnDisk" : "fmt.lib",
+	"paths" : 
+	{
+		"build" : "dependencies/tiny-cuda-nn/dependencies/fmt",
+		"source" : "dependencies/tiny-cuda-nn/dependencies/fmt"
+	},
+	"sourceGroups" : 
+	[
+		{
+			"name" : "Source Files",
+			"sourceIndexes" : 
+			[
+				0,
+				1
+			]
+		},
+		{
+			"name" : "Header Files",
+			"sourceIndexes" : 
+			[
+				2,
+				3,
+				4,
+				5,
+				6,
+				7,
+				8,
+				9,
+				10,
+				11,
+				12,
+				13,
+				14
+			]
+		},
+		{
+			"name" : "",
+			"sourceIndexes" : 
+			[
+				15,
+				16
+			]
+		}
+	],
+	"sources" : 
+	[
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "dependencies/tiny-cuda-nn/dependencies/fmt/src/format.cc",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "dependencies/tiny-cuda-nn/dependencies/fmt/src/os.cc",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"path" : "dependencies/tiny-cuda-nn/dependencies/fmt/include/fmt/args.h",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 1,
+			"path" : "dependencies/tiny-cuda-nn/dependencies/fmt/include/fmt/chrono.h",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 1,
+			"path" : "dependencies/tiny-cuda-nn/dependencies/fmt/include/fmt/color.h",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 1,
+			"path" : "dependencies/tiny-cuda-nn/dependencies/fmt/include/fmt/compile.h",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 1,
+			"path" : "dependencies/tiny-cuda-nn/dependencies/fmt/include/fmt/core.h",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 1,
+			"path" : "dependencies/tiny-cuda-nn/dependencies/fmt/include/fmt/format.h",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 1,
+			"path" : "dependencies/tiny-cuda-nn/dependencies/fmt/include/fmt/format-inl.h",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 1,
+			"path" : "dependencies/tiny-cuda-nn/dependencies/fmt/include/fmt/os.h",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 1,
+			"path" : "dependencies/tiny-cuda-nn/dependencies/fmt/include/fmt/ostream.h",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 1,
+			"path" : "dependencies/tiny-cuda-nn/dependencies/fmt/include/fmt/printf.h",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 1,
+			"path" : "dependencies/tiny-cuda-nn/dependencies/fmt/include/fmt/ranges.h",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 1,
+			"path" : "dependencies/tiny-cuda-nn/dependencies/fmt/include/fmt/std.h",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 1,
+			"path" : "dependencies/tiny-cuda-nn/dependencies/fmt/include/fmt/xchar.h",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 1,
+			"path" : "dependencies/tiny-cuda-nn/dependencies/fmt/README.rst",
+			"sourceGroupIndex" : 2
+		},
+		{
+			"backtrace" : 1,
+			"path" : "dependencies/tiny-cuda-nn/dependencies/fmt/ChangeLog.rst",
+			"sourceGroupIndex" : 2
+		}
+	],
+	"type" : "STATIC_LIBRARY"
+}

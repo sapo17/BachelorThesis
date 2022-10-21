@@ -1,0 +1,1180 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"childIndexes" : 
+					[
+						1,
+						3,
+						5
+					],
+					"jsonFile" : "directory-.-Debug-d0094a50bb2071803777.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.18"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						5,
+						9,
+						10,
+						11
+					]
+				},
+				{
+					"build" : "dependencies/tiny-cuda-nn",
+					"childIndexes" : 
+					[
+						2
+					],
+					"jsonFile" : "directory-dependencies.tiny-cuda-nn-Debug-6890f5504dca5efa2f3e.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.18"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 1,
+					"source" : "dependencies/tiny-cuda-nn",
+					"targetIndexes" : 
+					[
+						1,
+						12
+					]
+				},
+				{
+					"build" : "dependencies/tiny-cuda-nn/dependencies/fmt",
+					"jsonFile" : "directory-dependencies.tiny-cuda-nn.dependencies.fmt-Debug-4cf879d1e936cc50db66.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.1"
+					},
+					"parentIndex" : 1,
+					"projectIndex" : 2,
+					"source" : "dependencies/tiny-cuda-nn/dependencies/fmt",
+					"targetIndexes" : 
+					[
+						2,
+						6
+					]
+				},
+				{
+					"build" : "dependencies/glfw",
+					"childIndexes" : 
+					[
+						4
+					],
+					"jsonFile" : "directory-dependencies.glfw-Debug-01069d8dab9fa7a75fb9.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.13"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 3,
+					"source" : "dependencies/glfw",
+					"targetIndexes" : 
+					[
+						3
+					]
+				},
+				{
+					"build" : "dependencies/glfw/src",
+					"jsonFile" : "directory-dependencies.glfw.src-Debug-6ee9850b79ffe1c7485a.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.13"
+					},
+					"parentIndex" : 3,
+					"projectIndex" : 3,
+					"source" : "dependencies/glfw/src",
+					"targetIndexes" : 
+					[
+						7,
+						8
+					]
+				},
+				{
+					"build" : "dependencies/pybind11",
+					"jsonFile" : "directory-dependencies.pybind11-Debug-3cb0c3e7c48ddcae068c.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.4"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 4,
+					"source" : "dependencies/pybind11",
+					"targetIndexes" : 
+					[
+						4
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"childIndexes" : 
+					[
+						1,
+						3,
+						4
+					],
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "instant-ngp",
+					"targetIndexes" : 
+					[
+						0,
+						5,
+						9,
+						10,
+						11
+					]
+				},
+				{
+					"childIndexes" : 
+					[
+						2
+					],
+					"directoryIndexes" : 
+					[
+						1
+					],
+					"name" : "tiny-cuda-nn",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						1,
+						12
+					]
+				},
+				{
+					"directoryIndexes" : 
+					[
+						2
+					],
+					"name" : "FMT",
+					"parentIndex" : 1,
+					"targetIndexes" : 
+					[
+						2,
+						6
+					]
+				},
+				{
+					"directoryIndexes" : 
+					[
+						3,
+						4
+					],
+					"name" : "GLFW",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						3,
+						7,
+						8
+					]
+				},
+				{
+					"directoryIndexes" : 
+					[
+						5
+					],
+					"name" : "pybind11",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						4
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "ALL_BUILD::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ALL_BUILD-Debug-c8fec7b5e521c2d775cd.json",
+					"name" : "ALL_BUILD",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "ALL_BUILD::@83d64acc3a33ea5cdae1",
+					"jsonFile" : "target-ALL_BUILD-Debug-5a905f5d28f814ceb528.json",
+					"name" : "ALL_BUILD",
+					"projectIndex" : 1
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "ALL_BUILD::@d83c10a472d296e6d475",
+					"jsonFile" : "target-ALL_BUILD-Debug-501888578a116946b0d4.json",
+					"name" : "ALL_BUILD",
+					"projectIndex" : 2
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "ALL_BUILD::@37864a3f25feeb967066",
+					"jsonFile" : "target-ALL_BUILD-Debug-f482ce9386a2715b720d.json",
+					"name" : "ALL_BUILD",
+					"projectIndex" : 3
+				},
+				{
+					"directoryIndex" : 5,
+					"id" : "ALL_BUILD::@f45053be708cebeaef3b",
+					"jsonFile" : "target-ALL_BUILD-Debug-2d2ef3eba9e8a1cbe03f.json",
+					"name" : "ALL_BUILD",
+					"projectIndex" : 4
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ZERO_CHECK::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ZERO_CHECK-Debug-f8ae9c32f19806d816ed.json",
+					"name" : "ZERO_CHECK",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "fmt::@d83c10a472d296e6d475",
+					"jsonFile" : "target-fmt-Debug-eb782912a86dc730b2e1.json",
+					"name" : "fmt",
+					"projectIndex" : 2
+				},
+				{
+					"directoryIndex" : 4,
+					"id" : "glfw::@e43ad0a4af27ecc346ee",
+					"jsonFile" : "target-glfw-Debug-2d7a957e0ac5e33af3d2.json",
+					"name" : "glfw",
+					"projectIndex" : 3
+				},
+				{
+					"directoryIndex" : 4,
+					"id" : "glfw_objects::@e43ad0a4af27ecc346ee",
+					"jsonFile" : "target-glfw_objects-Debug-6f346745d5b04347fe4c.json",
+					"name" : "glfw_objects",
+					"projectIndex" : 3
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ngp::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ngp-Debug-81ecf0b7313f10b2b60f.json",
+					"name" : "ngp",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "pyngp::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-pyngp-Debug-4c98510a07f08ae5f874.json",
+					"name" : "pyngp",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "testbed::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-testbed-Debug-b448d34769c5bf6d0dcc.json",
+					"name" : "testbed",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "tiny-cuda-nn::@83d64acc3a33ea5cdae1",
+					"jsonFile" : "target-tiny-cuda-nn-Debug-18c746647f0a74a04c7e.json",
+					"name" : "tiny-cuda-nn",
+					"projectIndex" : 1
+				}
+			]
+		},
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"childIndexes" : 
+					[
+						1,
+						3,
+						5
+					],
+					"jsonFile" : "directory-.-Release-d0094a50bb2071803777.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.18"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						5,
+						9,
+						10,
+						11
+					]
+				},
+				{
+					"build" : "dependencies/tiny-cuda-nn",
+					"childIndexes" : 
+					[
+						2
+					],
+					"jsonFile" : "directory-dependencies.tiny-cuda-nn-Release-6890f5504dca5efa2f3e.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.18"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 1,
+					"source" : "dependencies/tiny-cuda-nn",
+					"targetIndexes" : 
+					[
+						1,
+						12
+					]
+				},
+				{
+					"build" : "dependencies/tiny-cuda-nn/dependencies/fmt",
+					"jsonFile" : "directory-dependencies.tiny-cuda-nn.dependencies.fmt-Release-4cf879d1e936cc50db66.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.1"
+					},
+					"parentIndex" : 1,
+					"projectIndex" : 2,
+					"source" : "dependencies/tiny-cuda-nn/dependencies/fmt",
+					"targetIndexes" : 
+					[
+						2,
+						6
+					]
+				},
+				{
+					"build" : "dependencies/glfw",
+					"childIndexes" : 
+					[
+						4
+					],
+					"jsonFile" : "directory-dependencies.glfw-Release-01069d8dab9fa7a75fb9.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.13"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 3,
+					"source" : "dependencies/glfw",
+					"targetIndexes" : 
+					[
+						3
+					]
+				},
+				{
+					"build" : "dependencies/glfw/src",
+					"jsonFile" : "directory-dependencies.glfw.src-Release-6ee9850b79ffe1c7485a.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.13"
+					},
+					"parentIndex" : 3,
+					"projectIndex" : 3,
+					"source" : "dependencies/glfw/src",
+					"targetIndexes" : 
+					[
+						7,
+						8
+					]
+				},
+				{
+					"build" : "dependencies/pybind11",
+					"jsonFile" : "directory-dependencies.pybind11-Release-3cb0c3e7c48ddcae068c.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.4"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 4,
+					"source" : "dependencies/pybind11",
+					"targetIndexes" : 
+					[
+						4
+					]
+				}
+			],
+			"name" : "Release",
+			"projects" : 
+			[
+				{
+					"childIndexes" : 
+					[
+						1,
+						3,
+						4
+					],
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "instant-ngp",
+					"targetIndexes" : 
+					[
+						0,
+						5,
+						9,
+						10,
+						11
+					]
+				},
+				{
+					"childIndexes" : 
+					[
+						2
+					],
+					"directoryIndexes" : 
+					[
+						1
+					],
+					"name" : "tiny-cuda-nn",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						1,
+						12
+					]
+				},
+				{
+					"directoryIndexes" : 
+					[
+						2
+					],
+					"name" : "FMT",
+					"parentIndex" : 1,
+					"targetIndexes" : 
+					[
+						2,
+						6
+					]
+				},
+				{
+					"directoryIndexes" : 
+					[
+						3,
+						4
+					],
+					"name" : "GLFW",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						3,
+						7,
+						8
+					]
+				},
+				{
+					"directoryIndexes" : 
+					[
+						5
+					],
+					"name" : "pybind11",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						4
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "ALL_BUILD::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ALL_BUILD-Release-c8fec7b5e521c2d775cd.json",
+					"name" : "ALL_BUILD",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "ALL_BUILD::@83d64acc3a33ea5cdae1",
+					"jsonFile" : "target-ALL_BUILD-Release-5a905f5d28f814ceb528.json",
+					"name" : "ALL_BUILD",
+					"projectIndex" : 1
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "ALL_BUILD::@d83c10a472d296e6d475",
+					"jsonFile" : "target-ALL_BUILD-Release-501888578a116946b0d4.json",
+					"name" : "ALL_BUILD",
+					"projectIndex" : 2
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "ALL_BUILD::@37864a3f25feeb967066",
+					"jsonFile" : "target-ALL_BUILD-Release-f482ce9386a2715b720d.json",
+					"name" : "ALL_BUILD",
+					"projectIndex" : 3
+				},
+				{
+					"directoryIndex" : 5,
+					"id" : "ALL_BUILD::@f45053be708cebeaef3b",
+					"jsonFile" : "target-ALL_BUILD-Release-2d2ef3eba9e8a1cbe03f.json",
+					"name" : "ALL_BUILD",
+					"projectIndex" : 4
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ZERO_CHECK::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ZERO_CHECK-Release-f8ae9c32f19806d816ed.json",
+					"name" : "ZERO_CHECK",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "fmt::@d83c10a472d296e6d475",
+					"jsonFile" : "target-fmt-Release-1634c079ee4f265ba9ac.json",
+					"name" : "fmt",
+					"projectIndex" : 2
+				},
+				{
+					"directoryIndex" : 4,
+					"id" : "glfw::@e43ad0a4af27ecc346ee",
+					"jsonFile" : "target-glfw-Release-12032612ed45b52245bb.json",
+					"name" : "glfw",
+					"projectIndex" : 3
+				},
+				{
+					"directoryIndex" : 4,
+					"id" : "glfw_objects::@e43ad0a4af27ecc346ee",
+					"jsonFile" : "target-glfw_objects-Release-321eee14d816343d9713.json",
+					"name" : "glfw_objects",
+					"projectIndex" : 3
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ngp::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ngp-Release-4e9a1e97e2e226e2e3f8.json",
+					"name" : "ngp",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "pyngp::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-pyngp-Release-4a9fceed89fcc3bfd2dc.json",
+					"name" : "pyngp",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "testbed::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-testbed-Release-dc56eb399eee22ce6cb0.json",
+					"name" : "testbed",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "tiny-cuda-nn::@83d64acc3a33ea5cdae1",
+					"jsonFile" : "target-tiny-cuda-nn-Release-e9865a3681a69d7e1a79.json",
+					"name" : "tiny-cuda-nn",
+					"projectIndex" : 1
+				}
+			]
+		},
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"childIndexes" : 
+					[
+						1,
+						3,
+						5
+					],
+					"jsonFile" : "directory-.-MinSizeRel-d0094a50bb2071803777.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.18"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						5,
+						9,
+						10,
+						11
+					]
+				},
+				{
+					"build" : "dependencies/tiny-cuda-nn",
+					"childIndexes" : 
+					[
+						2
+					],
+					"jsonFile" : "directory-dependencies.tiny-cuda-nn-MinSizeRel-6890f5504dca5efa2f3e.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.18"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 1,
+					"source" : "dependencies/tiny-cuda-nn",
+					"targetIndexes" : 
+					[
+						1,
+						12
+					]
+				},
+				{
+					"build" : "dependencies/tiny-cuda-nn/dependencies/fmt",
+					"jsonFile" : "directory-dependencies.tiny-cuda-nn.dependencies.fmt-MinSizeRel-4cf879d1e936cc50db66.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.1"
+					},
+					"parentIndex" : 1,
+					"projectIndex" : 2,
+					"source" : "dependencies/tiny-cuda-nn/dependencies/fmt",
+					"targetIndexes" : 
+					[
+						2,
+						6
+					]
+				},
+				{
+					"build" : "dependencies/glfw",
+					"childIndexes" : 
+					[
+						4
+					],
+					"jsonFile" : "directory-dependencies.glfw-MinSizeRel-01069d8dab9fa7a75fb9.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.13"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 3,
+					"source" : "dependencies/glfw",
+					"targetIndexes" : 
+					[
+						3
+					]
+				},
+				{
+					"build" : "dependencies/glfw/src",
+					"jsonFile" : "directory-dependencies.glfw.src-MinSizeRel-6ee9850b79ffe1c7485a.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.13"
+					},
+					"parentIndex" : 3,
+					"projectIndex" : 3,
+					"source" : "dependencies/glfw/src",
+					"targetIndexes" : 
+					[
+						7,
+						8
+					]
+				},
+				{
+					"build" : "dependencies/pybind11",
+					"jsonFile" : "directory-dependencies.pybind11-MinSizeRel-3cb0c3e7c48ddcae068c.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.4"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 4,
+					"source" : "dependencies/pybind11",
+					"targetIndexes" : 
+					[
+						4
+					]
+				}
+			],
+			"name" : "MinSizeRel",
+			"projects" : 
+			[
+				{
+					"childIndexes" : 
+					[
+						1,
+						3,
+						4
+					],
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "instant-ngp",
+					"targetIndexes" : 
+					[
+						0,
+						5,
+						9,
+						10,
+						11
+					]
+				},
+				{
+					"childIndexes" : 
+					[
+						2
+					],
+					"directoryIndexes" : 
+					[
+						1
+					],
+					"name" : "tiny-cuda-nn",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						1,
+						12
+					]
+				},
+				{
+					"directoryIndexes" : 
+					[
+						2
+					],
+					"name" : "FMT",
+					"parentIndex" : 1,
+					"targetIndexes" : 
+					[
+						2,
+						6
+					]
+				},
+				{
+					"directoryIndexes" : 
+					[
+						3,
+						4
+					],
+					"name" : "GLFW",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						3,
+						7,
+						8
+					]
+				},
+				{
+					"directoryIndexes" : 
+					[
+						5
+					],
+					"name" : "pybind11",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						4
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "ALL_BUILD::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ALL_BUILD-MinSizeRel-c8fec7b5e521c2d775cd.json",
+					"name" : "ALL_BUILD",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "ALL_BUILD::@83d64acc3a33ea5cdae1",
+					"jsonFile" : "target-ALL_BUILD-MinSizeRel-5a905f5d28f814ceb528.json",
+					"name" : "ALL_BUILD",
+					"projectIndex" : 1
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "ALL_BUILD::@d83c10a472d296e6d475",
+					"jsonFile" : "target-ALL_BUILD-MinSizeRel-501888578a116946b0d4.json",
+					"name" : "ALL_BUILD",
+					"projectIndex" : 2
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "ALL_BUILD::@37864a3f25feeb967066",
+					"jsonFile" : "target-ALL_BUILD-MinSizeRel-f482ce9386a2715b720d.json",
+					"name" : "ALL_BUILD",
+					"projectIndex" : 3
+				},
+				{
+					"directoryIndex" : 5,
+					"id" : "ALL_BUILD::@f45053be708cebeaef3b",
+					"jsonFile" : "target-ALL_BUILD-MinSizeRel-2d2ef3eba9e8a1cbe03f.json",
+					"name" : "ALL_BUILD",
+					"projectIndex" : 4
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ZERO_CHECK::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ZERO_CHECK-MinSizeRel-f8ae9c32f19806d816ed.json",
+					"name" : "ZERO_CHECK",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "fmt::@d83c10a472d296e6d475",
+					"jsonFile" : "target-fmt-MinSizeRel-7b89bb984f1187d07636.json",
+					"name" : "fmt",
+					"projectIndex" : 2
+				},
+				{
+					"directoryIndex" : 4,
+					"id" : "glfw::@e43ad0a4af27ecc346ee",
+					"jsonFile" : "target-glfw-MinSizeRel-e4bb6dc02edd76b759e9.json",
+					"name" : "glfw",
+					"projectIndex" : 3
+				},
+				{
+					"directoryIndex" : 4,
+					"id" : "glfw_objects::@e43ad0a4af27ecc346ee",
+					"jsonFile" : "target-glfw_objects-MinSizeRel-73c7cdbc605a59c95821.json",
+					"name" : "glfw_objects",
+					"projectIndex" : 3
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ngp::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ngp-MinSizeRel-d75cf9d2f8cb9a48b1e8.json",
+					"name" : "ngp",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "pyngp::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-pyngp-MinSizeRel-ea07fd1dc297c382b60d.json",
+					"name" : "pyngp",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "testbed::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-testbed-MinSizeRel-d5d8ec93b6526606a353.json",
+					"name" : "testbed",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "tiny-cuda-nn::@83d64acc3a33ea5cdae1",
+					"jsonFile" : "target-tiny-cuda-nn-MinSizeRel-d77b0f2d35dbdb2aa9a5.json",
+					"name" : "tiny-cuda-nn",
+					"projectIndex" : 1
+				}
+			]
+		},
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"childIndexes" : 
+					[
+						1,
+						3,
+						5
+					],
+					"jsonFile" : "directory-.-RelWithDebInfo-d0094a50bb2071803777.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.18"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						5,
+						9,
+						10,
+						11
+					]
+				},
+				{
+					"build" : "dependencies/tiny-cuda-nn",
+					"childIndexes" : 
+					[
+						2
+					],
+					"jsonFile" : "directory-dependencies.tiny-cuda-nn-RelWithDebInfo-6890f5504dca5efa2f3e.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.18"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 1,
+					"source" : "dependencies/tiny-cuda-nn",
+					"targetIndexes" : 
+					[
+						1,
+						12
+					]
+				},
+				{
+					"build" : "dependencies/tiny-cuda-nn/dependencies/fmt",
+					"jsonFile" : "directory-dependencies.tiny-cuda-nn.dependencies.fmt-RelWithDebInfo-4cf879d1e936cc50db66.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.1"
+					},
+					"parentIndex" : 1,
+					"projectIndex" : 2,
+					"source" : "dependencies/tiny-cuda-nn/dependencies/fmt",
+					"targetIndexes" : 
+					[
+						2,
+						6
+					]
+				},
+				{
+					"build" : "dependencies/glfw",
+					"childIndexes" : 
+					[
+						4
+					],
+					"jsonFile" : "directory-dependencies.glfw-RelWithDebInfo-01069d8dab9fa7a75fb9.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.13"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 3,
+					"source" : "dependencies/glfw",
+					"targetIndexes" : 
+					[
+						3
+					]
+				},
+				{
+					"build" : "dependencies/glfw/src",
+					"jsonFile" : "directory-dependencies.glfw.src-RelWithDebInfo-6ee9850b79ffe1c7485a.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.13"
+					},
+					"parentIndex" : 3,
+					"projectIndex" : 3,
+					"source" : "dependencies/glfw/src",
+					"targetIndexes" : 
+					[
+						7,
+						8
+					]
+				},
+				{
+					"build" : "dependencies/pybind11",
+					"jsonFile" : "directory-dependencies.pybind11-RelWithDebInfo-3cb0c3e7c48ddcae068c.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.4"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 4,
+					"source" : "dependencies/pybind11",
+					"targetIndexes" : 
+					[
+						4
+					]
+				}
+			],
+			"name" : "RelWithDebInfo",
+			"projects" : 
+			[
+				{
+					"childIndexes" : 
+					[
+						1,
+						3,
+						4
+					],
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "instant-ngp",
+					"targetIndexes" : 
+					[
+						0,
+						5,
+						9,
+						10,
+						11
+					]
+				},
+				{
+					"childIndexes" : 
+					[
+						2
+					],
+					"directoryIndexes" : 
+					[
+						1
+					],
+					"name" : "tiny-cuda-nn",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						1,
+						12
+					]
+				},
+				{
+					"directoryIndexes" : 
+					[
+						2
+					],
+					"name" : "FMT",
+					"parentIndex" : 1,
+					"targetIndexes" : 
+					[
+						2,
+						6
+					]
+				},
+				{
+					"directoryIndexes" : 
+					[
+						3,
+						4
+					],
+					"name" : "GLFW",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						3,
+						7,
+						8
+					]
+				},
+				{
+					"directoryIndexes" : 
+					[
+						5
+					],
+					"name" : "pybind11",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						4
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "ALL_BUILD::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ALL_BUILD-RelWithDebInfo-c8fec7b5e521c2d775cd.json",
+					"name" : "ALL_BUILD",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "ALL_BUILD::@83d64acc3a33ea5cdae1",
+					"jsonFile" : "target-ALL_BUILD-RelWithDebInfo-5a905f5d28f814ceb528.json",
+					"name" : "ALL_BUILD",
+					"projectIndex" : 1
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "ALL_BUILD::@d83c10a472d296e6d475",
+					"jsonFile" : "target-ALL_BUILD-RelWithDebInfo-501888578a116946b0d4.json",
+					"name" : "ALL_BUILD",
+					"projectIndex" : 2
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "ALL_BUILD::@37864a3f25feeb967066",
+					"jsonFile" : "target-ALL_BUILD-RelWithDebInfo-f482ce9386a2715b720d.json",
+					"name" : "ALL_BUILD",
+					"projectIndex" : 3
+				},
+				{
+					"directoryIndex" : 5,
+					"id" : "ALL_BUILD::@f45053be708cebeaef3b",
+					"jsonFile" : "target-ALL_BUILD-RelWithDebInfo-2d2ef3eba9e8a1cbe03f.json",
+					"name" : "ALL_BUILD",
+					"projectIndex" : 4
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ZERO_CHECK::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ZERO_CHECK-RelWithDebInfo-f8ae9c32f19806d816ed.json",
+					"name" : "ZERO_CHECK",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "fmt::@d83c10a472d296e6d475",
+					"jsonFile" : "target-fmt-RelWithDebInfo-7e9d9db3441c99388d22.json",
+					"name" : "fmt",
+					"projectIndex" : 2
+				},
+				{
+					"directoryIndex" : 4,
+					"id" : "glfw::@e43ad0a4af27ecc346ee",
+					"jsonFile" : "target-glfw-RelWithDebInfo-be53ac61127e864f8d76.json",
+					"name" : "glfw",
+					"projectIndex" : 3
+				},
+				{
+					"directoryIndex" : 4,
+					"id" : "glfw_objects::@e43ad0a4af27ecc346ee",
+					"jsonFile" : "target-glfw_objects-RelWithDebInfo-b725e9224d5066618a9b.json",
+					"name" : "glfw_objects",
+					"projectIndex" : 3
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ngp::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ngp-RelWithDebInfo-df57366534aded87634d.json",
+					"name" : "ngp",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "pyngp::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-pyngp-RelWithDebInfo-3959f2561f7cc41a3cbb.json",
+					"name" : "pyngp",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "testbed::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-testbed-RelWithDebInfo-eddef48a59a3c266a3d6.json",
+					"name" : "testbed",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "tiny-cuda-nn::@83d64acc3a33ea5cdae1",
+					"jsonFile" : "target-tiny-cuda-nn-RelWithDebInfo-1b5a876ca03e89c35ca0.json",
+					"name" : "tiny-cuda-nn",
+					"projectIndex" : 1
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "C:/UserData/z0047hfn/OneDrive - Siemens AG/Documents/Thesis/BachelorThesis/build",
+		"source" : "C:/UserData/z0047hfn/OneDrive - Siemens AG/Documents/Thesis/BachelorThesis/instant-ngp"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 4
+	}
+}

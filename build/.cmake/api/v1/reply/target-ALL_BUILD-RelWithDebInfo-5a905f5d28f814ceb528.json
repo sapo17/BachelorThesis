@@ -1,0 +1,43 @@
+{
+	"backtrace" : 0,
+	"backtraceGraph" : 
+	{
+		"commands" : [],
+		"files" : 
+		[
+			"dependencies/tiny-cuda-nn/CMakeLists.txt"
+		],
+		"nodes" : 
+		[
+			{
+				"file" : 0
+			}
+		]
+	},
+	"dependencies" : 
+	[
+		{
+			"id" : "tiny-cuda-nn::@83d64acc3a33ea5cdae1"
+		},
+		{
+			"id" : "fmt::@d83c10a472d296e6d475"
+		},
+		{
+			"id" : "ZERO_CHECK::@6890427a1f51a3e7e1df"
+		}
+	],
+	"folder" : 
+	{
+		"name" : "CMakePredefinedTargets"
+	},
+	"id" : "ALL_BUILD::@83d64acc3a33ea5cdae1",
+	"isGeneratorProvided" : true,
+	"name" : "ALL_BUILD",
+	"paths" : 
+	{
+		"build" : "dependencies/tiny-cuda-nn",
+		"source" : "dependencies/tiny-cuda-nn"
+	},
+	"sources" : [],
+	"type" : "UTILITY"
+}
