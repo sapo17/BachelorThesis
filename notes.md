@@ -149,10 +149,24 @@
        - _Material parameter estimation_
 
 ### 21.10.22
+- See highlights on *Instant Neural Graphics Primitives with a Multiresolution Hash Encoding*
 
-- Notes on Instant Neural Graphics Primitives with a Multiresolution Hash Encoding:
-  - Goals
-    - Taking an image -> creating a compact representation
-    - Being able to query and train it quickly
-- fully fused cuda kernels:
-- something in the direction of _instant neural grahpics primitives with a Multiresolution Hash Encoding_
+### 22.10.22
+- Testing instang-ngp
+  - References:
+    - Building on windows: 
+      - [Youtube Building Tutorial](https://www.youtube.com/watch?v=kq9xlvz73Rg&feature=youtu.be)
+      - [GitHub Building Tutorial](https://github.com/bycloudai/instant-ngp-Windows)
+    - Hands on With Nvidia Instant NeRFs
+      - [Youtube instant-ngp NeRFs tutorial](https://www.youtube.com/watch?v=z3-fjYzd0BA&t=71s)
+    - Training times:
+      - Franz, 54 Images, aabb:4, around 2 Mins
+      - Bunny, 95 Images, aabb:4, more than 3 Mins
+- To read:
+  - @article{munkberg2021nvdiffrec,
+            author = {Jacob Munkberg and Jon Hasselgren and Tianchang Shen and Jun Gao 
+                    and Wenzheng Chen and Alex Evans and Thomas Mueller and Sanja Fidler},
+            title = "{Extracting Triangular 3D Models, Materials, and Lighting From Images}",
+            journal = {arXiv:2111.12503},
+            year = {2021}
+        }
