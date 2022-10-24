@@ -149,12 +149,14 @@
        - _Material parameter estimation_
 
 ### 21.10.22
-- See highlights on *Instant Neural Graphics Primitives with a Multiresolution Hash Encoding*
+
+- See highlights on _Instant Neural Graphics Primitives with a Multiresolution Hash Encoding_
 
 ### 22.10.22
+
 - Testing instang-ngp
   - References:
-    - Building on windows: 
+    - Building on windows:
       - [Youtube Building Tutorial](https://www.youtube.com/watch?v=kq9xlvz73Rg&feature=youtu.be)
       - [GitHub Building Tutorial](https://github.com/bycloudai/instant-ngp-Windows)
     - Hands on With Nvidia Instant NeRFs
@@ -164,9 +166,18 @@
       - Bunny, 95 Images, aabb:4, more than 3 Mins
 - To read:
   - @article{munkberg2021nvdiffrec,
-            author = {Jacob Munkberg and Jon Hasselgren and Tianchang Shen and Jun Gao 
-                    and Wenzheng Chen and Alex Evans and Thomas Mueller and Sanja Fidler},
-            title = "{Extracting Triangular 3D Models, Materials, and Lighting From Images}",
-            journal = {arXiv:2111.12503},
-            year = {2021}
-        }
+    author = {Jacob Munkberg and Jon Hasselgren and Tianchang Shen and Jun Gao
+    and Wenzheng Chen and Alex Evans and Thomas Mueller and Sanja Fidler},
+    title = "{Extracting Triangular 3D Models, Materials, and Lighting From Images}",
+    journal = {arXiv:2111.12503},
+    year = {2021}
+    }
+
+### 24.10.22
+
+- Talk w/ David, Torsten:
+  - Students design light sources
+  - it would be interesting to reconstruct light sources, estimate their materials
+  - manipulate images e.g. w/ noise, try out whether you can still reconstruct a target image
+  - read more on literature
+  - try to playaround w/ the application that David mentioned
