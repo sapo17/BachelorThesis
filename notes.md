@@ -176,8 +176,17 @@
 ### 24.10.22
 
 - Talk w/ David, Torsten:
+
   - Students design light sources
   - it would be interesting to reconstruct light sources, estimate their materials
   - manipulate images e.g. w/ noise, try out whether you can still reconstruct a target image
   - read more on literature
   - try to playaround w/ the application that David mentioned
+
+  ### 25.10.22
+
+  - Maybe:
+    - To reconstruct light sources:
+      1. nerf target light source
+      2. Mesh it
+      3. Use material parameter optimization for the correct radiance value
