@@ -1,0 +1,455 @@
+<scene version="2.1.0">
+
+<!-- Defaults, these can be set via the command line: -Darg=value -->
+
+	<default name="spp" value="4096"/>
+	<default name="resx" value="512"/>
+	<default name="resy" value="512"/>
+
+<!-- Camera and Rendering Parameters -->
+
+	<integrator type="path">
+		<integer name="max_depth" value="12"/>
+	</integrator>
+	<sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="41.112090"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="100.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="360.00001001791264"/>
+			<rotate y="1" angle="-90.00000250447816"/>
+			<translate value="25.000000 -0.500000 0.000000"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/>
+		</film>
+	</sensor>
+
+<!-- Materials -->
+
+	<bsdf type="twosided" id="mat-green-diffuse">
+		<bsdf type="diffuse">
+			<rgb value="0.091011 0.800000 0.044358" name="reflectance"/>
+		</bsdf>
+	</bsdf>
+	<bsdf type="twosided" id="mat-white-diffuse">
+		<bsdf type="diffuse">
+			<rgb value="0.800000 0.800000 0.800000" name="reflectance"/>
+		</bsdf>
+	</bsdf>
+	<bsdf type="twosided" id="mat-red-diffuse">
+		<bsdf type="diffuse">
+			<rgb value="0.800000 0.027537 0.030877" name="reflectance"/>
+		</bsdf>
+	</bsdf>
+	<bsdf type="diffuse" id="empty-emitter-bsdf">
+		<rgb value="0.000000" name="reflectance"/>
+	</bsdf>
+	<bsdf type="twosided" id="mat-Metal.002">
+		<bsdf type="principled">
+			<rgb value="0.515480 0.515480 0.515480" name="base_color"/>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="1.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.850000"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>
+	</bsdf>
+	<bsdf type="twosided" id="mat-metal_plateado_pulido">
+		<bsdf type="principled">
+			<rgb value="0.533173 0.533173 0.533173" name="base_color"/>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="1.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.150000"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>
+	</bsdf>
+	<bsdf type="diffuse" id="mat-Material">
+		<rgb value="1.000000 0.000000 0.300000" name="reflectance"/>
+	</bsdf>
+	<bsdf type="twosided" id="mat-Material.001">
+		<bsdf type="principled">
+			<texture type="bitmap" name="base_color">
+				<string name="filename" value="textures/SheetOfThreads_low_DefaultMaterial_BaseColor.002.jpg"/>
+			</texture>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<texture type="bitmap" name="roughness">
+				<string name="filename" value="textures/SheetOfThreads_low_DefaultMaterial_Roughness.002.jpg"/>
+				<boolean name="raw" value="true"/>
+			</texture>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>
+	</bsdf>
+	<bsdf type="twosided" id="mat-plastico">
+		<bsdf type="principled">
+			<rgb value="0.048279 0.048279 0.048279" name="base_color"/>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.500000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.250000"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>
+	</bsdf>
+	<bsdf type="twosided" id="mat-metal_plateado_rugoso">
+		<bsdf type="principled">
+			<rgb value="0.533173 0.533173 0.533173" name="base_color"/>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="1.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.300000"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>
+	</bsdf>
+	<bsdf type="diffuse" id="mat-hilo_luz">
+		<rgb value="1.000000 0.000000 0.300000" name="reflectance"/>
+	</bsdf>
+	<bsdf type="twosided" id="mat-metal_cobrizo">
+		<bsdf type="principled">
+			<rgb value="0.800000 0.670379 0.267763" name="base_color"/>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="1.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.150000"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>
+	</bsdf>
+	<bsdf type="twosided" id="mat-negro_pulido">
+		<bsdf type="principled">
+			<rgb value="0.000000 0.000000 0.000000" name="base_color"/>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.100000"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>
+	</bsdf>
+	<bsdf type="dielectric" id="mat-glass.001">
+		<float name="int_ior" value="1.450000"/>
+		<rgb value="1.000000 1.000000 1.000000" name="specular_transmittance"/>
+	</bsdf>
+	<bsdf type="diffuse" id="mat-Lamp_rubber">
+		<rgb value="1.000000 0.000000 0.300000" name="reflectance"/>
+	</bsdf>
+	<bsdf type="diffuse" id="mat-Lamp_plastic1">
+		<rgb value="1.000000 0.000000 0.300000" name="reflectance"/>
+	</bsdf>
+	<bsdf type="twosided" id="mat-Lamp_plastic3">
+		<bsdf type="principled">
+			<rgb value="0.010021 0.010021 0.010021" name="base_color"/>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.300000"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>
+	</bsdf>
+	<bsdf type="roughdielectric" id="mat-glass">
+		<float name="alpha" value="0.250000"/>
+		<string name="distribution" value="beckmann"/>
+		<float name="int_ior" value="1.450000"/>
+		<rgb value="1.000000 1.000000 1.000000" name="specular_transmittance"/>
+	</bsdf>
+	<bsdf type="diffuse" id="mat-Lamp_plastic2">
+		<rgb value="1.000000 0.000000 0.300000" name="reflectance"/>
+	</bsdf>
+
+<!-- Emitters -->
+
+	<shape type="ply">
+		<string name="filename" value="meshes/Cube_016.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="empty-emitter-bsdf" name="bsdf"/>
+		<emitter type="area">
+			<rgb value="72.299995 72.299995 72.299995" name="radiance"/>
+		</emitter>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/socate-alambre_cobre.ply"/>
+		<ref id="empty-emitter-bsdf" name="bsdf"/>
+		<emitter type="area">
+			<rgb value="100.000000 100.000000 100.000000" name="radiance"/>
+		</emitter>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/socate_001-alambre_cobre.ply"/>
+		<ref id="empty-emitter-bsdf" name="bsdf"/>
+		<emitter type="area">
+			<rgb value="100.000000 100.000000 100.000000" name="radiance"/>
+		</emitter>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/Lamp_light.ply"/>
+		<ref id="empty-emitter-bsdf" name="bsdf"/>
+		<emitter type="area">
+			<rgb value="100.000000 84.254330 51.517886" name="radiance"/>
+		</emitter>
+	</shape>
+
+<!-- Shapes -->
+
+	<shape type="ply">
+		<string name="filename" value="meshes/left-wall.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-green-diffuse" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/bottom-wall.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-white-diffuse" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/back-wall.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-white-diffuse" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/right-wall.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-red-diffuse" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/top-wall.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-white-diffuse" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/Cube_015.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Metal.002" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/Cube.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-white-diffuse" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/tornillo-04.ply"/>
+		<ref id="mat-metal_plateado_pulido" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/base.ply"/>
+		<ref id="mat-Material" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/tornillo-03.ply"/>
+		<ref id="mat-metal_plateado_pulido" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/tornillo-02.ply"/>
+		<ref id="mat-metal_plateado_pulido" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/tornillo-01.ply"/>
+		<ref id="mat-metal_plateado_pulido" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/soga.ply"/>
+		<ref id="mat-Material.001" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/socate-plastico.ply"/>
+		<ref id="mat-plastico" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/socate-metal_plateado_rugoso.ply"/>
+		<ref id="mat-metal_plateado_rugoso" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/hilo.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-hilo_luz" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/bombillo-rosca-metal_cobrizo.ply"/>
+		<ref id="mat-metal_cobrizo" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/bombillo-rosca-metal_plateado_rugoso.ply"/>
+		<ref id="mat-metal_plateado_rugoso" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/bombillo-rosca-negro_pulido.ply"/>
+		<ref id="mat-negro_pulido" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/bombillo-vidrio.ply"/>
+		<ref id="mat-glass.001" name="bsdf"/>
+	</shape>
+	<shape type="shapegroup" id="mesh-bombillo-alambre">
+		<shape type="ply">
+			<string name="filename" value="meshes/bombillo-alambre.ply"/>
+			<boolean name="face_normals" value="true"/>
+			<ref id="mat-metal_cobrizo" name="bsdf"/>
+		</shape>
+	</shape>
+	<shape type="instance">
+		<ref id="mesh-bombillo-alambre" name="shape"/>
+		<transform name="to_world">
+			<matrix value="0.000002 4.927664 -0.000001 1.495643 0.000001 -0.000001 -4.927664 1.646390 -4.927664 0.000002 -0.000001 7.645354 0.000000 0.000000 0.000000 1.000000"/>
+		</transform>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/arandela.ply"/>
+		<ref id="mat-metal_plateado_rugoso" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/abrazadera-metal_cobrizo.ply"/>
+		<ref id="mat-metal_cobrizo" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/abrazadera-metal_plateado_rugoso.ply"/>
+		<ref id="mat-metal_plateado_rugoso" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/tornillo-04_001.ply"/>
+		<ref id="mat-metal_plateado_pulido" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/base_001.ply"/>
+		<ref id="mat-Material" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/tornillo-03_001.ply"/>
+		<ref id="mat-metal_plateado_pulido" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/tornillo-02_001.ply"/>
+		<ref id="mat-metal_plateado_pulido" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/tornillo-01_001.ply"/>
+		<ref id="mat-metal_plateado_pulido" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/soga_001.ply"/>
+		<ref id="mat-Material.001" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/socate_001-plastico.ply"/>
+		<ref id="mat-plastico" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/socate_001-metal_plateado_rugoso.ply"/>
+		<ref id="mat-metal_plateado_rugoso" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/hilo_001.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-hilo_luz" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/bombillo-rosca_001-metal_cobrizo.ply"/>
+		<ref id="mat-metal_cobrizo" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/bombillo-rosca_001-metal_plateado_rugoso.ply"/>
+		<ref id="mat-metal_plateado_rugoso" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/bombillo-rosca_001-negro_pulido.ply"/>
+		<ref id="mat-negro_pulido" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/bombillo-vidrio_001.ply"/>
+		<ref id="mat-glass.001" name="bsdf"/>
+	</shape>
+	<shape type="shapegroup" id="mesh-bombillo-alambre_001">
+		<shape type="ply">
+			<string name="filename" value="meshes/bombillo-alambre_001.ply"/>
+			<boolean name="face_normals" value="true"/>
+			<ref id="mat-metal_cobrizo" name="bsdf"/>
+		</shape>
+	</shape>
+	<shape type="instance">
+		<ref id="mesh-bombillo-alambre_001" name="shape"/>
+		<transform name="to_world">
+			<matrix value="0.000002 4.927664 -0.000001 -6.503371 0.000001 -0.000001 -4.927664 1.646390 -4.927664 0.000002 -0.000001 7.645354 0.000000 0.000000 0.000000 1.000000"/>
+		</transform>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/arandela_001.ply"/>
+		<ref id="mat-metal_plateado_rugoso" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/abrazadera_001-metal_cobrizo.ply"/>
+		<ref id="mat-metal_cobrizo" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/abrazadera_001-metal_plateado_rugoso.ply"/>
+		<ref id="mat-metal_plateado_rugoso" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/Lamp_wire.ply"/>
+		<ref id="mat-Lamp_rubber" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/Lamp_support.ply"/>
+		<ref id="mat-Lamp_plastic1" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/Lamp_support2-Lamp_plastic1.ply"/>
+		<ref id="mat-Lamp_plastic1" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/Lamp_support2-Lamp_plastic3.ply"/>
+		<ref id="mat-Lamp_plastic3" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/Lamp_glass.ply"/>
+		<ref id="mat-glass" name="bsdf"/>
+	</shape>
+	<shape type="ply">
+		<string name="filename" value="meshes/Lamp_bead.ply"/>
+		<ref id="mat-Lamp_plastic2" name="bsdf"/>
+	</shape>
+</scene>

@@ -190,3 +190,11 @@
       1. nerf target light source
       2. Mesh it
       3. Use material parameter optimization for the correct radiance value
+
+### 26.10.22
+- Try out:
+  - Use different type of light sources and optimize their radiance (done)
+    - Done w/ Mitsuba export 
+  - Use different type of light sources and optimize their shape + radiance (open)
+    - Maybe first optimize their shape
+    - then optimize their radiance (this can be done, as show on the prev. point)
