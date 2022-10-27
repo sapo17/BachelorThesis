@@ -198,3 +198,17 @@
   - Use different type of light sources and optimize their shape + radiance (open)
     - Maybe first optimize their shape
     - then optimize their radiance (this can be done, as show on the prev. point)
+
+### 27.10.22
+- To reconstruct light sources or any other object:
+    1. NeRF subject (e.g. light source: synthetic, or real life)
+    2. Mesh it using marching cubes (see also *extracting triangular 3D Model, Materials, and Lighting From Images*)
+    3. Use material parameter optimization to reconstruct reference image
+      - As mentioned *extracting triangular 3D...* the procedure is: 
+        - NeRF -> Marching Cubes -> Differentiable renderer
+
+- Important note from *extracting triangular 3D...*:
+  - *For performance reasons we use a differentiable rasterizer with deferred shading, hence reflections, refractions (e.g.,  glass), and translucency are not supported.*
+- Read, regarding marching cubes:
+  - William E. Lorensen and Harvey E. Cline. Marching Cubes: A High Resolution 3D Surface Construction Algorithm. SIGGRAPH Comput. Graph., 21(4):163?169, 1987
+  - Yiyi Liao, Simon Donn´e, and Andreas Geiger. Deep Marching Cubes: Learning Explicit Surface Representations. In Conference on Computer Vision and Pattern Recognition (CVPR), 2018.
