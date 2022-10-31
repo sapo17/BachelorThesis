@@ -192,23 +192,66 @@
       3. Use material parameter optimization for the correct radiance value
 
 ### 26.10.22
+
 - Try out:
   - Use different type of light sources and optimize their radiance (done)
-    - Done w/ Mitsuba export 
+    - Done w/ Mitsuba export
   - Use different type of light sources and optimize their shape + radiance (open)
     - Maybe first optimize their shape
     - then optimize their radiance (this can be done, as show on the prev. point)
 
 ### 27.10.22
-- To reconstruct light sources or any other object:
-    1. NeRF subject (e.g. light source: synthetic, or real life)
-    2. Mesh it using marching cubes (see also *extracting triangular 3D Model, Materials, and Lighting From Images*)
-    3. Use material parameter optimization to reconstruct reference image
-      - As mentioned *extracting triangular 3D...* the procedure is: 
-        - NeRF -> Marching Cubes -> Differentiable renderer
 
-- Important note from *extracting triangular 3D...*:
-  - *For performance reasons we use a differentiable rasterizer with deferred shading, hence reflections, refractions (e.g.,  glass), and translucency are not supported.*
+- To reconstruct light sources or any other object:
+
+  1. NeRF subject (e.g. light source: synthetic, or real life)
+  2. Mesh it using marching cubes (see also _extracting triangular 3D Model, Materials, and Lighting From Images_)
+  3. Use material parameter optimization to reconstruct reference image
+
+     - As mentioned _extracting triangular 3D..._ the procedure is:
+       - NeRF -> Marching Cubes -> Differentiable renderer
+
+- Important note from _extracting triangular 3D..._:
+  - _For performance reasons we use a differentiable rasterizer with deferred shading, hence reflections, refractions (e.g., glass), and translucency are not supported._
 - Read, regarding marching cubes:
   - William E. Lorensen and Harvey E. Cline. Marching Cubes: A High Resolution 3D Surface Construction Algorithm. SIGGRAPH Comput. Graph., 21(4):163?169, 1987
-  - Yiyi Liao, Simon Donn´e, and Andreas Geiger. Deep Marching Cubes: Learning Explicit Surface Representations. In Conference on Computer Vision and Pattern Recognition (CVPR), 2018.
+  - Yiyi Liao, Simon Donnï¿½e, and Andreas Geiger. Deep Marching Cubes: Learning Explicit Surface Representations. In Conference on Computer Vision and Pattern Recognition (CVPR), 2018.
+
+### 29.10.22
+
+- Questions for David:
+
+  - What exactly is meant by optimizing light sources?
+    - The object/shape itself
+      - Material
+      - Radiance/illumination
+        - Like this: ![](docs/radiance-optimization.png)
+      - Object pose / positioning
+      - All above
+  - You mentioned that students design light sources, and it would be interesting to use/reconstruct what they have done on tamashii:
+    - What would be the procedure?
+    - Would the input be a (reference) image, or a mesh/object?
+    - What would be the output after optimization?
+      - A render on tamashii?
+      - An image file?
+      - A scene file
+    - What would be the steps to achieve this task (from a client POV)? For example:
+    1.  Student designs a light source/s
+    2.  Student uploads the designed light source/s
+    3.  Tamashii reconstructs/optimizes input
+    4.  Tamashii shows the "result/s"...
+
+- Additional work on optimization: see _optimization-test-4.ipynb_
+
+### 31.10.22
+
+- To Read:
+  - _Physics based Differentiable Rendering: A comprehensive introduction - Zhao et. al_
+  - _radiative backpropogation - merlin et. al_
+
+- Update to the procedure mentioned on [27.10.22](#271022):
+
+  - NeRF'ing emissive, dielectric (e.g. glass) materials or circular objects (e.g. sphere) does not seem to work
+    - For emissive materials, one can do the following:
+      - NeRF light source while it does not emmit. With appropriate materials (e.g. diffuse) the light source should be NeRF'able
+    - For dielectric materials, spherical objects: **???**

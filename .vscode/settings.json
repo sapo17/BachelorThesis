@@ -1,5 +1,3 @@
 {
-  "editor.formatOnSave": true,
-  "cmake.sourceDirectory": "${workspaceFolder}/instant-ngp",
-  "cmake.buildDirectory": "${workspaceFolder}/instant-ngp/build"
+  "cmake.configureOnOpen": false
 }
