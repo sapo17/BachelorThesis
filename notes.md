@@ -255,3 +255,8 @@
     - For emissive materials, one can do the following:
       - NeRF light source while it does not emmit. With appropriate materials (e.g. diffuse) the light source should be NeRF'able
     - For dielectric materials, spherical objects: **???**
+
+- A simple GUI app for material-optimizer:
+  - Load a scene file
+  - Select scene parameters to modify/randomize
+  - Optimize selected scene parameters

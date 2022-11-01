@@ -1,9 +1,7 @@
 
 from matplotlib import pyplot as plt
-from contextlib import redirect_stdout
 import drjit as dr
 import mitsuba as mi
-import numpy as np
 import warnings
 import re
 import logging
