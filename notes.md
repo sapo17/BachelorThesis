@@ -260,3 +260,22 @@
   - Load a scene file
   - Select scene parameters to modify/randomize
   - Optimize selected scene parameters
+
+### 01.11.22
+- Work on material-optimizer-gui
+
+### 02.11.22
+- course on _Physics based Differentiable Rendering: A comprehensive introduction - Zhao et. al_
+  - [Course Website](https://shuangz.com/courses/pbdr-course-sg20/)
+    - watched until: 1:48
+
+### 03.11.22
+- see email to david
+- talk w/ david:
+  - Peter has some box for experimenting materials from an object
+    - Inside of the box is covered from external light sources
+    - Box has multiple light sources to shade object of interest
+    - One can put different (simple) objects inside the box and measure its material properties
+    - It would be interesting to take multiple photographs (from different point of view) of the object (w/ different materials, e.g. I could bring a small simple roug-glass object*, or if they have transparent materials such as frosted glass etc.)
+    - The task then would be to reconstruct/optimize an initial materials properties on mitsuba, as previously done with synthetic data, however in this case the reference image would be an image taken from inside the box
+    - Initially these task would be for simple objects, if successfull one can  try the procedure for more complex object. In the future, one can also NeRF objects and try similar things
