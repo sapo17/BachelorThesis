@@ -279,3 +279,19 @@
     - It would be interesting to take multiple photographs (from different point of view) of the object (w/ different materials, e.g. I could bring a small simple roug-glass object*, or if they have transparent materials such as frosted glass etc.)
     - The task then would be to reconstruct/optimize an initial materials properties on mitsuba, as previously done with synthetic data, however in this case the reference image would be an image taken from inside the box
     - Initially these task would be for simple objects, if successfull one can  try the procedure for more complex object. In the future, one can also NeRF objects and try similar things
+
+### 04.11.22
+- further work on material-optimizer-gui:
+  - modifiable param and optimization values
+
+### 05.11.22
+  - User provided reference image: *high priority*
+  - modifiable scene params other than reflectance *high priority*
+  - iteration count *low priority*
+  - samples per pixel: *low priority*
+  - resolution: *low priority*
+  - randomize scene params: *low priority*
+
+### 06/07.11.22
+  - User provided reference image: *high priority* (done)
+  - resolution: *low priority* (done: handled through resampling. Resampling according to loaded mitsuba scene file resolution definition)
