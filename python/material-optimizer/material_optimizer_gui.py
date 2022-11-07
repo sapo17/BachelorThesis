@@ -11,7 +11,6 @@ import sys
 import mitsuba as mi
 import drjit as dr
 import re
-import warnings
 import logging
 from PyQt6 import QtGui, QtWidgets
 import ctypes
@@ -30,32 +29,48 @@ logging.basicConfig(filename=LOG_FILE, encoding='utf-8', level=logging.INFO)
 class MaterialOptimizerModel:
     def __init__(self) -> None:
         self.refImage = None
+        self.sceneRes = (256, 256)
         self.loadMitsubaScene()
+        self.setSceneParams(self.scene)
+        self.setInitialSceneParams(self.sceneParams)
+        self.setDefaultOptimizationParams(self.initialSceneParams)
 
     def setScene(self, scene: mi.Scene):
         self.scene = scene
 
     def loadMitsubaScene(self, fileName=None):
         if fileName is None:
-            self.setScene(mi.load_dict(mi.cornell_box()))
+            self.setScene(mi.load_file(
+                'cbox.xml', resx=self.sceneRes[0], resy=self.sceneRes[1], integrator='prb'))
         else:
-            self.setScene(mi.load_file(fileName, res=256, integrator='prb'))
+            self.setScene(mi.load_file(
+                fileName, resx=self.sceneRes[0], resy=self.sceneRes[1], integrator='prb'))
 
+    def resetReferenceImage(self):
         if self.refImage is not None:
             self.refImage = None
 
-        self.params = mi.traverse(self.scene)
-        self.referenceReflectanceParams = self.createSubsetSceneParams(
-            self.params, REFLECTANCE_PATTERN)
-        self.referenceParams = dict(self.referenceReflectanceParams)
-        self.optimizationParams = {param: {
-            'Learning Rate': 0.3, 'Minimum Error': 0.01} for param in self.referenceParams}
+    def getDefaultOptimizationParams(self, params):
+        return {param: {
+            'Learning Rate': 0.3, 'Minimum Error': 0.01} for param in params}
+
+    def setDefaultOptimizationParams(self, initialParams):
+        self.optimizationParams = self.getDefaultOptimizationParams(
+            initialParams)
+
+    def setInitialSceneParams(self, params):
+        initialReflectanceParams = self.createSubsetSceneParams(
+            params, REFLECTANCE_PATTERN)
+        self.initialSceneParams = dict(initialReflectanceParams)
+
+    def setSceneParams(self, scene: mi.Scene):
+        self.sceneParams = mi.traverse(scene)
 
     def getModifiedParams(self):
         result = {}
-        for refKey, refValue in self.referenceParams.items():
-            if self.params[refKey] != refValue:
-                result[refKey] = self.params[refKey]
+        for refKey, refValue in self.initialSceneParams.items():
+            if self.sceneParams[refKey] != refValue:
+                result[refKey] = self.sceneParams[refKey]
         return result
 
     def createSubsetSceneParams(self, params: mi.SceneParameters,
@@ -63,52 +78,14 @@ class MaterialOptimizerModel:
         return {k: mi.Color3f(v)
                 for k, v in params.items() if pattern.search(k)}
 
-    def randomizeSRGBParams(self, params: mi.SceneParameters, ref_params: dict, bound: float):
-        if bound < 0.0:
-            warnings.warn(
-                'Negative bound value! Using 1.0 as the bound value.')
-            bound = 1.0
+    def updateParamErrors(self, params, initialParams, modifiedParams, paramErrors):
+        for key in modifiedParams:
+            err = dr.sum(
+                dr.sqr(initialParams[key] - params[key]))[0]
+            paramErrors[key].append(err)
+            logging.info(f"\tkey= {key} error= {paramErrors[key][-1]:6f}")
 
-        num_of_channels = 3
-        rng = mi.PCG32(size=num_of_channels * len(ref_params))
-        samples = rng.next_float64() * bound
-
-        for i, key in enumerate(ref_params):
-            if type(params[key]) is not mi.Color3f:
-                warn_msg = 'Invalid type:' + str(type(params[key]))
-                warnings.warn(warn_msg)
-                raise ValueError(
-                    'Given ref_params dictionary values must have the mi.Color3f type!')
-            params[key] = mi.Color3f(
-                samples[i*num_of_channels], samples[i*num_of_channels+1], samples[i*num_of_channels+2])
-
-        params.update()
-
-    def optimize(self, it, reflectanceOpt, opts, paramErrors):
-        # check all optimization parameters and if defined threshold is
-        # achieved stop optimization for that parameter (i.e. pop optimization param)
-        minErrors = {sceneParam: optimizationParam['Minimum Error']
-                     for sceneParam, optimizationParam in self.optimizationParams.items()}
-        for opt in opts:
-            for key in list(opt.keys()):
-                if key in opt and paramErrors[key][-1] < minErrors[key]:
-                    opt.variables.pop(key)
-                    logging.info(f'Key {key} is optimized')
-
-        # stop optimization if all optimization variables are empty
-        # (i.e. if all optimization params reached a defined threshold)
-        if all(map(lambda opt: not opt.variables, opts)):
-            return True
-
-        # Perform a (noisy) differentiable rendering of the scene
-        image = mi.render(self.scene, self.params, seed=it, spp=4)
-
-        # Evaluate the objective function from the current rendered image
-        loss = dr.sum(dr.sqr(image - self.refImage)) / len(image)
-
-        # Backpropagate through the rendering process
-        dr.backward(loss)
-
+    def updateAfterStep(self, opts, params):
         for opt in opts:
             # Optimizer: take a gradient descent step
             opt.step()
@@ -116,69 +93,58 @@ class MaterialOptimizerModel:
                 # Post-process the optimized parameters to ensure legal
                 # radiance values
                 if REFLECTANCE_PATTERN.search(key):
-                    opt[key] = dr.clamp(reflectanceOpt[key], 0.0, 1.0)
+                    opt[key] = dr.clamp(opt[key], 0.0, 1.0)
             # Update the scene state to the new optimized values
-            self.params.update(opt)
+            params.update(opt)
 
-        # update errors that are being optimized
-        logging.info(f"Iteration {it:02d}")
-        for key in self.getModifiedParams():
-            err = dr.sum(
-                dr.sqr(self.referenceParams[key] - self.params[key]))[0]
-            paramErrors[key].append(err)
-            logging.info(f"\tkey= {key} error= {paramErrors[key][-1]:6f}")
+    def mse(self, image, refImage):
+        return dr.mean(dr.sqr(refImage - image))
 
-        return False
+    def getMinParamErrors(self, optimizationParams: dict):
+        return {sceneParam: optimizationParam['Minimum Error']
+                for sceneParam, optimizationParam in optimizationParams.items()}
 
-    def prepareOptimization(self):
-        modifiedParams = self.getModifiedParams()
-        reflectanceOpt = mi.ad.Adam(
-            lr=0.2, params={k: self.params[k] for k in modifiedParams})
-        reflectanceOpt.set_learning_rate(
+    def getInitParamErrors(self, modifiedParams):
+        return {k: [dr.sum(dr.sqr(self.initialSceneParams[k] - self.sceneParams[k]))[0]]
+                for k in modifiedParams}
+
+    def initOptimizersWithCustomValues(self, customParams):
+        opt = mi.ad.Adam(
+            lr=0.2, params={k: self.sceneParams[k] for k in customParams})
+        opt.set_learning_rate(
             {sceneParam: optimizationParam['Learning Rate'] for sceneParam, optimizationParam in self.optimizationParams.items()})
-        self.params.update(reflectanceOpt)
-        opts = [reflectanceOpt]
+        opts = [opt]
+        return opts
 
-        # render initial image
-        initImg = mi.render(self.scene, spp=256)
-
-        # set initial parameter errors
-        paramErrors = {k: [dr.sum(dr.sqr(self.referenceParams[k] - self.params[k]))[0]]
-                       for k in modifiedParams}
-
-        # set optimization parameters
-        iteration_count = 200
-        return reflectanceOpt, opts, initImg, paramErrors, iteration_count
-
-    def render(self):
-        return mi.util.convert_to_bitmap(mi.render(self.scene, spp=512))
+    def render(self, scene: mi.Scene, spp: int, params=None, seed=0):
+        return mi.render(scene, params, seed=seed, spp=spp)
 
     def updateSceneParam(self, key, value):
-        if self.params[key] == value:
+        if self.sceneParams[key] == value:
             return
 
-        self.params[key] = value
-        self.params.update()
+        self.sceneParams[key] = value
+        self.sceneParams.update()
 
-    def setSceneParamsToModifiedParams(self, modifiedParams):
-        for key in modifiedParams:
-            self.params[key] = modifiedParams[key]
-        self.params.update()
+    def updateSceneParameters(self, currentSceneParams):
+        for key in currentSceneParams:
+            self.sceneParams[key] = currentSceneParams[key]
+        self.sceneParams.update()
 
     def setReferenceImageToInitiallyLoadedScene(self):
         # remember modified params
         modifiedParams = self.copyModifiedParams()
-        self.setSceneParamsToReferenceParams()
+        self.setSceneParamsToInitialParams()
         self.refImage = mi.render(self.scene, spp=512)
-        self.setSceneParamsToModifiedParams(modifiedParams)
+        self.updateSceneParameters(modifiedParams)
 
     def copyModifiedParams(self):
         return {k: mi.Color3f(v) for k, v in self.getModifiedParams().items()}
 
-    def setSceneParamsToReferenceParams(self):
+    def setSceneParamsToInitialParams(self):
         for key in self.getModifiedParams():
-            self.params[key] = self.referenceParams[key]
-        self.params.update()
+            self.sceneParams[key] = self.initialSceneParams[key]
+        self.sceneParams.update()
 
     def stringToColor3f(self, newValue) -> mi.Color3f:
         result = newValue.split(',')
@@ -197,6 +163,19 @@ class MaterialOptimizerModel:
         if self.optimizationParams[paramRow][paramCol] == newValue:
             return
         self.optimizationParams[paramRow][paramCol] = newValue
+
+    def readImage(self, fileName) -> mi.TensorXf:
+        result: mi.Bitmap = mi.Bitmap(fileName).convert(
+            mi.Bitmap.PixelFormat.RGB, mi.Struct.Type.Float32, srgb_gamma=False)
+        if result.size() != self.sceneRes:
+            result = result.resample(self.sceneRes)
+        result = mi.TensorXf(result)
+        result = dr.clamp(result, 0.0, 1.0)
+        return result
+
+    def updateSceneParamsWithOptimizers(self, opts):
+        for opt in opts:
+            self.sceneParams.update(opt)
 
 
 class MaterialOptimizerView(QMainWindow):
@@ -244,12 +223,24 @@ class MaterialOptimizerView(QMainWindow):
         centralWidget = QWidget(self)
         self.centralLayout = QVBoxLayout(centralWidget)
 
-        self.initTable(sceneParams)
+        self.initTopWidget(centralWidget)
+        self.table = self.initTable(sceneParams)
         self.initBottomWidget(centralWidget)
 
+        self.centralLayout.addWidget(self.topWidget)
         self.centralLayout.addWidget(self.table)
         self.centralLayout.addWidget(self.bottomWidget)
         self.setCentralWidget(centralWidget)
+
+    def initTopWidget(self, centralWidget):
+        self.defaultRefImgBtn = QRadioButton(
+            'Use original scene for reference image')
+        self.defaultRefImgBtn.setChecked(True)
+        self.customRefImgBtn = QRadioButton('Use custom reference image')
+        self.topWidget = QWidget(centralWidget)
+        self.radioBtnLayout = QHBoxLayout(self.topWidget)
+        self.radioBtnLayout.addWidget(self.defaultRefImgBtn)
+        self.radioBtnLayout.addWidget(self.customRefImgBtn)
 
     def initBottomWidget(self, centralWidget):
         self.bottomWidget = QWidget(centralWidget)
@@ -264,19 +255,15 @@ class MaterialOptimizerView(QMainWindow):
         columns = sceneParams[firstKey].keys()
         rowsLength = len(sceneParams)
         columnsLength = len(columns)
-        self.table = QTableWidget(rowsLength, columnsLength)
-        self.table.setHorizontalHeaderLabels(columns)
-        self.table.setVerticalHeaderLabels(sceneParams.keys())
-        self.table.horizontalHeader().setSectionResizeMode(
+        result = QTableWidget(rowsLength, columnsLength)
+        result.setHorizontalHeaderLabels(columns)
+        result.setVerticalHeaderLabels(sceneParams.keys())
+        result.horizontalHeader().setSectionResizeMode(
             QtWidgets.QHeaderView.ResizeMode.ResizeToContents)
 
         for row, param in enumerate(sceneParams):
             for col, label in enumerate(columns):
                 if label == 'Value':
-                    # if REFLECTANCE_PATTERN.search(param):
-                    #     self.setReflectanceToCellWidget(
-                    #         sceneParams, row, param, col)
-                    # else:
                     if type(sceneParams[param][label]) is mi.Color3f:
                         itemContent = self.Color3fToCellString(
                             sceneParams[param][label])
@@ -285,14 +272,22 @@ class MaterialOptimizerView(QMainWindow):
                         itemContent = 'Not implemented yet'
                 else:
                     item = QTableWidgetItem(str(sceneParams[param][label]))
-                self.table.setItem(row, col, item)
+                result.setItem(row, col, item)
+
+        return result
 
     @staticmethod
     def Color3fToCellString(color3f: mi.Color3f):
         return str(color3f).translate(
             str.maketrans({'[': None, ']': None}))
 
+    def replaceTable(self, newTable: QTableWidget):
+        self.centralLayout.replaceWidget(self.table, newTable)
+        self.table = newTable
+
 # Additional View for Plots
+
+
 class MplCanvas(FigureCanvasQTAgg):
 
     def __init__(self, parent=None):
@@ -331,7 +326,8 @@ class MaterialOptimizerController:
                  view: MaterialOptimizerView):
         self.model = model
         self.view = view
-        tableValues = self.combineTableValues()
+        tableValues = self.combineTableValues(
+            self.model.initialSceneParams, self.model.optimizationParams)
         self.view.initCentralWidget(tableValues)
         self.connectSignals()
 
@@ -339,36 +335,64 @@ class MaterialOptimizerController:
         try:
             fileName = self.view.showFileDialog('Xml File (*.xml)')
             self.model.loadMitsubaScene(fileName)
-            self.updateCentralWidget()
-            self.updateSignals()
+            self.model.resetReferenceImage()
+            self.model.setSceneParams(self.model.scene)
+            self.model.setInitialSceneParams(self.model.sceneParams)
+            self.model.setDefaultOptimizationParams(
+                self.model.initialSceneParams)
+            self.updateTable(self.model.initialSceneParams,
+                             self.model.optimizationParams)
         except Exception as err:
-            self.model.setScene()
-            msg = f"Invalid Mitsuba 3 scene file. Mitsuba Error: {err=}"
+            self.model.loadMitsubaScene()
+            msg = "Invalid Mitsuba 3 scene file. Setting default scene."
+            msg += f" Mitsuba Error: {err=}"
             self.view.showInfoMessageBox(msg)
 
+    def updateTable(self, params, optimizationParams):
+        newTable = self.view.initTable(
+            self.combineTableValues(params, optimizationParams))
+        self.view.replaceTable(newTable)
+        self.updateSignals()
+
+    def loadReferenceImage(self):
+        try:
+            refImgFileName = self.view.showFileDialog('Images (*.png *.jpg)')
+            readImg = self.model.readImage(refImgFileName)
+            self.model.refImage = readImg
+            msg = 'Selected image size is ' + str(readImg.shape)
+            msg += 'Resampling the reference image according to the loaded'
+            msg += ' scene resolution, if necessary.'
+        except Exception as err:
+            logging.error(str(err))
+            errMsg = 'Cannot load the reference image. Switching back to the'
+            errMsg += ' default reference image.'
+            self.view.defaultRefImgBtn.setChecked(True)
+            self.view.showInfoMessageBox(errMsg)
+
     def updateSignals(self):
-        self.view.optimizeButton.clicked.connect(self.optimizeMaterials)
         self.view.table.cellChanged.connect(self.onCellChanged)
 
-    def updateCentralWidget(self):
-        self.view.setCentralWidget(None)
-        tableValues = self.combineTableValues()
-        self.view.initCentralWidget(tableValues)
-
-    def combineTableValues(self):
+    def combineTableValues(self, params, optimizationParams):
         result = {}
-        for key in self.model.referenceParams:
-            result[key] = {'Value': self.model.referenceParams[key]}
-            result[key].update(self.model.optimizationParams[key])
+        for key in params:
+            result[key] = {'Value': params[key]}
+            result[key].update(optimizationParams[key])
         return result
 
     def optimizeMaterials(self):
+        if self.view.defaultRefImgBtn.isChecked():
+            self.optimizeMaterialsWithDefaultReferenceImage()
+        else:
+            self.optimizeMaterialsWithCustomReferenceImage()
+
+    def optimizeMaterialsWithDefaultReferenceImage(self):
         if self.view.progressBar.value() is self.view.progressBar.maximum():
             self.view.progressBar.reset()
             currentSceneParams = self.getCurrentSceneParams()
-            self.model.setSceneParamsToModifiedParams(currentSceneParams)
+            self.model.updateSceneParameters(currentSceneParams)
 
-        if len(self.model.getModifiedParams()) <= 0:
+        modifiedParams = self.model.getModifiedParams()
+        if len(modifiedParams) <= 0:
             self.view.showInfoMessageBox(
                 'Please modify a scene parameter before optimization.')
             return
@@ -381,24 +405,99 @@ class MaterialOptimizerController:
             self.view.progressBar.reset()
 
         self.view.progressBar.setValue(50)
-        reflectanceOpt, opts, initImg, paramErrors, iteration_count = self.model.prepareOptimization()
+        opts = self.model.initOptimizersWithCustomValues(modifiedParams)
+        self.model.updateSceneParamsWithOptimizers(opts)
+        initImg = self.model.render(self.model.scene, spp=256)
+        paramErrors = self.model.getInitParamErrors(modifiedParams)
+        minErrors = self.model.getMinParamErrors(self.model.optimizationParams)
+        iterationCount = 200
         self.view.progressBar.setValue(100)
 
         self.view.progressBar.reset()
-        for it in range(iteration_count):
-            self.view.progressBar.setValue(int(it/iteration_count * 100))
-            isOptimized = self.model.optimize(
-                it, reflectanceOpt, opts, paramErrors)
-            if isOptimized:
-                self.view.progressBar.setValue(self.view.progressBar.maximum())
+        for it in range(iterationCount):
+            self.view.progressBar.setValue(int(it/iterationCount * 100))
+
+            # check all optimization parameters and if defined threshold is
+            # achieved stop optimization for that parameter (i.e. pop optimization param)
+            for opt in opts:
+                for key in list(opt.keys()):
+                    if key in opt and paramErrors[key][-1] < minErrors[key]:
+                        opt.variables.pop(key)
+                        logging.info(f'Key {key} is optimized')
+
+            # stop optimization if all optimization variables are empty
+            # (i.e. if all optimization params reached a defined threshold)
+            if all(map(lambda opt: not opt.variables, opts)):
                 break
 
-        print('\nOptimization complete.')
+            # Perform a (noisy) differentiable rendering of the scene
+            image = self.model.render(
+                self.model.scene, spp=4, params=self.model.sceneParams, seed=it)
 
+            # Evaluate the objective function from the current rendered image
+            loss = self.model.mse(image, self.model.refImage)
+            # loss = dr.sum(dr.sqr(image - self.refImage)) / len(image)
+
+            # Backpropagate through the rendering process
+            dr.backward(loss)
+
+            self.model.updateAfterStep(opts, self.model.sceneParams)
+
+            logging.info(f"Iteration {it:02d}")
+            self.model.updateParamErrors(
+                self.model.sceneParams, self.model.initialSceneParams, modifiedParams, paramErrors)
+
+        self.view.progressBar.setValue(self.view.progressBar.maximum())
         sc = MplCanvas(self.view)
-        sc.plotOptimizationResults(self.model.refImage, initImg, self.model.render(),
+        sc.plotOptimizationResults(self.model.refImage, initImg, mi.util.convert_to_bitmap(self.model.render(self.model.scene, 512)),
                                    paramErrors)
+        self.view.optimizeButton.setDisabled(False)
+        self.view.optimizeButton.setText('Restart Optimization')
 
+    def optimizeMaterialsWithCustomReferenceImage(self):
+        if self.view.progressBar.value() is self.view.progressBar.maximum():
+            self.view.progressBar.reset()
+            currentSceneParams = self.getCurrentSceneParams()
+            self.model.updateSceneParameters(currentSceneParams)
+
+        self.view.progressBar.setValue(50)
+        opts = self.model.initOptimizersWithCustomValues(
+            self.model.createSubsetSceneParams(self.model.sceneParams, REFLECTANCE_PATTERN))
+        self.model.updateSceneParamsWithOptimizers(opts)
+        initImg = self.model.render(self.model.scene, spp=256)
+        iterationCount = 200
+        self.view.progressBar.setValue(100)
+
+        self.view.progressBar.reset()
+        lossHistKey = 'MSE(Current-Image, Reference-Image)'
+        lossHist = {lossHistKey: []}
+        for it in range(iterationCount):
+            self.view.progressBar.setValue(int(it/iterationCount * 100))
+
+            # Perform a (noisy) differentiable rendering of the scene
+            image = self.model.render(
+                self.model.scene, spp=4, params=self.model.sceneParams, seed=it)
+            image = dr.clamp(image, 0.0, 1.0)
+
+            # Evaluate the objective function from the current rendered image
+            loss = self.model.mse(image, self.model.refImage)
+            lossHist[lossHistKey].append(loss)
+            logging.info(f"Iteration {it:02d}")
+            logging.info(f"\tcurrent loss= {loss[0]:6f}")
+
+            minLossErr = 0.00095
+            if loss[0] < minLossErr:
+                break
+
+            # Backpropagate through the rendering process
+            dr.backward(loss)
+
+            self.model.updateAfterStep(opts, self.model.sceneParams)
+
+        self.view.progressBar.setValue(self.view.progressBar.maximum())
+        sc = MplCanvas(self.view)
+        sc.plotOptimizationResults(self.model.refImage, initImg, mi.util.convert_to_bitmap(
+            self.model.render(self.model.scene, 512)), lossHist)
         self.view.optimizeButton.setDisabled(False)
         self.view.optimizeButton.setText('Restart Optimization')
 
@@ -417,6 +516,30 @@ class MaterialOptimizerController:
         self.view.importFile.triggered.connect(self.loadMitsubaScene)
         self.view.optimizeButton.clicked.connect(self.optimizeMaterials)
         self.view.table.cellChanged.connect(self.onCellChanged)
+        self.view.customRefImgBtn.toggled.connect(
+            self.onCustomRefImgBtnChecked)
+        self.view.defaultRefImgBtn.toggled.connect(
+            self.onDefaultRefImgBtnChecked)
+
+    def onCustomRefImgBtnChecked(self):
+        if not self.view.customRefImgBtn.isChecked():
+            return
+
+        self.loadReferenceImage()
+        self.hideTableColumn('Minimum Error', True)
+
+    def hideTableColumn(self, columnLabel: str, hide: bool):
+        for colIdx in range(self.view.table.columnCount()):
+            if self.view.table.horizontalHeaderItem(colIdx).text() == columnLabel:
+                break
+        self.view.table.setColumnHidden(colIdx, hide)
+
+    def onDefaultRefImgBtnChecked(self):
+        if not self.view.defaultRefImgBtn.isChecked():
+            return
+
+        self.model.resetReferenceImage()
+        self.hideTableColumn('Minimum Error', False)
 
     def onCellChanged(self, row, col):
         if col == 0:
@@ -449,12 +572,12 @@ class MaterialOptimizerController:
         param = self.view.table.verticalHeaderItem(
             self.view.table.currentRow()).text()
         newValue = self.view.table.item(row, col).text()
-        if type(self.model.params[param]) is mi.Color3f:
+        if type(self.model.sceneParams[param]) is mi.Color3f:
             try:
                 newValue = self.model.stringToColor3f(newValue)
             except ValueError as err:
                 self.view.table.item(row, col).setText(
-                    MaterialOptimizerView.Color3fToCellString(self.model.referenceParams[param]))
+                    MaterialOptimizerView.Color3fToCellString(self.model.initialSceneParams[param]))
                 errMsg = 'Scene parameter is not changed. ' + str(err)
                 self.view.showInfoMessageBox(errMsg)
                 return False, None, None
