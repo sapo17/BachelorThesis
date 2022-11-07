@@ -2,10 +2,7 @@
 Author: Can Hasbay
 """
 
-from PyQt6.QtWidgets import (
-    QMainWindow, QFileDialog, QApplication, QMessageBox, QTableWidget,
-    QTableWidgetItem, QWidget, QVBoxLayout, QProgressBar, QPushButton,
-    QHBoxLayout)
+from PyQt6.QtWidgets import *
 from PyQt6.QtGui import QAction
 from pathlib import Path
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
@@ -17,16 +14,17 @@ import re
 import warnings
 import logging
 from PyQt6 import QtGui, QtWidgets
-from PyQt6.QtCore import Qt, pyqtSignal
+import ctypes
 
+# Constants
+MY_APP_ID = u'sapo.material-optimizer.0.1'  # arbitrary string
+ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(MY_APP_ID)
 mi.set_variant('cuda_ad_rgb')
-
 REFLECTANCE_PATTERN: re.Pattern = re.compile(r'.*\.reflectance\.value')
 RADIANCE_PATTERN: re.Pattern = re.compile(r'.*\.radiance\.value')
-
-log_file = Path("python\material-optimizer\material-optimizer.log")
-log_file.unlink(missing_ok=True)
-logging.basicConfig(filename=log_file, encoding='utf-8', level=logging.INFO)
+LOG_FILE = Path("python\material-optimizer\material-optimizer.log")
+LOG_FILE.unlink(missing_ok=True)
+logging.basicConfig(filename=LOG_FILE, encoding='utf-8', level=logging.INFO)
 
 
 class MaterialOptimizerModel:
@@ -167,7 +165,7 @@ class MaterialOptimizerModel:
             self.params[key] = modifiedParams[key]
         self.params.update()
 
-    def setReferenceImage(self):
+    def setReferenceImageToInitiallyLoadedScene(self):
         # remember modified params
         modifiedParams = self.copyModifiedParams()
         self.setSceneParamsToReferenceParams()
@@ -216,7 +214,7 @@ class MaterialOptimizerView(QMainWindow):
         # self.colorPickerWindow = None
 
     def initWindowProperties(self):
-        self.setGeometry(300, 300, 550, 450)
+        self.setGeometry(1024, 512, 1024, 512)
         self.setWindowTitle('Material Optimizer')
 
     def initMenu(self):
@@ -230,10 +228,10 @@ class MaterialOptimizerView(QMainWindow):
         fileMenu = menubar.addMenu('&File')
         fileMenu.addAction(self.importFile)
 
-    def showFileDialog(self):
+    def showFileDialog(self, filterStr: str):
         homeDir = str(Path.home())
         return QFileDialog.getOpenFileName(
-            self, 'Import File', homeDir, 'Xml File (*.xml)')[0]
+            self, 'Import File', homeDir, filterStr)[0]
 
     def showInfoMessageBox(self, text):
         msgBox = QMessageBox()
@@ -269,6 +267,8 @@ class MaterialOptimizerView(QMainWindow):
         self.table = QTableWidget(rowsLength, columnsLength)
         self.table.setHorizontalHeaderLabels(columns)
         self.table.setVerticalHeaderLabels(sceneParams.keys())
+        self.table.horizontalHeader().setSectionResizeMode(
+            QtWidgets.QHeaderView.ResizeMode.ResizeToContents)
 
         for row, param in enumerate(sceneParams):
             for col, label in enumerate(columns):
@@ -291,70 +291,6 @@ class MaterialOptimizerView(QMainWindow):
     def Color3fToCellString(color3f: mi.Color3f):
         return str(color3f).translate(
             str.maketrans({'[': None, ']': None}))
-
-    # def setReflectanceToCellWidget(self, sceneParams, row, param, col):
-    #     qColor = QtGui.QColor()
-    #     qColor.setRgbF(
-    #         sceneParams[param].x[0], sceneParams[param].y[0], sceneParams[param].z[0])
-    #     item = ColorButton(color=qColor.name())
-    #     self.table.setCellWidget(row, col, item)
-
-
-# class ColorButton(QtWidgets.QPushButton):
-#     '''
-#     Taken: https://www.pythonguis.com/widgets/qcolorbutton-a-color-selector-tool-for-pyqt/
-#     Additional View: Color Picker
-#     Custom Qt Widget to show a chosen color.
-
-#     Left-clicking the button shows the color-chooser, while
-#     right-clicking resets the color to None (no-color).
-#     '''
-
-#     colorChanged = pyqtSignal(object)
-
-#     def __init__(self, *args, color=None, **kwargs):
-#         super(ColorButton, self).__init__(*args, **kwargs)
-
-#         self._color = None
-#         self._default = color
-#         self.pressed.connect(self.onColorPicker)
-
-#         # Set the initial/default state.
-#         self.setColor(self._default)
-
-#     def setColor(self, color):
-#         if color != self._color:
-#             self._color = color
-#             self.colorChanged.emit(color)
-
-#         if self._color:
-#             self.setStyleSheet("background-color: %s;" % self._color)
-#         else:
-#             self.setStyleSheet("")
-
-#     def color(self):
-#         return self._color
-
-#     def onColorPicker(self):
-#         '''
-#         Show color-picker dialog to select color.
-
-#         Qt will use the native dialog by default.
-
-#         '''
-#         dlg = QtWidgets.QColorDialog(self)
-#         if self._color:
-#             dlg.setCurrentColor(QtGui.QColor(self._color))
-
-#         if dlg.exec():
-#             self.setColor(dlg.currentColor().name())
-
-#     def mousePressEvent(self, e):
-#         if e.button() == Qt.MouseButton.RightButton:
-#             self.setColor(self._default)
-
-#         return super(ColorButton, self).mousePressEvent(e)
-
 
 # Additional View for Plots
 class MplCanvas(FigureCanvasQTAgg):
@@ -400,8 +336,8 @@ class MaterialOptimizerController:
         self.connectSignals()
 
     def loadMitsubaScene(self):
-        fileName = self.view.showFileDialog()
         try:
+            fileName = self.view.showFileDialog('Xml File (*.xml)')
             self.model.loadMitsubaScene(fileName)
             self.updateCentralWidget()
             self.updateSignals()
@@ -440,7 +376,7 @@ class MaterialOptimizerController:
         self.view.optimizeButton.setDisabled(True)
         if self.model.refImage is None:
             self.view.progressBar.setValue(25)
-            self.model.setReferenceImage()
+            self.model.setReferenceImageToInitiallyLoadedScene()
             self.view.progressBar.setValue(self.view.progressBar.maximum())
             self.view.progressBar.reset()
 
@@ -535,6 +471,8 @@ def main():
     # View
     materialOptimizerView = MaterialOptimizerView()
     materialOptimizerView.show()
+    materialOptimizerView.setWindowIcon(
+        QtGui.QIcon('python/material-optimizer/sloth.png'))
 
     # Controller
     materialOptimizerController = MaterialOptimizerController(
