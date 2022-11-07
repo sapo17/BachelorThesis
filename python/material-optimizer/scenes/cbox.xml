@@ -1,0 +1,105 @@
+<scene version="2.1.0">
+
+<!-- Defaults, these can be set via the command line: -Darg=value -->
+
+	<default name="spp" value="64"/>
+	<default name="resx" value="256"/>
+	<default name="resy" value="256"/>
+
+<!-- Camera and Rendering Parameters -->
+
+	<integrator type="path" id="integrator">
+		<integer name="max_depth" value="8"/>
+	</integrator>
+	<sensor type="perspective" id="sensor">
+		<string name="fov_axis" value="smaller"/>
+		<float name="near_clip" value="0.001000"/>
+		<float name="far_clip" value="100.000000"/>
+		<integer name="focus_distance" value="1000"/>
+		<float name="fov" value="39.307700"/>
+		<transform name="to_world">
+			<rotate x="1" angle="180.00000500895632"/>
+			<rotate z="1" angle="180.00000500895632"/>
+			<translate value="0.000000 0.000000 3.900000"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/>
+			<rfilter type="gaussian"/>
+			<string name="pixel_format" value="rgb"/>
+			<string name="component_format" value="float32"/>
+		</film>
+	</sensor>
+
+<!-- Materials -->
+
+	<bsdf type="diffuse" id="white">
+		<rgb value="0.885809 0.698859 0.666422" name="reflectance"/>
+	</bsdf>
+	<bsdf type="diffuse" id="green">
+		<rgb value="0.105421 0.377980 0.076425" name="reflectance"/>
+	</bsdf>
+	<bsdf type="diffuse" id="red">
+		<rgb value="0.570068 0.043014 0.044371" name="reflectance"/>
+	</bsdf>
+
+<!-- Emitters -->
+
+	<shape type="rectangle" id="light">
+		<transform name="to_world">
+			<matrix value="0.230000 0.000000 0.000000 0.000000 0.000000 -0.000000 -0.190000 0.990000 0.000000 0.190000 -0.000000 0.010000 0.000000 0.000000 0.000000 1.000000"/>
+		</transform>
+		<ref id="white" name="bsdf"/>
+		<emitter type="area">
+			<rgb value="18.387000 13.987300 6.753570" name="radiance"/>
+		</emitter>
+	</shape>
+
+<!-- Shapes -->
+
+	<shape type="rectangle" id="floor">
+		<transform name="to_world">
+			<matrix value="1.000000 0.000000 0.000000 0.000000 0.000000 -0.000000 1.000000 -1.000000 0.000000 -1.000000 -0.000000 0.000000 0.000000 0.000000 0.000000 1.000000"/>
+		</transform>
+		<ref id="white" name="bsdf"/>
+	</shape>
+	<shape type="rectangle" id="ceiling">
+		<transform name="to_world">
+			<matrix value="1.000000 0.000000 0.000000 0.000000 0.000000 -0.000000 -1.000000 1.000000 0.000000 1.000000 -0.000000 0.000000 0.000000 0.000000 0.000000 1.000000"/>
+		</transform>
+		<ref id="white" name="bsdf"/>
+	</shape>
+	<shape type="rectangle" id="back">
+		<transform name="to_world">
+			<matrix value="1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 0.000000 0.000000 0.000000 0.000000 1.000000 -1.000000 0.000000 0.000000 0.000000 1.000000"/>
+		</transform>
+		<ref id="white" name="bsdf"/>
+	</shape>
+	<shape type="rectangle" id="green-wall">
+		<transform name="to_world">
+			<matrix value="-0.000000 0.000000 -1.000000 1.000000 0.000000 1.000000 0.000000 0.000000 1.000000 0.000000 -0.000000 0.000000 0.000000 0.000000 0.000000 1.000000"/>
+		</transform>
+		<ref id="green" name="bsdf"/>
+	</shape>
+	<shape type="rectangle" id="red-wall">
+		<transform name="to_world">
+			<matrix value="-0.000000 0.000000 1.000000 -1.000000 0.000000 1.000000 0.000000 0.000000 -1.000000 0.000000 -0.000000 0.000000 0.000000 0.000000 0.000000 1.000000"/>
+		</transform>
+		<ref id="red" name="bsdf"/>
+	</shape>
+	<shape type="cube" id="small-box">
+		<transform name="to_world">
+			<matrix value="0.286891 0.000000 -0.087712 0.335000 0.000000 0.300000 0.000000 -0.700000 0.087712 0.000000 0.286891 0.380000 0.000000 0.000000 0.000000 1.000000"/>
+		</transform>
+		<ref id="white" name="bsdf"/>
+	</shape>
+	<shape type="cube" id="large-box">
+		<transform name="to_world">
+			<matrix value="0.284910 0.000000 0.093949 -0.330000 0.000000 0.610000 0.000000 -0.400000 -0.093949 0.000000 0.284910 -0.280000 0.000000 0.000000 0.000000 1.000000"/>
+		</transform>
+		<ref id="white" name="bsdf"/>
+	</shape>
+</scene>
