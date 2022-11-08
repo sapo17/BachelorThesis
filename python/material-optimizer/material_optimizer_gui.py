@@ -37,15 +37,16 @@ class MaterialOptimizerModel:
         self.setInitialSceneParams(self.sceneParams)
         self.setDefaultOptimizationParams(self.initialSceneParams)
 
-    def setScene(self, scene: mi.Scene):
-        self.scene = scene
+    def setScene(self, fileName: str, sceneRes: tuple):
+        self.scene = mi.load_file(
+            fileName, resx=sceneRes[0], resy=sceneRes[1], width=sceneRes[0], height=sceneRes[1], resolution=sceneRes, integrator='prb')
 
     def loadMitsubaScene(self, fileName=None):
         if fileName is None:
             fileName = SCENES_DIR_PATH + 'cbox.xml'
 
-        self.setScene(mi.load_file(
-            fileName, resx=self.sceneRes[0], resy=self.sceneRes[1], integrator='prb'))
+        self.setScene(fileName, self.sceneRes)
+        self.fileName = fileName
 
     def resetReferenceImage(self):
         if self.refImage is not None:
@@ -168,10 +169,19 @@ class MaterialOptimizerModel:
     def readImage(self, fileName) -> mi.TensorXf:
         result: mi.Bitmap = mi.Bitmap(fileName).convert(
             mi.Bitmap.PixelFormat.RGB, mi.Struct.Type.Float32, srgb_gamma=False)
-        if result.size() != self.sceneRes:
-            result = result.resample(self.sceneRes)
+        resultSize = result.size()
+        if resultSize != self.sceneRes:
+            result = self.adjustImageSize(result, resultSize)
         result = mi.TensorXf(result)
         result = dr.clamp(result, 0.0, 1.0)
+        return result
+
+    def adjustImageSize(self, result, resultSize) -> mi.Bitmap:
+        aspectRatio = resultSize[0] / resultSize[1]
+        newSize = (int(256 * aspectRatio), 256)
+        self.setScene(self.fileName, newSize)
+        self.setSceneParams(self.scene)
+        result = result.resample(newSize)
         return result
 
     def updateSceneParamsWithOptimizers(self, opts):
@@ -338,6 +348,7 @@ class MaterialOptimizerController:
             fileName = self.view.showFileDialog('Xml File (*.xml)')
             self.model.loadMitsubaScene(fileName)
             self.model.resetReferenceImage()
+            self.view.defaultRefImgBtn.setChecked(True)
             self.model.setSceneParams(self.model.scene)
             self.model.setInitialSceneParams(self.model.sceneParams)
             self.model.setDefaultOptimizationParams(
@@ -462,12 +473,13 @@ class MaterialOptimizerController:
             currentSceneParams = self.getCurrentSceneParams()
             self.model.updateSceneParameters(currentSceneParams)
 
+        self.view.optimizeButton.setDisabled(True)
         self.view.progressBar.setValue(50)
         opts = self.model.initOptimizersWithCustomValues(
             self.model.createSubsetSceneParams(self.model.sceneParams, REFLECTANCE_PATTERN))
         self.model.updateSceneParamsWithOptimizers(opts)
         initImg = self.model.render(self.model.scene, spp=256)
-        iterationCount = 200
+        iterationCount = 100
         self.view.progressBar.setValue(100)
 
         self.view.progressBar.reset()
