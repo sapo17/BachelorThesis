@@ -16,7 +16,6 @@ from PyQt6 import QtGui, QtWidgets
 import ctypes
 
 # Constants
-LOG_DIR_PATH = 'log/'
 IMAGES_DIR_PATH = 'images/'
 SCENES_DIR_PATH = 'scenes/'
 MY_APP_ID = u'sapo.material-optimizer.0.1'  # arbitrary string
@@ -24,7 +23,7 @@ ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(MY_APP_ID)
 mi.set_variant('cuda_ad_rgb')
 REFLECTANCE_PATTERN: re.Pattern = re.compile(r'.*\.reflectance\.value')
 RADIANCE_PATTERN: re.Pattern = re.compile(r'.*\.radiance\.value')
-LOG_FILE = Path(LOG_DIR_PATH + "material-optimizer.log")
+LOG_FILE = Path("material-optimizer.log")
 LOG_FILE.unlink(missing_ok=True)
 logging.basicConfig(filename=LOG_FILE, encoding='utf-8', level=logging.INFO)
 
