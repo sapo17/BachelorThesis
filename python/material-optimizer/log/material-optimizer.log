@@ -1,0 +1,62 @@
+INFO:root:Iteration 00
+INFO:root:	current loss= 0.008064
+INFO:root:Iteration 01
+INFO:root:	current loss= 0.004198
+INFO:root:Iteration 02
+INFO:root:	current loss= 0.004965
+INFO:root:Iteration 03
+INFO:root:	current loss= 0.006381
+INFO:root:Iteration 04
+INFO:root:	current loss= 0.005540
+INFO:root:Iteration 05
+INFO:root:	current loss= 0.004799
+INFO:root:Iteration 06
+INFO:root:	current loss= 0.003901
+INFO:root:Iteration 07
+INFO:root:	current loss= 0.002793
+INFO:root:Iteration 08
+INFO:root:	current loss= 0.001755
+INFO:root:Iteration 09
+INFO:root:	current loss= 0.002047
+INFO:root:Iteration 10
+INFO:root:	current loss= 0.003748
+INFO:root:Iteration 11
+INFO:root:	current loss= 0.003743
+INFO:root:Iteration 12
+INFO:root:	current loss= 0.002323
+INFO:root:Iteration 13
+INFO:root:	current loss= 0.001355
+INFO:root:Iteration 14
+INFO:root:	current loss= 0.001167
+INFO:root:Iteration 15
+INFO:root:	current loss= 0.001404
+INFO:root:Iteration 16
+INFO:root:	current loss= 0.001694
+INFO:root:Iteration 17
+INFO:root:	current loss= 0.001811
+INFO:root:Iteration 18
+INFO:root:	current loss= 0.001759
+INFO:root:Iteration 19
+INFO:root:	current loss= 0.001553
+INFO:root:Iteration 20
+INFO:root:	current loss= 0.001434
+INFO:root:Iteration 21
+INFO:root:	current loss= 0.001602
+INFO:root:Iteration 22
+INFO:root:	current loss= 0.001830
+INFO:root:Iteration 23
+INFO:root:	current loss= 0.001912
+INFO:root:Iteration 24
+INFO:root:	current loss= 0.001777
+INFO:root:Iteration 25
+INFO:root:	current loss= 0.001352
+INFO:root:Iteration 26
+INFO:root:	current loss= 0.001034
+INFO:root:Iteration 27
+INFO:root:	current loss= 0.000980
+INFO:root:Iteration 28
+INFO:root:	current loss= 0.001007
+INFO:root:Iteration 29
+INFO:root:	current loss= 0.000981
+INFO:root:Iteration 30
+INFO:root:	current loss= 0.000938
