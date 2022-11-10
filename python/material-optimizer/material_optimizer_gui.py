@@ -23,6 +23,7 @@ ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(MY_APP_ID)
 mi.set_variant('cuda_ad_rgb')
 REFLECTANCE_PATTERN: re.Pattern = re.compile(r'.*\.reflectance\.value')
 RADIANCE_PATTERN: re.Pattern = re.compile(r'.*\.radiance\.value')
+SUPPORTED_BSDF_PATTERNS = [REFLECTANCE_PATTERN, RADIANCE_PATTERN]
 LOG_FILE = Path("material-optimizer.log")
 LOG_FILE.unlink(missing_ok=True)
 logging.basicConfig(filename=LOG_FILE, encoding='utf-8', level=logging.INFO)
@@ -62,7 +63,7 @@ class MaterialOptimizerModel:
 
     def setInitialSceneParams(self, params):
         initialReflectanceParams = self.createSubsetSceneParams(
-            params, REFLECTANCE_PATTERN)
+            params, SUPPORTED_BSDF_PATTERNS)
         self.initialSceneParams = dict(initialReflectanceParams)
 
     def setSceneParams(self, scene: mi.Scene):
@@ -76,9 +77,14 @@ class MaterialOptimizerModel:
         return result
 
     def createSubsetSceneParams(self, params: mi.SceneParameters,
-                                pattern: re.Pattern) -> dict:
-        return {k: mi.Color3f(v)
-                for k, v in params.items() if pattern.search(k)}
+                                patterns: list) -> dict:
+        result = {}
+        for k, v in params.items():
+            for pattern in patterns:
+                if pattern.search(k):
+                    # TODO beware your casting everything to a Color3f
+                    result[k] = mi.Color3f(v)
+        return result
 
     def updateParamErrors(self, params, initialParams, modifiedParams, paramErrors):
         for key in modifiedParams:
@@ -476,7 +482,7 @@ class MaterialOptimizerController:
         self.view.optimizeButton.setDisabled(True)
         self.view.progressBar.setValue(50)
         opts = self.model.initOptimizersWithCustomValues(
-            self.model.createSubsetSceneParams(self.model.sceneParams, REFLECTANCE_PATTERN))
+            self.model.createSubsetSceneParams(self.model.sceneParams, SUPPORTED_BSDF_PATTERNS))
         self.model.updateSceneParamsWithOptimizers(opts)
         initImg = self.model.render(self.model.scene, spp=256)
         iterationCount = 100
