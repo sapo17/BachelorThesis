@@ -47,8 +47,8 @@ class MaterialOptimizerModel:
         if fileName is None:
             fileName = SCENES_DIR_PATH + 'cbox.xml'
 
-        integratorType = self.findPossibleIntegratorType(fileName)
-        self.setScene(fileName, self.sceneRes, integratorType)
+        self.integratorType = self.findPossibleIntegratorType(fileName)
+        self.setScene(fileName, self.sceneRes, self.integratorType)
         self.fileName = fileName
 
     def findPossibleIntegratorType(self, fileName) -> str:
@@ -207,7 +207,7 @@ class MaterialOptimizerModel:
     def adjustImageSize(self, result, resultSize) -> mi.Bitmap:
         aspectRatio = resultSize[0] / resultSize[1]
         newSize = (int(256 * aspectRatio), 256)
-        self.setScene(self.fileName, newSize)
+        self.setScene(self.fileName, newSize, self.integratorType)
         self.setSceneParams(self.scene)
         result = result.resample(newSize)
         return result
