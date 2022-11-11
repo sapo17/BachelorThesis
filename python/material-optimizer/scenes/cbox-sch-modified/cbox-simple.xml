@@ -51,8 +51,6 @@
 
     <bsdf type="dielectric" id="glass" />
 
-    <bsdf type="conductor" id="mirror" />
-
     <!-- Light -->
 
     <shape type="obj" id="light">
@@ -92,14 +90,6 @@
         <string name="filename" value="meshes/cbox_redwall.obj" />
         <ref id="red" />
     </shape>
-
-    <!-- <shape type="sphere" id="mirrorsphere">
-        <transform name="to_world">
-            <scale value="0.5"/>
-            <translate x="-0.3" y="-0.5" z="0.2"/>
-        </transform>
-        <ref id="mirror"/>
-    </shape> -->
 
     <shape type="sphere" id="glasssphere">
         <transform name="to_world">

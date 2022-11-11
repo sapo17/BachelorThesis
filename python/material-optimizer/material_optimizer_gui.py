@@ -23,7 +23,8 @@ ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(MY_APP_ID)
 mi.set_variant('cuda_ad_rgb')
 REFLECTANCE_PATTERN: re.Pattern = re.compile(r'.*\.reflectance\.value')
 RADIANCE_PATTERN: re.Pattern = re.compile(r'.*\.radiance\.value')
-SUPPORTED_BSDF_PATTERNS = [REFLECTANCE_PATTERN, RADIANCE_PATTERN]
+ETA_PATTERN: re.Pattern = re.compile(r'.*\.eta')
+SUPPORTED_BSDF_PATTERNS = [REFLECTANCE_PATTERN, RADIANCE_PATTERN, ETA_PATTERN]
 LOG_FILE = Path("material-optimizer.log")
 LOG_FILE.unlink(missing_ok=True)
 logging.basicConfig(filename=LOG_FILE, encoding='utf-8', level=logging.INFO)
@@ -38,16 +39,27 @@ class MaterialOptimizerModel:
         self.setInitialSceneParams(self.sceneParams)
         self.setDefaultOptimizationParams(self.initialSceneParams)
 
-    def setScene(self, fileName: str, sceneRes: tuple):
+    def setScene(self, fileName: str, sceneRes: tuple, integratorType: str):
         self.scene = mi.load_file(
-            fileName, resx=sceneRes[0], resy=sceneRes[1], width=sceneRes[0], height=sceneRes[1], resolution=sceneRes, integrator='prb')
+            fileName, resx=sceneRes[0], resy=sceneRes[1], width=sceneRes[0], height=sceneRes[1], resolution=sceneRes, integrator=integratorType)
 
     def loadMitsubaScene(self, fileName=None):
         if fileName is None:
             fileName = SCENES_DIR_PATH + 'cbox.xml'
 
-        self.setScene(fileName, self.sceneRes)
+        self.integratorType = self.findPossibleIntegratorType(fileName)
+        self.setScene(fileName, self.sceneRes, self.integratorType)
         self.fileName = fileName
+
+    def findPossibleIntegratorType(self, fileName) -> str:
+        tmpScene = mi.load_file(fileName)
+        tmpParams = mi.traverse(tmpScene)
+        hasETAPattern = any(ETA_PATTERN.search(k)
+                            for k in tmpParams.properties)
+        integratorType = 'prb'
+        if hasETAPattern:
+            integratorType = 'path'
+        return integratorType
 
     def resetReferenceImage(self):
         if self.refImage is not None:
@@ -62,9 +74,8 @@ class MaterialOptimizerModel:
             initialParams)
 
     def setInitialSceneParams(self, params):
-        initialReflectanceParams = self.createSubsetSceneParams(
-            params, SUPPORTED_BSDF_PATTERNS)
-        self.initialSceneParams = dict(initialReflectanceParams)
+        self.initialSceneParams = dict(self.createSubsetSceneParams(
+            params, SUPPORTED_BSDF_PATTERNS))
 
     def setSceneParams(self, scene: mi.Scene):
         self.sceneParams = mi.traverse(scene)
@@ -82,9 +93,16 @@ class MaterialOptimizerModel:
         for k, v in params.items():
             for pattern in patterns:
                 if pattern.search(k):
-                    # TODO beware your casting everything to a Color3f
-                    result[k] = mi.Color3f(v)
+                    self.copyMitsubaTypeIfSupported(result, k, v)
         return result
+
+    def copyMitsubaTypeIfSupported(self, result, k, v):
+        vType = type(v)
+        if vType is mi.Color3f:
+            result[k] = mi.Color3f(v)
+        elif vType is mi.Float:
+            if len(v) == 1:
+                result[k] = mi.Float(v[0])
 
     def updateParamErrors(self, params, initialParams, modifiedParams, paramErrors):
         for key in modifiedParams:
@@ -98,12 +116,16 @@ class MaterialOptimizerModel:
             # Optimizer: take a gradient descent step
             opt.step()
             for key in opt.keys():
-                # Post-process the optimized parameters to ensure legal
-                # radiance values
-                if REFLECTANCE_PATTERN.search(key):
-                    opt[key] = dr.clamp(opt[key], 0.0, 1.0)
+                self.ensureLegalParamValues(opt, key)
             # Update the scene state to the new optimized values
             params.update(opt)
+
+    def ensureLegalParamValues(self, opt, key):
+        # Post-process the optimized parameters to ensure legal values
+        if REFLECTANCE_PATTERN.search(key):
+            opt[key] = dr.clamp(opt[key], 0.0, 1.0)
+        elif ETA_PATTERN.search(key):
+            opt[key] = dr.clamp(opt[key], 0.0, 3.0)
 
     def mse(self, image, refImage):
         return dr.mean(dr.sqr(refImage - image))
@@ -146,8 +168,11 @@ class MaterialOptimizerModel:
         self.refImage = mi.render(self.scene, spp=512)
         self.updateSceneParameters(modifiedParams)
 
-    def copyModifiedParams(self):
-        return {k: mi.Color3f(v) for k, v in self.getModifiedParams().items()}
+    def copyModifiedParams(self) -> dict:
+        result = {}
+        for k, v in self.getModifiedParams().items():
+            self.copyMitsubaTypeIfSupported(result, k, v)
+        return result
 
     def setSceneParamsToInitialParams(self):
         for key in self.getModifiedParams():
@@ -185,7 +210,7 @@ class MaterialOptimizerModel:
     def adjustImageSize(self, result, resultSize) -> mi.Bitmap:
         aspectRatio = resultSize[0] / resultSize[1]
         newSize = (int(256 * aspectRatio), 256)
-        self.setScene(self.fileName, newSize)
+        self.setScene(self.fileName, newSize, self.integratorType)
         self.setSceneParams(self.scene)
         result = result.resample(newSize)
         return result
@@ -193,6 +218,18 @@ class MaterialOptimizerModel:
     def updateSceneParamsWithOptimizers(self, opts):
         for opt in opts:
             self.sceneParams.update(opt)
+
+    @staticmethod
+    def is_float(element: any) -> bool:
+        """ Taken from https://stackoverflow.com/questions/736043/checking-if-a-string-can-be-converted-to-float-in-python/20929881#20929881"""
+        # If you expect None to be passed:
+        if element is None:
+            return False
+        try:
+            float(element)
+            return True
+        except ValueError:
+            return False
 
 
 class MaterialOptimizerView(QMainWindow):
@@ -280,15 +317,21 @@ class MaterialOptimizerView(QMainWindow):
 
         for row, param in enumerate(sceneParams):
             for col, label in enumerate(columns):
+                value = sceneParams[param][label]
                 if label == 'Value':
-                    if type(sceneParams[param][label]) is mi.Color3f:
-                        itemContent = self.Color3fToCellString(
-                            sceneParams[param][label])
+                    valueType = type(value)
+                    if valueType is mi.Color3f:
+                        itemContent = self.Color3fToCellString(value)
                         item = QTableWidgetItem(itemContent)
+                    elif valueType is mi.Float:
+                        if len(value) == 1:
+                            item = QTableWidgetItem(str(value[0]))
+                        else:
+                            item = QTableWidgetItem('Not implemented yet')
                     else:
-                        itemContent = 'Not implemented yet'
+                        item = QTableWidgetItem('Not implemented yet')
                 else:
-                    item = QTableWidgetItem(str(sceneParams[param][label]))
+                    item = QTableWidgetItem(str(value))
                 result.setItem(row, col, item)
 
         return result
@@ -592,7 +635,8 @@ class MaterialOptimizerController:
         param = self.view.table.verticalHeaderItem(
             self.view.table.currentRow()).text()
         newValue = self.view.table.item(row, col).text()
-        if type(self.model.sceneParams[param]) is mi.Color3f:
+        paramType = type(self.model.sceneParams[param])
+        if paramType is mi.Color3f:
             try:
                 newValue = self.model.stringToColor3f(newValue)
             except ValueError as err:
@@ -601,6 +645,14 @@ class MaterialOptimizerController:
                 errMsg = 'Scene parameter is not changed. ' + str(err)
                 self.view.showInfoMessageBox(errMsg)
                 return False, None, None
+        elif paramType is mi.Float:
+            if len(self.model.initialSceneParams[param]) != 1 and not MaterialOptimizerModel.is_float(newValue):
+                self.view.table.item(row, col).setText(
+                    str(self.model.initialSceneParams[param][0]))
+                errMsg = 'Scene parameter is not changed. ' + str(err)
+                self.view.showInfoMessageBox(errMsg)
+                return False, None, None
+            newValue = mi.Float(float(newValue))
         return True, param, newValue
 
 
