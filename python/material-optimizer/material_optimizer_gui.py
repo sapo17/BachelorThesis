@@ -590,8 +590,8 @@ class MaterialOptimizerController:
         if not self.view.customRefImgBtn.isChecked():
             return
 
-        self.loadReferenceImage()
         self.hideTableColumn('Minimum Error', True)
+        self.loadReferenceImage()
 
     def hideTableColumn(self, columnLabel: str, hide: bool):
         for colIdx in range(self.view.table.columnCount()):
