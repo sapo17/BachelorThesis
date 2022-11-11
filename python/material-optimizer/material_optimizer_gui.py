@@ -568,11 +568,13 @@ class MaterialOptimizerController:
         currentSceneParams = {}
         for row in range(self.view.table.rowCount()):
             key = self.view.table.verticalHeaderItem(row).text()
-            # since cell values for scene param cannot be other than
-            # mi.Color3f, no check for type casting is necessary
-            # see also self.onSceneParamChanged()
-            currentSceneParams[key] = self.model.stringToColor3f(
-                self.view.table.item(row, 0).text())
+            initValue = self.model.initialSceneParams[key]
+            newValue = self.view.table.item(row, 0).text()
+            if type(initValue) is mi.Color3f:
+                currentSceneParams[key] = self.model.stringToColor3f(newValue)
+            elif type(initValue) is mi.Float:
+                currentSceneParams[key] = mi.Float(float(newValue))
+
         return currentSceneParams
 
     def connectSignals(self):
