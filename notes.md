@@ -310,3 +310,7 @@
   - after the optimization finished, user should be able to select the state of the scene and render the scene in that state (e.g. optimization finished after 100th iteration and during it the minimum error threshold is not achieved, however user sees on the loss histogram plot the 51th iteration had lower loss value than the last state of the scene, thus user is able to select and use that scene state) (**open, not hight prio**)
   - support for dielectric materials (**open, high prio**)
 - Feature requests are available on GitHub->Issues
+
+### 11.11.22
+- [Mitsuba 3 Discussion: Optimizing Dielectric Materials](https://github.com/mitsuba-renderer/mitsuba3/discussions/379)
+- See also [GitHub Repository Issues](https://github.com/sapo17/BachelorThesis/issues) for development details on material-optimizer 
