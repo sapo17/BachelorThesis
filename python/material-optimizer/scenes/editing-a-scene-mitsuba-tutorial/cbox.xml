@@ -28,6 +28,7 @@
             <rfilter type="tent"/>
             <string name="pixel_format" value="rgb"/>
             <string name="component_format" value="float32"/>
+            <boolean name="sample_border" value="true" />
         </film>
     </sensor>
 
@@ -49,7 +50,12 @@
         <rgb name="reflectance" value="0.570068, 0.0430135, 0.0443706"/>
     </bsdf>
 
-    <bsdf type="dielectric" id="glass"/>
+    <bsdf type="roughdielectric" id="glass">
+        <string name="distribution" value="beckmann"/>
+        <float name="alpha" value="0.01"/>
+        <float name="int_ior" value="1.504"/>
+        <float name="ext_ior" value="1.0"/>
+    </bsdf>
 
     <bsdf type="conductor" id="mirror"/>
 

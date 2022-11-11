@@ -23,7 +23,7 @@ ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(MY_APP_ID)
 mi.set_variant('cuda_ad_rgb')
 REFLECTANCE_PATTERN: re.Pattern = re.compile(r'.*\.reflectance\.value')
 RADIANCE_PATTERN: re.Pattern = re.compile(r'.*\.radiance\.value')
-ETA_PATTERN: re.Pattern = re.compile(r'.*\.eta\.value')
+ETA_PATTERN: re.Pattern = re.compile(r'.*\.eta')
 SUPPORTED_BSDF_PATTERNS = [REFLECTANCE_PATTERN, RADIANCE_PATTERN, ETA_PATTERN]
 LOG_FILE = Path("material-optimizer.log")
 LOG_FILE.unlink(missing_ok=True)
@@ -74,9 +74,8 @@ class MaterialOptimizerModel:
             initialParams)
 
     def setInitialSceneParams(self, params):
-        initialReflectanceParams = self.createSubsetSceneParams(
-            params, SUPPORTED_BSDF_PATTERNS)
-        self.initialSceneParams = dict(initialReflectanceParams)
+        self.initialSceneParams = dict(self.createSubsetSceneParams(
+            params, SUPPORTED_BSDF_PATTERNS))
 
     def setSceneParams(self, scene: mi.Scene):
         self.sceneParams = mi.traverse(scene)
@@ -117,12 +116,16 @@ class MaterialOptimizerModel:
             # Optimizer: take a gradient descent step
             opt.step()
             for key in opt.keys():
-                # Post-process the optimized parameters to ensure legal
-                # radiance values
-                if REFLECTANCE_PATTERN.search(key):
-                    opt[key] = dr.clamp(opt[key], 0.0, 1.0)
+                self.ensureLegalParamValues(opt, key)
             # Update the scene state to the new optimized values
             params.update(opt)
+
+    def ensureLegalParamValues(self, opt, key):
+        # Post-process the optimized parameters to ensure legal values
+        if REFLECTANCE_PATTERN.search(key):
+            opt[key] = dr.clamp(opt[key], 0.0, 1.0)
+        elif ETA_PATTERN.search(key):
+            opt[key] = dr.clamp(opt[key], 0.0, 3.0)
 
     def mse(self, image, refImage):
         return dr.mean(dr.sqr(refImage - image))
