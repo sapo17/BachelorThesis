@@ -747,10 +747,11 @@ class MaterialOptimizerController:
                 self.view.showInfoMessageBox(errMsg)
                 return False, None, None
         elif paramType is mi.Float:
-            if len(self.model.initialSceneParams[param]) != 1 and not MaterialOptimizerModel.is_float(newValue):
+            if len(self.model.initialSceneParams[param]) != 1 or not MaterialOptimizerModel.is_float(newValue):
                 self.view.table.item(row, col).setText(
                     str(self.model.initialSceneParams[param][0]))
-                errMsg = 'Scene parameter is not changed. ' + str(err)
+                errMsg = 'Scene parameter is not changed.'
+                errMsg += ' Please provide a valid float value (e.g. 0.1).'
                 self.view.showInfoMessageBox(errMsg)
                 return False, None, None
             newValue = mi.Float(float(newValue))
