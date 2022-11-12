@@ -608,7 +608,7 @@ class MaterialOptimizerController:
             self.onCustomRefImgBtnChecked)
         self.view.defaultRefImgBtn.toggled.connect(
             self.onDefaultRefImgBtnChecked)
-        self.view.minErrLine.returnPressed.connect(self.onMinErrLineChanged)
+        self.view.minErrLine.editingFinished.connect(self.onMinErrLineChanged)
 
     def onMinErrLineChanged(self):
         try:
