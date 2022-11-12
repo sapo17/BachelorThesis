@@ -28,6 +28,7 @@ SUPPORTED_BSDF_PATTERNS = [REFLECTANCE_PATTERN, RADIANCE_PATTERN, ETA_PATTERN]
 LOG_FILE = Path("material-optimizer.log")
 LOG_FILE.unlink(missing_ok=True)
 logging.basicConfig(filename=LOG_FILE, encoding='utf-8', level=logging.INFO)
+DEFAULT_MIN_ERR_ON_CUSTOM_IMG = 0.001
 
 
 class MaterialOptimizerModel:
@@ -231,6 +232,11 @@ class MaterialOptimizerModel:
         except ValueError:
             return False
 
+    def setMinErrOnCustomImage(self, value: str):
+        if not MaterialOptimizerModel.is_float(value):
+            raise ValueError('Please provide a valid float value (e.g. 0.001)')
+        self.minErrOnCustomImage = float(value)
+
 
 class MaterialOptimizerView(QMainWindow):
 
@@ -279,11 +285,11 @@ class MaterialOptimizerView(QMainWindow):
 
         self.initTopWidget(centralWidget)
         self.table = self.initTable(sceneParams)
-        self.initBottomWidget(centralWidget)
+        self.initBottomContainer(centralWidget)
 
         self.centralLayout.addWidget(self.topWidget)
         self.centralLayout.addWidget(self.table)
-        self.centralLayout.addWidget(self.bottomWidget)
+        self.centralLayout.addWidget(self.bottomContainer)
         self.setCentralWidget(centralWidget)
 
     def initTopWidget(self, centralWidget):
@@ -296,13 +302,31 @@ class MaterialOptimizerView(QMainWindow):
         self.radioBtnLayout.addWidget(self.defaultRefImgBtn)
         self.radioBtnLayout.addWidget(self.customRefImgBtn)
 
-    def initBottomWidget(self, centralWidget):
-        self.bottomWidget = QWidget(centralWidget)
-        self.bottomLayout = QHBoxLayout(self.bottomWidget)
-        self.progressBar = QProgressBar(self.bottomWidget)
+    def initBottomContainer(self, centralWidget):
+        self.bottomContainer = QWidget(centralWidget)
+        self.bottomContainerLayout = QVBoxLayout(self.bottomContainer)
+        self.initProgessContainer(centralWidget)
+        self.initMinErrContainer()
+        self.bottomContainerLayout.addWidget(self.minErrorContainer)
+        self.bottomContainerLayout.addWidget(self.progressContainer)
+
+    def initMinErrContainer(self):
+        self.minErrorContainer = QWidget(self.bottomContainer)
+        self.minErrorContainerLayout = QHBoxLayout(self.minErrorContainer)
+        minErrLabel = QLabel(text='Minimum Error')
+        self.minErrLine = QLineEdit()
+        self.minErrLine.setText(str(DEFAULT_MIN_ERR_ON_CUSTOM_IMG))
+        self.minErrorContainerLayout.addWidget(minErrLabel)
+        self.minErrorContainerLayout.addWidget(self.minErrLine)
+        self.minErrorContainer.hide()
+
+    def initProgessContainer(self, centralWidget):
+        self.progressContainer = QWidget(self.bottomContainer)
+        self.progressContainerLayout = QHBoxLayout(self.progressContainer)
+        self.progressBar = QProgressBar(self.bottomContainer)
         self.optimizeButton = QPushButton('Start Optimization', centralWidget)
-        self.bottomLayout.addWidget(self.progressBar)
-        self.bottomLayout.addWidget(self.optimizeButton)
+        self.progressContainerLayout.addWidget(self.progressBar)
+        self.progressContainerLayout.addWidget(self.optimizeButton)
 
     def initTable(self, sceneParams: dict):
         firstKey = list(sceneParams)[0]
@@ -539,7 +563,7 @@ class MaterialOptimizerController:
 
             # Perform a (noisy) differentiable rendering of the scene
             image = self.model.render(
-                self.model.scene, spp=4, params=self.model.sceneParams, seed=it)
+                self.model.scene, spp=16, params=self.model.sceneParams, seed=it)
             image = dr.clamp(image, 0.0, 1.0)
 
             # Evaluate the objective function from the current rendered image
@@ -548,8 +572,7 @@ class MaterialOptimizerController:
             logging.info(f"Iteration {it:02d}")
             logging.info(f"\tcurrent loss= {loss[0]:6f}")
 
-            minLossErr = 0.00095
-            if loss[0] < minLossErr:
+            if loss[0] < self.model.minErrOnCustomImage:
                 break
 
             # Backpropagate through the rendering process
@@ -585,12 +608,22 @@ class MaterialOptimizerController:
             self.onCustomRefImgBtnChecked)
         self.view.defaultRefImgBtn.toggled.connect(
             self.onDefaultRefImgBtnChecked)
+        self.view.minErrLine.editingFinished.connect(self.onMinErrLineChanged)
+
+    def onMinErrLineChanged(self):
+        try:
+            self.model.setMinErrOnCustomImage(self.view.minErrLine.text())
+        except Exception as err:
+            self.view.minErrLine.setText(str(DEFAULT_MIN_ERR_ON_CUSTOM_IMG))
+            self.view.showInfoMessageBox(str(err))
 
     def onCustomRefImgBtnChecked(self):
         if not self.view.customRefImgBtn.isChecked():
             return
 
         self.hideTableColumn('Minimum Error', True)
+        self.model.setMinErrOnCustomImage(self.view.minErrLine.text())
+        self.view.minErrorContainer.show()
         self.loadReferenceImage()
 
     def hideTableColumn(self, columnLabel: str, hide: bool):
@@ -604,6 +637,7 @@ class MaterialOptimizerController:
             return
 
         self.model.resetReferenceImage()
+        self.view.minErrorContainer.hide()
         self.hideTableColumn('Minimum Error', False)
 
     def onCellChanged(self, row, col):
