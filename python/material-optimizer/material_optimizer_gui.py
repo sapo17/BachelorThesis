@@ -236,14 +236,18 @@ class MaterialOptimizerModel:
         if not MaterialOptimizerModel.is_float(value):
             raise ValueError('Please provide a valid float value (e.g. 0.001)')
         self.minErrOnCustomImage = float(value)
-
+    
+    @staticmethod
+    def minIdxInDrList(lis: list):
+        minValue = dr.min(lis)
+        return lis.index(minValue)
 
 class MaterialOptimizerView(QMainWindow):
 
     def __init__(self):
         super().__init__()
         self.initUI()
-        self.layout
+        self.setWindowIcon(QtGui.QIcon(IMAGES_DIR_PATH + 'sloth.png'))
         self.show()
 
     def initUI(self):
@@ -370,6 +374,47 @@ class MaterialOptimizerView(QMainWindow):
         self.table = newTable
 
 # Additional View for Plots
+class PopUpWindow(QMainWindow):
+
+    def __init__(self, parent: MaterialOptimizerView):
+        super(PopUpWindow, self).__init__(parent)
+        self.setWindowIcon(QtGui.QIcon(IMAGES_DIR_PATH + 'sloth.png'))
+        parent.setDisabled(True)
+        self.setDisabled(False)
+
+    # def initOptimizedSceneSelector(self, refImage, initImg, minIdx: int, scene: mi.Scene, sceneParams: mi.SceneParameters, sceneParamsHist: list, render, lossHist):
+    def initOptimizedSceneSelector(self, model: MaterialOptimizerModel, initImg, lossHist: list, sceneParamsHist: list):
+        comboBox = QComboBox()
+        comboBox.addItems(['Last Iteration', 'Min Error'])
+        self.setCentralWidget(comboBox)
+        comboBox.currentTextChanged.connect(self.onOptimizedSceneSelectorTextChanged)
+
+        self.model = model
+        self.initImg = initImg
+        self.lossHist = lossHist
+        self.sceneParamsHist = sceneParamsHist
+
+        self.show()
+        lastIteration = len(self.sceneParamsHist) - 1
+        self.showOptimizedPlot(lastIteration)
+
+    def onOptimizedSceneSelectorTextChanged(self, text: str):
+        if text == 'Min Error':
+            self.showOptimizedPlot(MaterialOptimizerModel.minIdxInDrList(self.lossHist))
+        else:
+            self.showOptimizedPlot(len(self.sceneParamsHist)-1)
+
+    def showOptimizedPlot(self, iteration: int):
+        self.model.sceneParams.update(values=self.sceneParamsHist[iteration])
+        sc = MplCanvas()
+        lossHistKey = 'MSE(Current-Image, Reference-Image)'
+        lossHistDict = {lossHistKey: self.lossHist}
+        sc.plotOptimizationResults(self.model.refImage, self.initImg, mi.util.convert_to_bitmap(
+                self.model.render(self.model.scene, 512)), lossHistDict, iteration, self.lossHist[iteration][0])
+
+    def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
+        self.parent().setDisabled(False)
+        return super().closeEvent(a0)
 
 
 class MplCanvas(FigureCanvasQTAgg):
@@ -378,7 +423,7 @@ class MplCanvas(FigureCanvasQTAgg):
         fig, self.axes = plt.subplots(2, 2, figsize=(10, 10))
         super(MplCanvas, self).__init__(fig)
 
-    def plotOptimizationResults(self, refImage, initImg, finalImg, paramErrors):
+    def plotOptimizationResults(self, refImage, initImg, finalImg, paramErrors, iterationNumber: int, loss: float):
 
         for k, v in paramErrors.items():
             self.axes[0][0].plot(v, label=k)
@@ -394,7 +439,7 @@ class MplCanvas(FigureCanvasQTAgg):
 
         self.axes[1][0].imshow(mi.util.convert_to_bitmap(finalImg))
         self.axes[1][0].axis('off')
-        self.axes[1][0].set_title('Optimized image')
+        self.axes[1][0].set_title(f'Optimized image: Iteration #{iterationNumber}, Loss: {loss:6f}')
 
         self.axes[1][1].imshow(mi.util.convert_to_bitmap(refImage))
         self.axes[1][1].axis('off')
@@ -497,6 +542,8 @@ class MaterialOptimizerController:
         paramErrors = self.model.getInitParamErrors(modifiedParams)
         minErrors = self.model.getMinParamErrors(self.model.optimizationParams)
         iterationCount = 200
+        sceneParamsHist = []
+        lossHist = []
         self.view.progressBar.setValue(100)
 
         self.view.progressBar.reset()
@@ -522,7 +569,8 @@ class MaterialOptimizerController:
 
             # Evaluate the objective function from the current rendered image
             loss = self.model.mse(image, self.model.refImage)
-            # loss = dr.sum(dr.sqr(image - self.refImage)) / len(image)
+            lossHist.append(loss)
+            sceneParamsHist.append(self.model.copyModifiedParams())
 
             # Backpropagate through the rendering process
             dr.backward(loss)
@@ -534,9 +582,13 @@ class MaterialOptimizerController:
                 self.model.sceneParams, self.model.initialSceneParams, modifiedParams, paramErrors)
 
         self.view.progressBar.setValue(self.view.progressBar.maximum())
-        sc = MplCanvas(self.view)
-        sc.plotOptimizationResults(self.model.refImage, initImg, mi.util.convert_to_bitmap(self.model.render(self.model.scene, 512)),
-                                   paramErrors)
+
+        if it <= 0:
+            self.view.showInfoMessageBox('No optimization was necessary')
+        else:
+            popUp = PopUpWindow(self.view)
+            popUp.initOptimizedSceneSelector(self.model, initImg, lossHist, sceneParamsHist)
+
         self.view.optimizeButton.setDisabled(False)
         self.view.optimizeButton.setText('Restart Optimization')
 
@@ -553,22 +605,23 @@ class MaterialOptimizerController:
         self.model.updateSceneParamsWithOptimizers(opts)
         initImg = self.model.render(self.model.scene, spp=256)
         iterationCount = 100
+        sceneParamsHist = []
+        lossHist = []
         self.view.progressBar.setValue(100)
 
         self.view.progressBar.reset()
-        lossHistKey = 'MSE(Current-Image, Reference-Image)'
-        lossHist = {lossHistKey: []}
         for it in range(iterationCount):
             self.view.progressBar.setValue(int(it/iterationCount * 100))
 
             # Perform a (noisy) differentiable rendering of the scene
             image = self.model.render(
-                self.model.scene, spp=16, params=self.model.sceneParams, seed=it)
+                                self.model.scene, spp=16, params=self.model.sceneParams, seed=it)
             image = dr.clamp(image, 0.0, 1.0)
 
             # Evaluate the objective function from the current rendered image
             loss = self.model.mse(image, self.model.refImage)
-            lossHist[lossHistKey].append(loss)
+            lossHist.append(loss)
+            sceneParamsHist.append(self.model.copyModifiedParams())
             logging.info(f"Iteration {it:02d}")
             logging.info(f"\tcurrent loss= {loss[0]:6f}")
 
@@ -581,9 +634,13 @@ class MaterialOptimizerController:
             self.model.updateAfterStep(opts, self.model.sceneParams)
 
         self.view.progressBar.setValue(self.view.progressBar.maximum())
-        sc = MplCanvas(self.view)
-        sc.plotOptimizationResults(self.model.refImage, initImg, mi.util.convert_to_bitmap(
-            self.model.render(self.model.scene, 512)), lossHist)
+
+        if it <= 0:
+            self.view.showInfoMessageBox('No optimization was necessary')
+        else:
+            popUp = PopUpWindow(self.view)
+            popUp.initOptimizedSceneSelector(self.model, initImg, lossHist, sceneParamsHist)
+
         self.view.optimizeButton.setDisabled(False)
         self.view.optimizeButton.setText('Restart Optimization')
 
@@ -702,8 +759,6 @@ def main():
     # View
     materialOptimizerView = MaterialOptimizerView()
     materialOptimizerView.show()
-    materialOptimizerView.setWindowIcon(
-        QtGui.QIcon(IMAGES_DIR_PATH + 'sloth.png'))
 
     # Controller
     materialOptimizerController = MaterialOptimizerController(
