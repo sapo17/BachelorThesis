@@ -12,7 +12,7 @@ import mitsuba as mi
 import drjit as dr
 import re
 import logging
-from PyQt6 import QtGui, QtWidgets
+from PyQt6 import QtGui, QtWidgets, QtCore
 import ctypes
 
 # Constants
@@ -68,7 +68,7 @@ class MaterialOptimizerModel:
 
     def getDefaultOptimizationParams(self, params):
         return {param: {
-            'Learning Rate': 0.3, 'Minimum Error': 0.01} for param in params}
+            'Learning Rate': 0.3, 'Minimum Error': 0.01, 'Optimize': False} for param in params}
 
     def setDefaultOptimizationParams(self, initialParams):
         self.optimizationParams = self.getDefaultOptimizationParams(
@@ -139,13 +139,12 @@ class MaterialOptimizerModel:
         return {k: [dr.sum(dr.sqr(self.initialSceneParams[k] - self.sceneParams[k]))[0]]
                 for k in modifiedParams}
 
-    def initOptimizersWithCustomValues(self, customParams):
+    def initOptimizersWithCustomValues(self, customParams: list) -> list:
         opt = mi.ad.Adam(
             lr=0.2, params={k: self.sceneParams[k] for k in customParams})
         opt.set_learning_rate(
-            {sceneParam: optimizationParam['Learning Rate'] for sceneParam, optimizationParam in self.optimizationParams.items()})
-        opts = [opt]
-        return opts
+            {k: self.optimizationParams[k]['Learning Rate'] for k in customParams})
+        return [opt]
 
     def render(self, scene: mi.Scene, spp: int, params=None, seed=0):
         return mi.render(scene, params, seed=seed, spp=spp)
@@ -359,11 +358,22 @@ class MaterialOptimizerView(QMainWindow):
                             item = QTableWidgetItem('Not implemented yet')
                     else:
                         item = QTableWidgetItem('Not implemented yet')
+                elif label == 'Optimize':
+                    self.setCheckboxAsQTableItem(result, row, col, value)
+                    continue
                 else:
                     item = QTableWidgetItem(str(value))
                 result.setItem(row, col, item)
 
         return result
+
+    def setCheckboxAsQTableItem(self, result, row, col, value):
+        checkboxContainer = QWidget()
+        layout = QHBoxLayout(checkboxContainer)
+        item = QCheckBox()
+        item.setChecked(value)
+        layout.addWidget(item, alignment=QtCore.Qt.AlignmentFlag.AlignCenter)
+        result.setCellWidget(row, col, checkboxContainer)
 
     @staticmethod
     def Color3fToCellString(color3f: mi.Color3f):
@@ -463,6 +473,7 @@ class MaterialOptimizerController:
         tableValues = self.combineTableValues(
             self.model.initialSceneParams, self.model.optimizationParams)
         self.view.initCentralWidget(tableValues)
+        self.hideTableColumn('Optimize', True)
         self.connectSignals()
 
     def loadMitsubaScene(self):
@@ -487,6 +498,7 @@ class MaterialOptimizerController:
         newTable = self.view.initTable(
             self.combineTableValues(params, optimizationParams))
         self.view.replaceTable(newTable)
+        self.hideTableColumn('Optimize', True)
         self.updateSignals()
 
     def loadReferenceImage(self):
@@ -540,7 +552,7 @@ class MaterialOptimizerController:
             self.view.progressBar.reset()
 
         self.view.progressBar.setValue(50)
-        opts = self.model.initOptimizersWithCustomValues(modifiedParams)
+        opts = self.model.initOptimizersWithCustomValues(list(modifiedParams))
         self.model.updateSceneParamsWithOptimizers(opts)
         initImg = self.model.render(self.model.scene, spp=256)
         paramErrors = self.model.getInitParamErrors(modifiedParams)
@@ -599,6 +611,12 @@ class MaterialOptimizerController:
         self.view.optimizeButton.setText('Restart Optimization')
 
     def optimizeMaterialsWithCustomReferenceImage(self):
+        checkedRows = self.getCheckedRows()
+        if len(checkedRows) <= 0:
+            msg = 'Please check at least one scene parameter for the optimization.'
+            self.view.showInfoMessageBox(msg)
+            return
+
         if self.view.progressBar.value() is self.view.progressBar.maximum():
             self.view.progressBar.reset()
             currentSceneParams = self.getCurrentSceneParams()
@@ -606,8 +624,7 @@ class MaterialOptimizerController:
 
         self.view.optimizeButton.setDisabled(True)
         self.view.progressBar.setValue(50)
-        opts = self.model.initOptimizersWithCustomValues(
-            self.model.createSubsetSceneParams(self.model.sceneParams, SUPPORTED_BSDF_PATTERNS))
+        opts = self.model.initOptimizersWithCustomValues(checkedRows)
         self.model.updateSceneParamsWithOptimizers(opts)
         initImg = self.model.render(self.model.scene, spp=256)
         iterationCount = 100
@@ -621,7 +638,7 @@ class MaterialOptimizerController:
 
             # Perform a (noisy) differentiable rendering of the scene
             image = self.model.render(
-                self.model.scene, spp=16, params=self.model.sceneParams, seed=it)
+                self.model.scene, spp=32, params=self.model.sceneParams, seed=it)
             image = dr.clamp(image, 0.0, 1.0)
 
             # Evaluate the objective function from the current rendered image
@@ -687,15 +704,33 @@ class MaterialOptimizerController:
             return
 
         self.hideTableColumn('Minimum Error', True)
+        self.hideTableColumn('Optimize', False)
         self.model.setMinErrOnCustomImage(self.view.minErrLine.text())
         self.view.minErrorContainer.show()
         self.loadReferenceImage()
 
     def hideTableColumn(self, columnLabel: str, hide: bool):
+        colIdx = self.getColumnIndex(columnLabel)
+        self.view.table.setColumnHidden(colIdx, hide)
+
+    def getColumnIndex(self, columnLabel: str):
         for colIdx in range(self.view.table.columnCount()):
             if self.view.table.horizontalHeaderItem(colIdx).text() == columnLabel:
-                break
-        self.view.table.setColumnHidden(colIdx, hide)
+                return colIdx
+        return 0
+
+    def getCheckedRows(self) -> list:
+        result = []
+        colIdx = self.getColumnIndex('Optimize')
+        for rowIdx in range(self.view.table.rowCount()):
+            assert self.view.table.cellWidget(
+                rowIdx, colIdx).layout().itemAt(0) != None
+            isChecked = self.view.table.cellWidget(
+                rowIdx, colIdx).layout().itemAt(0).widget().isChecked()
+            if isChecked:
+                result.append(
+                    self.view.table.verticalHeaderItem(rowIdx).text())
+        return result
 
     def onDefaultRefImgBtnChecked(self):
         if not self.view.defaultRefImgBtn.isChecked():
@@ -703,6 +738,7 @@ class MaterialOptimizerController:
 
         self.model.resetReferenceImage()
         self.view.minErrorContainer.hide()
+        self.hideTableColumn('Optimize', True)
         self.hideTableColumn('Minimum Error', False)
 
     def onCellChanged(self, row, col):
