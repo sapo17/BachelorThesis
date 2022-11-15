@@ -29,6 +29,7 @@ LOG_FILE = Path("material-optimizer.log")
 LOG_FILE.unlink(missing_ok=True)
 logging.basicConfig(filename=LOG_FILE, encoding='utf-8', level=logging.INFO)
 DEFAULT_MIN_ERR_ON_CUSTOM_IMG = 0.001
+SUPPORTED_SPP_VALUES = ['4', '16', '32', '64']
 
 
 class MaterialOptimizerModel:
@@ -231,10 +232,25 @@ class MaterialOptimizerModel:
         except ValueError:
             return False
 
+    @staticmethod
+    def is_int(element: any) -> bool:
+        if element is None:
+            return False
+        try:
+            int(element)
+            return True
+        except ValueError:
+            return False
+
     def setMinErrOnCustomImage(self, value: str):
         if not MaterialOptimizerModel.is_float(value):
             raise ValueError('Please provide a valid float value (e.g. 0.001)')
         self.minErrOnCustomImage = float(value)
+
+    def setSamplesPerPixelOnCustomImage(self, value: str):
+        if not MaterialOptimizerModel.is_int(value):
+            raise ValueError('Please provide a valid integer value (e.g. 4)')
+        self.samplesPerPixelOnCustomImage = int(value)
 
     @staticmethod
     def minIdxInDrList(lis: list):
@@ -298,7 +314,7 @@ class MaterialOptimizerView(QMainWindow):
 
     def initTopWidget(self, centralWidget):
         self.defaultRefImgBtn = QRadioButton(
-            'Use original scene for reference image')
+            'Use original scene as the reference image')
         self.defaultRefImgBtn.setChecked(True)
         self.customRefImgBtn = QRadioButton('Use custom reference image')
         self.topWidget = QWidget(centralWidget)
@@ -310,19 +326,36 @@ class MaterialOptimizerView(QMainWindow):
         self.bottomContainer = QWidget(centralWidget)
         self.bottomContainerLayout = QVBoxLayout(self.bottomContainer)
         self.initProgessContainer(centralWidget)
-        self.initMinErrContainer()
-        self.bottomContainerLayout.addWidget(self.minErrorContainer)
+        self.initConfigurationContainer()
+        self.bottomContainerLayout.addWidget(self.configContainer)
         self.bottomContainerLayout.addWidget(self.progressContainer)
 
-    def initMinErrContainer(self):
-        self.minErrorContainer = QWidget(self.bottomContainer)
-        self.minErrorContainerLayout = QHBoxLayout(self.minErrorContainer)
+    def initConfigurationContainer(self):
+        self.configContainer = QWidget(self.bottomContainer)
+        self.configContainerLayout = QVBoxLayout(self.configContainer)
+
+        # min error text input
+        self.minErrContainer = QWidget(self.configContainer)
+        self.minErrContainerLayout = QHBoxLayout(self.minErrContainer)
         minErrLabel = QLabel(text='Minimum Error')
         self.minErrLine = QLineEdit()
         self.minErrLine.setText(str(DEFAULT_MIN_ERR_ON_CUSTOM_IMG))
-        self.minErrorContainerLayout.addWidget(minErrLabel)
-        self.minErrorContainerLayout.addWidget(self.minErrLine)
-        self.minErrorContainer.hide()
+        self.minErrContainerLayout.addWidget(minErrLabel)
+        self.minErrContainerLayout.addWidget(self.minErrLine)
+
+        # samples per pixel dropdown
+        self.sppContainer = QWidget(self.configContainer)
+        self.sppContainerLayout = QHBoxLayout(self.sppContainer)
+        samplesPerPixelLabel = QLabel(
+            text='Samples per pixel during optimization')
+        self.samplesPerPixelBox = QComboBox()
+        self.samplesPerPixelBox.addItems(SUPPORTED_SPP_VALUES)
+        self.sppContainerLayout.addWidget(samplesPerPixelLabel)
+        self.sppContainerLayout.addWidget(self.samplesPerPixelBox)
+
+        self.configContainerLayout.addWidget(self.minErrContainer)
+        self.configContainerLayout.addWidget(self.sppContainer)
+        self.configContainer.hide()
 
     def initProgessContainer(self, centralWidget):
         self.progressContainer = QWidget(self.bottomContainer)
@@ -638,7 +671,7 @@ class MaterialOptimizerController:
 
             # Perform a (noisy) differentiable rendering of the scene
             image = self.model.render(
-                self.model.scene, spp=32, params=self.model.sceneParams, seed=it)
+                self.model.scene, spp=self.model.samplesPerPixelOnCustomImage, params=self.model.sceneParams, seed=it)
             image = dr.clamp(image, 0.0, 1.0)
 
             # Evaluate the objective function from the current rendered image
@@ -691,12 +724,27 @@ class MaterialOptimizerController:
         self.view.defaultRefImgBtn.toggled.connect(
             self.onDefaultRefImgBtnChecked)
         self.view.minErrLine.editingFinished.connect(self.onMinErrLineChanged)
+        self.view.samplesPerPixelBox.currentTextChanged.connect(
+            self.onSamplesPerPixelChanged)
 
     def onMinErrLineChanged(self):
         try:
             self.model.setMinErrOnCustomImage(self.view.minErrLine.text())
         except Exception as err:
             self.view.minErrLine.setText(str(DEFAULT_MIN_ERR_ON_CUSTOM_IMG))
+            self.view.showInfoMessageBox(str(err))
+
+    def onSamplesPerPixelChanged(self, text: str):
+        try:
+            self.model.setSamplesPerPixelOnCustomImage(text)
+            if self.model.samplesPerPixelOnCustomImage > 16:
+                msg = 'Beware that higher samples per pixel rate during '
+                msg += 'optimization may cause to unwanted crashes because of '
+                msg += 'GPU Memory(CUDA) limitations.'
+                self.view.showInfoMessageBox(msg)
+        except Exception as err:
+            self.view.samplesPerPixelBox.setCurrentText(
+                SUPPORTED_SPP_VALUES[0])
             self.view.showInfoMessageBox(str(err))
 
     def onCustomRefImgBtnChecked(self):
@@ -706,7 +754,7 @@ class MaterialOptimizerController:
         self.hideTableColumn('Minimum Error', True)
         self.hideTableColumn('Optimize', False)
         self.model.setMinErrOnCustomImage(self.view.minErrLine.text())
-        self.view.minErrorContainer.show()
+        self.view.configContainer.show()
         self.loadReferenceImage()
 
     def hideTableColumn(self, columnLabel: str, hide: bool):
@@ -737,7 +785,7 @@ class MaterialOptimizerController:
             return
 
         self.model.resetReferenceImage()
-        self.view.minErrorContainer.hide()
+        self.view.configContainer.hide()
         self.hideTableColumn('Optimize', True)
         self.hideTableColumn('Minimum Error', False)
 
