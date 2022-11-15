@@ -60,7 +60,7 @@ class MaterialOptimizerModel:
                             for k in tmpParams.properties)
         integratorType = 'prb'
         if hasETAPattern:
-            integratorType = 'path'
+            integratorType = 'prb_reparam'
         return integratorType
 
     def resetReferenceImage(self):
