@@ -24,7 +24,13 @@ mi.set_variant("cuda_ad_rgb")
 REFLECTANCE_PATTERN: re.Pattern = re.compile(r".*\.reflectance\.value")
 RADIANCE_PATTERN: re.Pattern = re.compile(r".*\.radiance\.value")
 ETA_PATTERN: re.Pattern = re.compile(r".*\.eta")
-SUPPORTED_BSDF_PATTERNS = [REFLECTANCE_PATTERN, RADIANCE_PATTERN, ETA_PATTERN]
+ALPHA_PATTERN: re.Pattern = re.compile(r".*\.alpha")
+SUPPORTED_BSDF_PATTERNS = [
+    REFLECTANCE_PATTERN,
+    RADIANCE_PATTERN,
+    ETA_PATTERN,
+    ALPHA_PATTERN,
+]
 LOG_FILE = Path("material-optimizer.log")
 LOG_FILE.unlink(missing_ok=True)
 logging.basicConfig(filename=LOG_FILE, encoding="utf-8", level=logging.INFO)
@@ -63,11 +69,12 @@ class MaterialOptimizerModel:
     def findPossibleIntegratorType(self, fileName) -> str:
         tmpScene = mi.load_file(fileName)
         tmpParams = mi.traverse(tmpScene)
-        hasETAPattern = any(
-            ETA_PATTERN.search(k) for k in tmpParams.properties
+        hasETAOrALPHAPattern = any(
+            ETA_PATTERN.search(k) or ALPHA_PATTERN.search(k)
+            for k in tmpParams.properties
         )
         integratorType = "prb"
-        if hasETAPattern:
+        if hasETAOrALPHAPattern:
             integratorType = "prb_reparam"
         return integratorType
 
@@ -146,6 +153,8 @@ class MaterialOptimizerModel:
             opt[key] = dr.clamp(opt[key], 0.0, 1.0)
         elif ETA_PATTERN.search(key):
             opt[key] = dr.clamp(opt[key], 0.0, 3.0)
+        elif ALPHA_PATTERN.search(key):
+            opt[key] = dr.clamp(opt[key], 0.0, 1.0)
 
     def mse(self, image, refImage):
         return dr.mean(dr.sqr(refImage - image))
