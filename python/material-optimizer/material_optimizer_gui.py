@@ -25,11 +25,23 @@ REFLECTANCE_PATTERN: re.Pattern = re.compile(r".*\.reflectance\.value")
 RADIANCE_PATTERN: re.Pattern = re.compile(r".*\.radiance\.value")
 ETA_PATTERN: re.Pattern = re.compile(r".*\.eta")
 ALPHA_PATTERN: re.Pattern = re.compile(r".*\.alpha")
+BASE_COLOR_PATTERN: re.Pattern = re.compile(r".*\.base_color")
+ROUGHNESS_PATTERN: re.Pattern = re.compile(r".*\.roughness")
+DIFF_TRANS_PATTERN: re.Pattern = re.compile(r".*\.diff_trans")
 SUPPORTED_BSDF_PATTERNS = [
     REFLECTANCE_PATTERN,
     RADIANCE_PATTERN,
     ETA_PATTERN,
     ALPHA_PATTERN,
+    BASE_COLOR_PATTERN,
+    ROUGHNESS_PATTERN,
+    DIFF_TRANS_PATTERN,
+]
+PATTERNS_INTRODUCE_DISCONTINUITIES = [
+    # see also parameter 'D' flags https://mitsuba.readthedocs.io/en/stable/src/generated/plugins_bsdfs.html#technical-details
+    ETA_PATTERN,
+    ALPHA_PATTERN,
+    ROUGHNESS_PATTERN,
 ]
 LOG_FILE = Path("material-optimizer.log")
 LOG_FILE.unlink(missing_ok=True)
@@ -69,14 +81,17 @@ class MaterialOptimizerModel:
     def findPossibleIntegratorType(self, fileName) -> str:
         tmpScene = mi.load_file(fileName)
         tmpParams = mi.traverse(tmpScene)
-        hasETAOrALPHAPattern = any(
-            ETA_PATTERN.search(k) or ALPHA_PATTERN.search(k)
-            for k in tmpParams.properties
-        )
         integratorType = "prb"
-        if hasETAOrALPHAPattern:
+        if self.anyParamsProducesDiscontinuities(tmpParams):
             integratorType = "prb_reparam"
         return integratorType
+
+    def anyParamsProducesDiscontinuities(self, tmpParams):
+        return any(
+            pattern.search(k)
+            for k in tmpParams.properties
+            for pattern in PATTERNS_INTRODUCE_DISCONTINUITIES
+        )
 
     def resetReferenceImage(self):
         if self.refImage is not None:
@@ -149,11 +164,11 @@ class MaterialOptimizerModel:
 
     def ensureLegalParamValues(self, opt, key):
         # Post-process the optimized parameters to ensure legal values
-        if REFLECTANCE_PATTERN.search(key):
-            opt[key] = dr.clamp(opt[key], 0.0, 1.0)
-        elif ETA_PATTERN.search(key):
+        if ETA_PATTERN.search(key):
             opt[key] = dr.clamp(opt[key], 0.0, 3.0)
-        elif ALPHA_PATTERN.search(key):
+        elif DIFF_TRANS_PATTERN.search(key):
+            opt[key] = dr.clamp(opt[key], 0.0, 2.0)
+        else:
             opt[key] = dr.clamp(opt[key], 0.0, 1.0)
 
     def mse(self, image, refImage):
