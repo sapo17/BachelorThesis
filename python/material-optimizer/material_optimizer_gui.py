@@ -10,45 +10,12 @@ from matplotlib import pyplot as plt
 import sys
 import mitsuba as mi
 import drjit as dr
-import re
 import logging
 from PyQt6 import QtGui, QtWidgets, QtCore
 import ctypes
+from constants import *
 
-# Constants
-IMAGES_DIR_PATH = "images/"
-SCENES_DIR_PATH = "scenes/"
-MY_APP_ID = "sapo.material-optimizer.0.1"  # arbitrary string
-ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(MY_APP_ID)
 mi.set_variant("cuda_ad_rgb")
-REFLECTANCE_PATTERN: re.Pattern = re.compile(r".*\.reflectance\.value")
-RADIANCE_PATTERN: re.Pattern = re.compile(r".*\.radiance\.value")
-ETA_PATTERN: re.Pattern = re.compile(r".*\.eta")
-ALPHA_PATTERN: re.Pattern = re.compile(r".*\.alpha")
-BASE_COLOR_PATTERN: re.Pattern = re.compile(r".*\.base_color")
-ROUGHNESS_PATTERN: re.Pattern = re.compile(r".*\.roughness")
-DIFF_TRANS_PATTERN: re.Pattern = re.compile(r".*\.diff_trans")
-SUPPORTED_BSDF_PATTERNS = [
-    REFLECTANCE_PATTERN,
-    RADIANCE_PATTERN,
-    ETA_PATTERN,
-    ALPHA_PATTERN,
-    BASE_COLOR_PATTERN,
-    ROUGHNESS_PATTERN,
-    DIFF_TRANS_PATTERN,
-]
-PATTERNS_INTRODUCE_DISCONTINUITIES = [
-    # see also parameter 'D' flags https://mitsuba.readthedocs.io/en/stable/src/generated/plugins_bsdfs.html#technical-details
-    ETA_PATTERN,
-    ALPHA_PATTERN,
-    ROUGHNESS_PATTERN,
-]
-LOG_FILE = Path("material-optimizer.log")
-LOG_FILE.unlink(missing_ok=True)
-logging.basicConfig(filename=LOG_FILE, encoding="utf-8", level=logging.INFO)
-DEFAULT_MIN_ERR_ON_CUSTOM_IMG = 0.001
-SUPPORTED_SPP_VALUES = ["4", "16", "32", "64"]
-
 
 class MaterialOptimizerModel:
     def __init__(self) -> None:
@@ -978,6 +945,12 @@ class MaterialOptimizerController:
 
 
 def main():
+
+    if sys.platform == 'win32':
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(MY_APP_ID)
+    
+    LOG_FILE.unlink(missing_ok=True)
+    logging.basicConfig(filename=LOG_FILE, encoding="utf-8", level=logging.INFO)
 
     app = QApplication(sys.argv)
 
