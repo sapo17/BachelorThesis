@@ -82,7 +82,9 @@ class MaterialOptimizerModel:
 
     def setInitialSceneParams(self, params):
         self.initialSceneParams = dict(
-            self.createSubsetSceneParams(params, SUPPORTED_BSDF_PATTERNS)
+            self.createSubsetSceneParams(
+                params, SUPPORTED_MITSUBA_PARAMETER_PATTERNS
+            )
         )
 
     def setSceneParams(self, scene: mi.Scene):
@@ -133,9 +135,11 @@ class MaterialOptimizerModel:
     def ensureLegalParamValues(self, opt, key):
         # Post-process the optimized parameters to ensure legal values
         if ETA_PATTERN.search(key):
-            opt[key] = dr.clamp(opt[key], 0.0, 3.0)
+            opt[key] = dr.clamp(opt[key], 0.0, MAX_ETA_VALUE)
         elif DIFF_TRANS_PATTERN.search(key):
-            opt[key] = dr.clamp(opt[key], 0.0, 2.0)
+            opt[key] = dr.clamp(opt[key], 0.0, MAX_DIFF_TRANS_VALUE)
+        elif DELTA_PATTERN.search(key):
+            opt[key] = dr.clamp(opt[key], 0.0, MAX_DELTA_VALUE)
         else:
             opt[key] = dr.clamp(opt[key], 0.0, 1.0)
 
@@ -684,7 +688,8 @@ class MaterialOptimizerController:
             lossHist.append(loss)
             sceneParamsHist.append(
                 self.model.createSubsetSceneParams(
-                    self.model.sceneParams, SUPPORTED_BSDF_PATTERNS
+                    self.model.sceneParams,
+                    SUPPORTED_MITSUBA_PARAMETER_PATTERNS,
                 )
             )
 
@@ -754,7 +759,8 @@ class MaterialOptimizerController:
             lossHist.append(loss)
             sceneParamsHist.append(
                 self.model.createSubsetSceneParams(
-                    self.model.sceneParams, SUPPORTED_BSDF_PATTERNS
+                    self.model.sceneParams,
+                    SUPPORTED_MITSUBA_PARAMETER_PATTERNS,
                 )
             )
             logging.info(f"Iteration {it:02d}")
