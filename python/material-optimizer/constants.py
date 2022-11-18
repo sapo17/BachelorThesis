@@ -1,13 +1,43 @@
 from pathlib import Path
 import re
 
-""" Configuration Contants """
-IMAGES_DIR_PATH = "images/"
-SCENES_DIR_PATH = "scenes/"
-MY_APP_ID = "sapo.material-optimizer.0.1"  # arbitrary string
-LOG_FILE = Path("material-optimizer.log")
-DEFAULT_MIN_ERR_ON_CUSTOM_IMG = 0.001
-SUPPORTED_SPP_VALUES = ["4", "16", "32", "64"]
+""" Configuration Constants """
+IMAGES_DIR_PATH: str = "images/"
+SCENES_DIR_PATH: str = "scenes/"
+MY_APP_ID: str = "sapo.material-optimizer.0.1"  # arbitrary string
+LOG_FILE: Path = Path("material-optimizer.log")
+DEFAULT_MIN_ERR_ON_CUSTOM_IMG: float = 0.001
+SUPPORTED_SPP_VALUES: list = ["4", "16", "32", "64"]
+CUDA_AD_RGB: str = "cuda_ad_rgb"
+DEFAULT_MITSUBA_SCENE: str = "cbox.xml"
+MITSUBA_PRB_INTEGRATOR: str = "prb"
+MITSUBA_PRB_REPARAM_INTEGRATOR: str = "prb_reparam"
+COLUMN_LABEL_VALUE: str = 'Value'
+COLUMN_LABEL_LEARNING_RATE: str = "Learning Rate"
+COLUMN_LABEL_MINIMUM_ERROR: str = "Minimum Error"
+COLUMN_LABEL_OPTIMIZE: str = "Optimize"
+WINDOW_ICON_FILE_NAME: str = "sloth.png"
+MATERIAL_OPTIMIZER_STRING: str = "Material Optimizer"
+IMPORT_STRING: str = "Import"
+IMPORT_SHORTCUT_STRING: str = "Ctrl+I"
+IMPORT_LABEL_STRING: str = "Import Mitsuba 3 Scene File"
+FILE_STRING: str = "&File"
+IMPORT_FILE_STRING: str = "Import File"
+INFO_STRING: str = "Info"
+START_OPTIMIZATION_STRING: str = "Start Optimization"
+NOT_IMPLEMENTED_STRING: str = "Not implemented yet"
+LAST_ITERATION_STRING: str = "Last Iteration"
+FIGURE_FILE_NAME: str = "material-optimizer-result-figure.png"
+ITERATION_STRING: str = "iteration"
+LOSS_STRING: str = "Loss"
+PARAMETER_ERROR_PLOT_STRING: str = "Parameter error plot"
+OFF_STRING: str = "off"
+INITIAL_IMAGE_STRING: str = "Initial Image"
+REFERENCE_IMAGE_STRING: str = "Reference Image"
+XML_FILE_FILTER_STRING: str = "Xml File (*.xml)"
+IMAGES_FILE_FILTER_STRING: str = "Images (*.png *.jpg)"
+RESTART_OPTIMIZATION_STRING: str = "Restart Optimization"
+
 
 """ 
 BSDF Parameter Patterns Constants
@@ -48,13 +78,13 @@ CLEARCOAT_GLOSS_PATTERN: re.Pattern = re.compile(r".*\.clearcoat_gloss")
 # max Index of refraction value is taken from
 # https://en.wikipedia.org/wiki/List_of_refractive_indices
 # Germanium: ~4.1
-MAX_ETA_VALUE = 4.1
+MAX_ETA_VALUE: float = 4.1
 
 # taken from https://mitsuba.readthedocs.io/en/stable/src/generated/plugins_bsdfs.html#the-thin-principled-bsdf-principledthin
-MAX_DIFF_TRANS_VALUE = 2.0
+MAX_DIFF_TRANS_VALUE: float = 2.0
 
 # taken from https://mitsuba.readthedocs.io/en/stable/src/generated/plugins_bsdfs.html#linear-retarder-material-retarder
-MAX_DELTA_VALUE = 360.0
+MAX_DELTA_VALUE: float = 360.0
 
 
 """ 
@@ -71,7 +101,7 @@ IRRADIANCE_PATTERN: re.Pattern = re.compile(
 )  # supports only float/Color3f entry
 
 """ Combine Patterns """
-SUPPORTED_MITSUBA_PARAMETER_PATTERNS = [
+SUPPORTED_MITSUBA_PARAMETER_PATTERNS: list = [
     REFLECTANCE_PATTERN,
     RADIANCE_PATTERN,
     ETA_PATTERN,
@@ -102,7 +132,7 @@ SUPPORTED_MITSUBA_PARAMETER_PATTERNS = [
     SCALE_PATTERN,
     IRRADIANCE_PATTERN,
 ]
-PATTERNS_INTRODUCE_DISCONTINUITIES = [
+PATTERNS_INTRODUCE_DISCONTINUITIES: list = [
     # see also parameter 'D' flags https://mitsuba.readthedocs.io/en/stable/src/generated/plugins_bsdfs.html#technical-details
     ETA_PATTERN,
     ALPHA_PATTERN,
