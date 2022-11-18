@@ -60,8 +60,8 @@
     <bsdf type="roughdielectric" id="glass">
         <string name="distribution" value="ggx"/>
         <float name="alpha" value="0.01"/>
-        <float name="int_ior" value="1.504"/>
-        <float name="ext_ior" value="1.0"/>
+        <string name="int_ior" value="acrylic glass"/>
+        <string name="ext_ior" value="air"/>
     </bsdf>
 
     <!-- <bsdf type="conductor" id="mirror"/> -->
@@ -111,6 +111,12 @@
             <scale value="0.5"/>
             <translate x="0.0" y="-0.5" z="0.2"/>
         </transform>
+        <medium type="homogeneous" name="interior">
+            <float name="scale" value="4"/>
+            <rgb name="sigma_t" value="1, 1, 0.5"/>
+            <rgb name="albedo" value="1.0, 1.0, 1.0"/>
+            <boolean name="sample_emitters" value="false"/>
+        </medium>
         <ref id="glass"/>
     </shape>
 

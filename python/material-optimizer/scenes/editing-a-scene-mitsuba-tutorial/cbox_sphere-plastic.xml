@@ -25,7 +25,7 @@
         <film type="hdrfilm">
             <integer name="width"  value="$res"/>
             <integer name="height" value="$res"/>
-            <rfilter type="tent"/>
+            <rfilter type="mitchell"/>
             <string name="pixel_format" value="rgb"/>
             <string name="component_format" value="float32"/>
             <boolean name="sample_border" value="true" />
@@ -50,14 +50,24 @@
         <rgb name="reflectance" value="0.570068, 0.0430135, 0.0443706"/>
     </bsdf>
 
-    <bsdf type="roughdielectric" id="glass">
-        <string name="distribution" value="beckmann"/>
+    <bsdf type="diffuse" id="blue">
+        <rgb name="reflectance" value="0.0 0.0 1.0"/>
+    </bsdf>
+
+    <!-- <bsdf type="plastic" id="plastic">
+        <rgb name="diffuse_reflectance" value="1, 1, 1"/>
+        <float name="int_ior" value="1.504"/>
+        <float name="ext_ior" value="1.0"/>
+    </bsdf> -->
+
+    <bsdf type="roughplastic" id="plastic">
+        <string name="distribution" value="ggx"/>
         <float name="alpha" value="0.01"/>
         <float name="int_ior" value="1.504"/>
         <float name="ext_ior" value="1.0"/>
+        <boolean name="nonlinear" value="true"/>
+        <rgb name="diffuse_reflectance" value="1, 1, 1"/>
     </bsdf>
-
-    <bsdf type="conductor" id="mirror"/>
 
     <!-- Light -->
 
@@ -71,11 +81,6 @@
             <rgb name="radiance" value="18.387, 13.9873, 6.75357"/>
         </emitter>
     </shape>
-
-    <emitter type="point">
-        <point name="position" value="0.0, 5.0, 0.0"/>
-        <rgb name="intensity" value="1.0"/>
-    </emitter>
 
     <!-- Shapes -->
 
@@ -91,7 +96,7 @@
 
     <shape type="obj" id="back">
         <string name="filename" value="meshes/cbox_back.obj"/>
-        <ref id="white"/>
+        <ref id="blue"/>
     </shape>
 
     <shape type="obj" id="greenwall">
@@ -104,19 +109,12 @@
         <ref id="red"/>
     </shape>
 
-    <shape type="sphere" id="mirrorsphere">
+    <shape type="sphere" id="sphere">
         <transform name="to_world">
             <scale value="0.5"/>
-            <translate x="-0.3" y="-0.5" z="0.2"/>
+            <translate x="0.0" y="-0.5" z="0.2"/>
         </transform>
-        <ref id="mirror"/>
+        <ref id="plastic"/>
     </shape>
 
-    <shape type="sphere" id="glasssphere">
-        <transform name="to_world">
-            <scale value="0.25"/>
-            <translate x="0.5" y="-0.75" z="-0.2"/>
-        </transform>
-        <ref id="glass"/>
-    </shape>
 </scene>
