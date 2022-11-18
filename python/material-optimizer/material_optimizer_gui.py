@@ -17,6 +17,7 @@ from constants import *
 
 mi.set_variant(CUDA_AD_RGB)
 
+
 class MaterialOptimizerModel:
     def __init__(self) -> None:
         self.refImage = None
@@ -50,15 +51,32 @@ class MaterialOptimizerModel:
         tmpScene = mi.load_file(fileName)
         tmpParams = mi.traverse(tmpScene)
         integratorType = MITSUBA_PRB_INTEGRATOR
-        if self.anyParamsProducesDiscontinuities(tmpParams):
+        if self.anyInPatterns(
+            tmpParams, PATTERNS_REQUIRE_VOLUMETRIC_INTEGRATOR
+        ):
+            if self.anyInPatterns(
+                tmpParams, PATTERNS_INTRODUCE_DISCONTINUITIES
+            ):
+                msg = f"Beware that {integratorType} is in use, however the "
+                msg += "scene contains some parameters that may introduce "
+                msg += "discontinuities! Information from the mitsuba "
+                msg += "documentation: No reparameterization. This means that "
+                msg += " the integrator cannot be used for shape optimization "
+                msg += "(it will return incorrect/biased gradients for "
+                msg += "geometric parameters like vertex positions.)"
+                logging.warning(msg)
+            integratorType = MITSUBA_PRBVOLPATH_INTEGRATOR
+        elif self.anyInPatterns(tmpParams, PATTERNS_INTRODUCE_DISCONTINUITIES):
             integratorType = MITSUBA_PRB_REPARAM_INTEGRATOR
+
+        logging.info(f"Integrator type: {integratorType}")
         return integratorType
 
-    def anyParamsProducesDiscontinuities(self, tmpParams):
+    def anyInPatterns(self, tmpParams, patterns: list):
         return any(
             pattern.search(k)
             for k in tmpParams.properties
-            for pattern in PATTERNS_INTRODUCE_DISCONTINUITIES
+            for pattern in patterns
         )
 
     def resetReferenceImage(self):
@@ -140,6 +158,10 @@ class MaterialOptimizerModel:
             opt[key] = dr.clamp(opt[key], 0.0, MAX_DIFF_TRANS_VALUE)
         elif DELTA_PATTERN.search(key):
             opt[key] = dr.clamp(opt[key], 0.0, MAX_DELTA_VALUE)
+        elif SIGMA_T_PATTERN.search(key):
+            opt[key] = dr.clamp(opt[key], 0.0, MAX_SIGMA_T_VALUE)
+        elif PHASE_G_PATTERN.search(key):
+            opt[key] = dr.clamp(opt[key], MIN_PHASE_G_VALUE, MAX_PHASE_G_VALUE)
         else:
             opt[key] = dr.clamp(opt[key], 0.0, 1.0)
 
@@ -292,7 +314,9 @@ class MaterialOptimizerView(QMainWindow):
     def __init__(self):
         super().__init__()
         self.initUI()
-        self.setWindowIcon(QtGui.QIcon(IMAGES_DIR_PATH + WINDOW_ICON_FILE_NAME))
+        self.setWindowIcon(
+            QtGui.QIcon(IMAGES_DIR_PATH + WINDOW_ICON_FILE_NAME)
+        )
         self.show()
 
     def initUI(self):
@@ -399,7 +423,9 @@ class MaterialOptimizerView(QMainWindow):
         self.progressContainer = QWidget(self.bottomContainer)
         self.progressContainerLayout = QHBoxLayout(self.progressContainer)
         self.progressBar = QProgressBar(self.bottomContainer)
-        self.optimizeButton = QPushButton(START_OPTIMIZATION_STRING, centralWidget)
+        self.optimizeButton = QPushButton(
+            START_OPTIMIZATION_STRING, centralWidget
+        )
         self.progressContainerLayout.addWidget(self.progressBar)
         self.progressContainerLayout.addWidget(self.optimizeButton)
 
@@ -459,7 +485,9 @@ class MaterialOptimizerView(QMainWindow):
 class PopUpWindow(QMainWindow):
     def __init__(self, parent: MaterialOptimizerView):
         super(PopUpWindow, self).__init__(parent)
-        self.setWindowIcon(QtGui.QIcon(IMAGES_DIR_PATH + WINDOW_ICON_FILE_NAME))
+        self.setWindowIcon(
+            QtGui.QIcon(IMAGES_DIR_PATH + WINDOW_ICON_FILE_NAME)
+        )
         parent.setDisabled(True)
         self.setDisabled(False)
 
@@ -601,7 +629,9 @@ class MaterialOptimizerController:
 
     def loadReferenceImage(self):
         try:
-            refImgFileName = self.view.showFileDialog(IMAGES_FILE_FILTER_STRING)
+            refImgFileName = self.view.showFileDialog(
+                IMAGES_FILE_FILTER_STRING
+            )
             readImg = self.model.readImage(refImgFileName)
             self.model.refImage = readImg
             msg = "Selected image size is " + str(readImg.shape)

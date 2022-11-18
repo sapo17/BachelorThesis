@@ -1,6 +1,7 @@
 from pathlib import Path
 import re
 
+
 """ Configuration Constants """
 IMAGES_DIR_PATH: str = "images/"
 SCENES_DIR_PATH: str = "scenes/"
@@ -12,6 +13,7 @@ CUDA_AD_RGB: str = "cuda_ad_rgb"
 DEFAULT_MITSUBA_SCENE: str = "cbox.xml"
 MITSUBA_PRB_INTEGRATOR: str = "prb"
 MITSUBA_PRB_REPARAM_INTEGRATOR: str = "prb_reparam"
+MITSUBA_PRBVOLPATH_INTEGRATOR: str = "prbvolpath"
 COLUMN_LABEL_VALUE: str = 'Value'
 COLUMN_LABEL_LEARNING_RATE: str = "Learning Rate"
 COLUMN_LABEL_MINIMUM_ERROR: str = "Minimum Error"
@@ -100,6 +102,26 @@ IRRADIANCE_PATTERN: re.Pattern = re.compile(
     r".*\.irradiance"
 )  # supports only float/Color3f entry
 
+
+""" 
+Participating Media Patterns Constants
+See also: https://mitsuba.readthedocs.io/en/stable/src/generated/plugins_media.html#
+"""
+ALBEDO_PATTERN: re.Pattern = re.compile(r".*\.albedo")
+SIGMA_T_PATTERN: re.Pattern = re.compile(r".*\.sigma_t")
+
+MAX_SIGMA_T_VALUE: float = 10.0
+
+
+""" 
+Phase functions Patterns Constants
+See also: https://mitsuba.readthedocs.io/en/stable/src/generated/plugins_phase.html#phase-functions
+"""
+PHASE_G_PATTERN: re.Pattern = re.compile(r".*\.g")
+MAX_PHASE_G_VALUE: float = 1.0
+MIN_PHASE_G_VALUE: float = -1.0
+
+
 """ Combine Patterns """
 SUPPORTED_MITSUBA_PARAMETER_PATTERNS: list = [
     REFLECTANCE_PATTERN,
@@ -131,6 +153,9 @@ SUPPORTED_MITSUBA_PARAMETER_PATTERNS: list = [
     INTENSITY_PATTERN,
     SCALE_PATTERN,
     IRRADIANCE_PATTERN,
+    ALBEDO_PATTERN,
+    SIGMA_T_PATTERN,
+    PHASE_G_PATTERN
 ]
 PATTERNS_INTRODUCE_DISCONTINUITIES: list = [
     # see also parameter 'D' flags https://mitsuba.readthedocs.io/en/stable/src/generated/plugins_bsdfs.html#technical-details
@@ -145,4 +170,9 @@ PATTERNS_INTRODUCE_DISCONTINUITIES: list = [
     SPECULAR_PATTERN,
     CLEARCOAT_PATTERN,
     CLEARCOAT_GLOSS_PATTERN,
+    PHASE_G_PATTERN
+]
+PATTERNS_REQUIRE_VOLUMETRIC_INTEGRATOR = [
+    ALBEDO_PATTERN,
+    SIGMA_T_PATTERN
 ]
