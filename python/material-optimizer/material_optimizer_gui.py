@@ -15,8 +15,7 @@ from PyQt6 import QtGui, QtWidgets, QtCore
 import ctypes
 from constants import *
 
-mi.set_variant("cuda_ad_rgb")
-
+mi.set_variant(CUDA_AD_RGB)
 
 class MaterialOptimizerModel:
     def __init__(self) -> None:
@@ -41,7 +40,7 @@ class MaterialOptimizerModel:
 
     def loadMitsubaScene(self, fileName=None):
         if fileName is None:
-            fileName = SCENES_DIR_PATH + "cbox.xml"
+            fileName = SCENES_DIR_PATH + DEFAULT_MITSUBA_SCENE
 
         self.integratorType = self.findPossibleIntegratorType(fileName)
         self.setScene(fileName, self.sceneRes, self.integratorType)
@@ -50,9 +49,9 @@ class MaterialOptimizerModel:
     def findPossibleIntegratorType(self, fileName) -> str:
         tmpScene = mi.load_file(fileName)
         tmpParams = mi.traverse(tmpScene)
-        integratorType = "prb"
+        integratorType = MITSUBA_PRB_INTEGRATOR
         if self.anyParamsProducesDiscontinuities(tmpParams):
-            integratorType = "prb_reparam"
+            integratorType = MITSUBA_PRB_REPARAM_INTEGRATOR
         return integratorType
 
     def anyParamsProducesDiscontinuities(self, tmpParams):
@@ -69,9 +68,9 @@ class MaterialOptimizerModel:
     def getDefaultOptimizationParams(self, params):
         return {
             param: {
-                "Learning Rate": 0.3,
-                "Minimum Error": 0.01,
-                "Optimize": False,
+                COLUMN_LABEL_LEARNING_RATE: 0.3,
+                COLUMN_LABEL_MINIMUM_ERROR: 0.01,
+                COLUMN_LABEL_OPTIMIZE: False,
             }
             for param in params
         }
@@ -149,7 +148,7 @@ class MaterialOptimizerModel:
 
     def getMinParamErrors(self, optimizationParams: dict):
         return {
-            sceneParam: optimizationParam["Minimum Error"]
+            sceneParam: optimizationParam[COLUMN_LABEL_MINIMUM_ERROR]
             for sceneParam, optimizationParam in optimizationParams.items()
         }
 
@@ -169,7 +168,7 @@ class MaterialOptimizerModel:
         )
         opt.set_learning_rate(
             {
-                k: self.optimizationParams[k]["Learning Rate"]
+                k: self.optimizationParams[k][COLUMN_LABEL_LEARNING_RATE]
                 for k in customParams
             }
         )
@@ -293,7 +292,7 @@ class MaterialOptimizerView(QMainWindow):
     def __init__(self):
         super().__init__()
         self.initUI()
-        self.setWindowIcon(QtGui.QIcon(IMAGES_DIR_PATH + "sloth.png"))
+        self.setWindowIcon(QtGui.QIcon(IMAGES_DIR_PATH + WINDOW_ICON_FILE_NAME))
         self.show()
 
     def initUI(self):
@@ -304,29 +303,29 @@ class MaterialOptimizerView(QMainWindow):
 
     def initWindowProperties(self):
         self.setGeometry(1024, 512, 1024, 512)
-        self.setWindowTitle("Material Optimizer")
+        self.setWindowTitle(MATERIAL_OPTIMIZER_STRING)
 
     def initMenu(self):
         # Menu Bar: Import File
-        self.importFile = QAction("Import", self)
-        self.importFile.setShortcut("Ctrl+I")
-        self.importFile.setStatusTip("Import Mitsuba 3 Scene File")
+        self.importFile = QAction(IMPORT_STRING, self)
+        self.importFile.setShortcut(IMPORT_SHORTCUT_STRING)
+        self.importFile.setStatusTip(IMPORT_LABEL_STRING)
 
         # Menu
         menubar = self.menuBar()
-        fileMenu = menubar.addMenu("&File")
+        fileMenu = menubar.addMenu(FILE_STRING)
         fileMenu.addAction(self.importFile)
 
     def showFileDialog(self, filterStr: str):
         homeDir = str(Path.home())
         return QFileDialog.getOpenFileName(
-            self, "Import File", homeDir, filterStr
+            self, IMPORT_FILE_STRING, homeDir, filterStr
         )[0]
 
     def showInfoMessageBox(self, text):
         msgBox = QMessageBox()
         msgBox.setText(text)
-        msgBox.setWindowTitle("Info")
+        msgBox.setWindowTitle(INFO_STRING)
         msgBox.setStandardButtons(QMessageBox.StandardButton.Ok)
         msgBox.exec()
 
@@ -375,7 +374,7 @@ class MaterialOptimizerView(QMainWindow):
         # min error text input
         self.minErrContainer = QWidget(self.configContainer)
         self.minErrContainerLayout = QHBoxLayout(self.minErrContainer)
-        minErrLabel = QLabel(text="Minimum Error")
+        minErrLabel = QLabel(text=COLUMN_LABEL_MINIMUM_ERROR)
         self.minErrLine = QLineEdit()
         self.minErrLine.setText(str(DEFAULT_MIN_ERR_ON_CUSTOM_IMG))
         self.minErrContainerLayout.addWidget(minErrLabel)
@@ -400,7 +399,7 @@ class MaterialOptimizerView(QMainWindow):
         self.progressContainer = QWidget(self.bottomContainer)
         self.progressContainerLayout = QHBoxLayout(self.progressContainer)
         self.progressBar = QProgressBar(self.bottomContainer)
-        self.optimizeButton = QPushButton("Start Optimization", centralWidget)
+        self.optimizeButton = QPushButton(START_OPTIMIZATION_STRING, centralWidget)
         self.progressContainerLayout.addWidget(self.progressBar)
         self.progressContainerLayout.addWidget(self.optimizeButton)
 
@@ -419,7 +418,7 @@ class MaterialOptimizerView(QMainWindow):
         for row, param in enumerate(sceneParams):
             for col, label in enumerate(columns):
                 value = sceneParams[param][label]
-                if label == "Value":
+                if label == COLUMN_LABEL_VALUE:
                     valueType = type(value)
                     if valueType is mi.Color3f:
                         itemContent = self.Color3fToCellString(value)
@@ -428,10 +427,10 @@ class MaterialOptimizerView(QMainWindow):
                         if len(value) == 1:
                             item = QTableWidgetItem(str(value[0]))
                         else:
-                            item = QTableWidgetItem("Not implemented yet")
+                            item = QTableWidgetItem(NOT_IMPLEMENTED_STRING)
                     else:
-                        item = QTableWidgetItem("Not implemented yet")
-                elif label == "Optimize":
+                        item = QTableWidgetItem(NOT_IMPLEMENTED_STRING)
+                elif label == COLUMN_LABEL_OPTIMIZE:
                     self.setCheckboxAsQTableItem(result, row, col, value)
                     continue
                 else:
@@ -460,7 +459,7 @@ class MaterialOptimizerView(QMainWindow):
 class PopUpWindow(QMainWindow):
     def __init__(self, parent: MaterialOptimizerView):
         super(PopUpWindow, self).__init__(parent)
-        self.setWindowIcon(QtGui.QIcon(IMAGES_DIR_PATH + "sloth.png"))
+        self.setWindowIcon(QtGui.QIcon(IMAGES_DIR_PATH + WINDOW_ICON_FILE_NAME))
         parent.setDisabled(True)
         self.setDisabled(False)
 
@@ -472,7 +471,7 @@ class PopUpWindow(QMainWindow):
         sceneParamsHist: list,
     ):
         comboBox = QComboBox()
-        comboBox.addItems(["Last Iteration", "Min Error"])
+        comboBox.addItems([LAST_ITERATION_STRING, COLUMN_LABEL_MINIMUM_ERROR])
         self.setCentralWidget(comboBox)
         comboBox.currentTextChanged.connect(
             self.onOptimizedSceneSelectorTextChanged
@@ -488,7 +487,7 @@ class PopUpWindow(QMainWindow):
         self.showOptimizedPlot(lastIteration)
 
     def onOptimizedSceneSelectorTextChanged(self, text: str):
-        if text == "Min Error":
+        if text == COLUMN_LABEL_MINIMUM_ERROR:
             self.showOptimizedPlot(
                 MaterialOptimizerModel.minIdxInDrList(self.lossHist)
             )
@@ -534,25 +533,25 @@ class MplCanvas(FigureCanvasQTAgg):
         for k, v in paramErrors.items():
             self.axes[0][0].plot(v, label=k)
 
-        self.axes[0][0].set_xlabel("iteration")
-        self.axes[0][0].set_ylabel("Loss")
+        self.axes[0][0].set_xlabel(ITERATION_STRING)
+        self.axes[0][0].set_ylabel(LOSS_STRING)
         self.axes[0][0].legend()
-        self.axes[0][0].set_title("Parameter error plot")
+        self.axes[0][0].set_title(PARAMETER_ERROR_PLOT_STRING)
 
         self.axes[0][1].imshow(mi.util.convert_to_bitmap(initImg))
-        self.axes[0][1].axis("off")
-        self.axes[0][1].set_title("Initial Image")
+        self.axes[0][1].axis(OFF_STRING)
+        self.axes[0][1].set_title(INITIAL_IMAGE_STRING)
 
         self.axes[1][0].imshow(mi.util.convert_to_bitmap(finalImg))
-        self.axes[1][0].axis("off")
+        self.axes[1][0].axis(OFF_STRING)
         self.axes[1][0].set_title(
             f"Optimized image: Iteration #{iterationNumber}, Loss: {loss:6f}"
         )
 
         self.axes[1][1].imshow(mi.util.convert_to_bitmap(refImage))
-        self.axes[1][1].axis("off")
-        self.axes[1][1].set_title("Reference Image")
-        plt.savefig(IMAGES_DIR_PATH + "material-optimizer-result-figure.png")
+        self.axes[1][1].axis(OFF_STRING)
+        self.axes[1][1].set_title(REFERENCE_IMAGE_STRING)
+        plt.savefig(IMAGES_DIR_PATH + FIGURE_FILE_NAME)
 
         self.show()
 
@@ -569,12 +568,12 @@ class MaterialOptimizerController:
             self.model.initialSceneParams, self.model.optimizationParams
         )
         self.view.initCentralWidget(tableValues)
-        self.hideTableColumn("Optimize", True)
+        self.hideTableColumn(COLUMN_LABEL_OPTIMIZE, True)
         self.connectSignals()
 
     def loadMitsubaScene(self):
         try:
-            fileName = self.view.showFileDialog("Xml File (*.xml)")
+            fileName = self.view.showFileDialog(XML_FILE_FILTER_STRING)
             self.model.loadMitsubaScene(fileName)
             self.model.resetReferenceImage()
             self.view.defaultRefImgBtn.setChecked(True)
@@ -597,12 +596,12 @@ class MaterialOptimizerController:
             self.combineTableValues(params, optimizationParams)
         )
         self.view.replaceTable(newTable)
-        self.hideTableColumn("Optimize", True)
+        self.hideTableColumn(COLUMN_LABEL_OPTIMIZE, True)
         self.updateSignals()
 
     def loadReferenceImage(self):
         try:
-            refImgFileName = self.view.showFileDialog("Images (*.png *.jpg)")
+            refImgFileName = self.view.showFileDialog(IMAGES_FILE_FILTER_STRING)
             readImg = self.model.readImage(refImgFileName)
             self.model.refImage = readImg
             msg = "Selected image size is " + str(readImg.shape)
@@ -621,7 +620,7 @@ class MaterialOptimizerController:
     def combineTableValues(self, params, optimizationParams):
         result = {}
         for key in params:
-            result[key] = {"Value": params[key]}
+            result[key] = {COLUMN_LABEL_VALUE: params[key]}
             result[key].update(optimizationParams[key])
         return result
 
@@ -718,7 +717,7 @@ class MaterialOptimizerController:
             )
 
         self.view.optimizeButton.setDisabled(False)
-        self.view.optimizeButton.setText("Restart Optimization")
+        self.view.optimizeButton.setText(RESTART_OPTIMIZATION_STRING)
 
     def optimizeMaterialsWithCustomReferenceImage(self):
         checkedRows = self.getCheckedRows()
@@ -786,7 +785,7 @@ class MaterialOptimizerController:
             )
 
         self.view.optimizeButton.setDisabled(False)
-        self.view.optimizeButton.setText("Restart Optimization")
+        self.view.optimizeButton.setText(RESTART_OPTIMIZATION_STRING)
 
     def getCurrentSceneParams(self):
         currentSceneParams = {}
@@ -841,8 +840,8 @@ class MaterialOptimizerController:
         if not self.view.customRefImgBtn.isChecked():
             return
 
-        self.hideTableColumn("Minimum Error", True)
-        self.hideTableColumn("Optimize", False)
+        self.hideTableColumn(COLUMN_LABEL_MINIMUM_ERROR, True)
+        self.hideTableColumn(COLUMN_LABEL_OPTIMIZE, False)
         self.model.setMinErrOnCustomImage(self.view.minErrLine.text())
         self.view.configContainer.show()
         self.loadReferenceImage()
@@ -862,7 +861,7 @@ class MaterialOptimizerController:
 
     def getCheckedRows(self) -> list:
         result = []
-        colIdx = self.getColumnIndex("Optimize")
+        colIdx = self.getColumnIndex(COLUMN_LABEL_OPTIMIZE)
         for rowIdx in range(self.view.table.rowCount()):
             assert (
                 self.view.table.cellWidget(rowIdx, colIdx).layout().itemAt(0)
@@ -887,8 +886,8 @@ class MaterialOptimizerController:
 
         self.model.resetReferenceImage()
         self.view.configContainer.hide()
-        self.hideTableColumn("Optimize", True)
-        self.hideTableColumn("Minimum Error", False)
+        self.hideTableColumn(COLUMN_LABEL_OPTIMIZE, True)
+        self.hideTableColumn(COLUMN_LABEL_MINIMUM_ERROR, False)
 
     def onCellChanged(self, row, col):
         if col == 0:
