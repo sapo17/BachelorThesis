@@ -523,6 +523,9 @@ class PopUpWindow(QMainWindow):
             self.showOptimizedPlot(len(self.sceneParamsHist) - 1)
 
     def showOptimizedPlot(self, iteration: int):
+        logging.info(
+            f"Scene parameters in {iteration}:\n {self.sceneParamsHist[iteration]}"
+        )
         self.model.sceneParams.update(values=self.sceneParamsHist[iteration])
         sc = MplCanvas()
         lossHistKey = "MSE(Current-Image, Reference-Image)"
@@ -805,6 +808,7 @@ class MaterialOptimizerController:
             self.model.updateAfterStep(opts, self.model.sceneParams)
 
         self.view.progressBar.setValue(self.view.progressBar.maximum())
+        logging.info(f"Initial scene parameters:\n {sceneParamsHist[0]}")
 
         if it <= 0:
             self.view.showInfoMessageBox("No optimization was necessary")
