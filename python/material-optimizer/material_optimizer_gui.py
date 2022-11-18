@@ -299,6 +299,11 @@ class MaterialOptimizerModel:
             raise ValueError("Please provide a valid float value (e.g. 0.001)")
         self.minErrOnCustomImage = float(value)
 
+    def setIterationCountOnCustomImage(self, value: str):
+        if not MaterialOptimizerModel.is_int(value):
+            raise ValueError("Please provide a valid integer value (e.g. 50)")
+        self.iterationCountOnCustomImage = int(value)
+
     def setSamplesPerPixelOnCustomImage(self, value: str):
         if not MaterialOptimizerModel.is_int(value):
             raise ValueError("Please provide a valid integer value (e.g. 4)")
@@ -415,8 +420,20 @@ class MaterialOptimizerView(QMainWindow):
         self.sppContainerLayout.addWidget(samplesPerPixelLabel)
         self.sppContainerLayout.addWidget(self.samplesPerPixelBox)
 
+        # iteration count input
+        self.iterationContainer = QWidget(self.configContainer)
+        self.iterationContainerLayout = QHBoxLayout(self.iterationContainer)
+        iterationCountLabel = QLabel(text=COLUMN_LABEL_ITERATION_COUNT)
+        self.iterationCountLine = QLineEdit()
+        self.iterationCountLine.setText(
+            str(DEFAULT_ITERATION_COUNT_ON_CUSTOM_IMG)
+        )
+        self.iterationContainerLayout.addWidget(iterationCountLabel)
+        self.iterationContainerLayout.addWidget(self.iterationCountLine)
+
         self.configContainerLayout.addWidget(self.minErrContainer)
         self.configContainerLayout.addWidget(self.sppContainer)
+        self.configContainerLayout.addWidget(self.iterationContainer)
         self.configContainer.hide()
 
     def initProgessContainer(self, centralWidget):
@@ -769,14 +786,15 @@ class MaterialOptimizerController:
         opts = self.model.initOptimizersWithCustomValues(checkedRows)
         self.model.updateSceneParamsWithOptimizers(opts)
         initImg = self.model.render(self.model.scene, spp=256)
-        iterationCount = 100
         sceneParamsHist = []
         lossHist = []
         self.view.progressBar.setValue(100)
 
         self.view.progressBar.reset()
-        for it in range(iterationCount):
-            self.view.progressBar.setValue(int(it / iterationCount * 100))
+        for it in range(self.model.iterationCountOnCustomImage):
+            self.view.progressBar.setValue(
+                int(it / self.model.iterationCountOnCustomImage * 100)
+            )
 
             # Perform a (noisy) differentiable rendering of the scene
             image = self.model.render(
@@ -845,6 +863,9 @@ class MaterialOptimizerController:
             self.onDefaultRefImgBtnChecked
         )
         self.view.minErrLine.editingFinished.connect(self.onMinErrLineChanged)
+        self.view.iterationCountLine.editingFinished.connect(
+            self.onIterationCountLineChanged
+        )
         self.view.samplesPerPixelBox.currentTextChanged.connect(
             self.onSamplesPerPixelChanged
         )
@@ -854,6 +875,17 @@ class MaterialOptimizerController:
             self.model.setMinErrOnCustomImage(self.view.minErrLine.text())
         except Exception as err:
             self.view.minErrLine.setText(str(DEFAULT_MIN_ERR_ON_CUSTOM_IMG))
+            self.view.showInfoMessageBox(str(err))
+
+    def onIterationCountLineChanged(self):
+        try:
+            self.model.setIterationCountOnCustomImage(
+                self.view.iterationCountLine.text()
+            )
+        except Exception as err:
+            self.view.iterationCountLine.setText(
+                str(DEFAULT_ITERATION_COUNT_ON_CUSTOM_IMG)
+            )
             self.view.showInfoMessageBox(str(err))
 
     def onSamplesPerPixelChanged(self, text: str):
@@ -877,6 +909,9 @@ class MaterialOptimizerController:
         self.hideTableColumn(COLUMN_LABEL_MINIMUM_ERROR, True)
         self.hideTableColumn(COLUMN_LABEL_OPTIMIZE, False)
         self.model.setMinErrOnCustomImage(self.view.minErrLine.text())
+        self.model.setIterationCountOnCustomImage(
+            self.view.iterationCountLine.text()
+        )
         self.view.configContainer.show()
         self.loadReferenceImage()
 
