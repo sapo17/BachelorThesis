@@ -17,6 +17,7 @@ from constants import *
 
 mi.set_variant("cuda_ad_rgb")
 
+
 class MaterialOptimizerModel:
     def __init__(self) -> None:
         self.refImage = None
@@ -329,13 +330,19 @@ class MaterialOptimizerView(QMainWindow):
         self.centralLayout = QVBoxLayout(centralWidget)
 
         self.initTopWidget(centralWidget)
-        self.table = self.initTable(sceneParams)
+        self.initTableContainer(sceneParams, centralWidget)
         self.initBottomContainer(centralWidget)
 
         self.centralLayout.addWidget(self.topWidget)
-        self.centralLayout.addWidget(self.table)
+        self.centralLayout.addWidget(self.tableContainer)
         self.centralLayout.addWidget(self.bottomContainer)
         self.setCentralWidget(centralWidget)
+
+    def initTableContainer(self, sceneParams, centralWidget):
+        self.tableContainer = QWidget(centralWidget)
+        self.tableContainerLayout = QVBoxLayout(self.tableContainer)
+        self.table = self.initTable(sceneParams)
+        self.tableContainerLayout.addWidget(self.table)
 
     def initTopWidget(self, centralWidget):
         self.defaultRefImgBtn = QRadioButton(
@@ -441,7 +448,7 @@ class MaterialOptimizerView(QMainWindow):
         return str(color3f).translate(str.maketrans({"[": None, "]": None}))
 
     def replaceTable(self, newTable: QTableWidget):
-        self.centralLayout.replaceWidget(self.table, newTable)
+        self.tableContainerLayout.replaceWidget(self.table, newTable)
         self.table = newTable
 
 
@@ -946,11 +953,15 @@ class MaterialOptimizerController:
 
 def main():
 
-    if sys.platform == 'win32':
-        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(MY_APP_ID)
-    
+    if sys.platform == "win32":
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(
+            MY_APP_ID
+        )
+
     LOG_FILE.unlink(missing_ok=True)
-    logging.basicConfig(filename=LOG_FILE, encoding="utf-8", level=logging.INFO)
+    logging.basicConfig(
+        filename=LOG_FILE, encoding="utf-8", level=logging.INFO
+    )
 
     app = QApplication(sys.argv)
 
