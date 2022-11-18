@@ -8,15 +8,17 @@ SCENES_DIR_PATH: str = "scenes/"
 MY_APP_ID: str = "sapo.material-optimizer.0.1"  # arbitrary string
 LOG_FILE: Path = Path("material-optimizer.log")
 DEFAULT_MIN_ERR_ON_CUSTOM_IMG: float = 0.001
+DEFAULT_ITERATION_COUNT_ON_CUSTOM_IMG: int = 50
 SUPPORTED_SPP_VALUES: list = ["4", "16", "32", "64"]
 CUDA_AD_RGB: str = "cuda_ad_rgb"
 DEFAULT_MITSUBA_SCENE: str = "cbox.xml"
 MITSUBA_PRB_INTEGRATOR: str = "prb"
 MITSUBA_PRB_REPARAM_INTEGRATOR: str = "prb_reparam"
 MITSUBA_PRBVOLPATH_INTEGRATOR: str = "prbvolpath"
-COLUMN_LABEL_VALUE: str = 'Value'
+COLUMN_LABEL_VALUE: str = "Value"
 COLUMN_LABEL_LEARNING_RATE: str = "Learning Rate"
 COLUMN_LABEL_MINIMUM_ERROR: str = "Minimum Error"
+COLUMN_LABEL_ITERATION_COUNT: str = "Iteration Count"
 COLUMN_LABEL_OPTIMIZE: str = "Optimize"
 WINDOW_ICON_FILE_NAME: str = "sloth.png"
 MATERIAL_OPTIMIZER_STRING: str = "Material Optimizer"
@@ -155,7 +157,7 @@ SUPPORTED_MITSUBA_PARAMETER_PATTERNS: list = [
     IRRADIANCE_PATTERN,
     ALBEDO_PATTERN,
     SIGMA_T_PATTERN,
-    PHASE_G_PATTERN
+    PHASE_G_PATTERN,
 ]
 PATTERNS_INTRODUCE_DISCONTINUITIES: list = [
     # see also parameter 'D' flags https://mitsuba.readthedocs.io/en/stable/src/generated/plugins_bsdfs.html#technical-details
@@ -170,9 +172,6 @@ PATTERNS_INTRODUCE_DISCONTINUITIES: list = [
     SPECULAR_PATTERN,
     CLEARCOAT_PATTERN,
     CLEARCOAT_GLOSS_PATTERN,
-    PHASE_G_PATTERN
+    PHASE_G_PATTERN,
 ]
-PATTERNS_REQUIRE_VOLUMETRIC_INTEGRATOR = [
-    ALBEDO_PATTERN,
-    SIGMA_T_PATTERN
-]
+PATTERNS_REQUIRE_VOLUMETRIC_INTEGRATOR = [ALBEDO_PATTERN, SIGMA_T_PATTERN]
