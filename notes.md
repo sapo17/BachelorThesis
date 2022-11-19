@@ -314,3 +314,17 @@
 ### 11.11.22
 - [Mitsuba 3 Discussion: Optimizing Dielectric Materials](https://github.com/mitsuba-renderer/mitsuba3/discussions/379)
 - See also [GitHub Repository Issues](https://github.com/sapo17/BachelorThesis/issues) for development details on material-optimizer 
+
+### 12.11.22
+- More work on material-optimizer
+
+### 13/14.11.22
+- Time spent on literature and nerfstudio: 
+  - Promising findings from [Deng et al](https://dl.acm.org/doi/abs/10.1145/3528233.3530714)
+    - See notes on github [issue](https://github.com/sapo17/BachelorThesis/issues/23)
+  - See also (all included on github issues):
+    - [Inverse rendering approach for heterogeneous translucent materials](https://dl.acm.org/doi/10.1145/3013971.3013973)
+    - [MobileNerF](https://mobile-nerf.github.io/)
+
+### 16.11.22
+- More work on material-optimizer (see github issues for more info)
