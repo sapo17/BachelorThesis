@@ -14,6 +14,8 @@ import logging
 from PyQt6 import QtGui, QtWidgets, QtCore
 import ctypes
 from constants import *
+import json
+import datetime
 
 mi.set_variant(CUDA_AD_RGB)
 
@@ -515,21 +517,51 @@ class PopUpWindow(QMainWindow):
         lossHist: list,
         sceneParamsHist: list,
     ):
-        comboBox = QComboBox()
-        comboBox.addItems([LAST_ITERATION_STRING, COLUMN_LABEL_MINIMUM_ERROR])
-        self.setCentralWidget(comboBox)
-        comboBox.currentTextChanged.connect(
-            self.onOptimizedSceneSelectorTextChanged
-        )
-
         self.model = model
         self.initImg = initImg
         self.lossHist = lossHist
         self.sceneParamsHist = sceneParamsHist
 
+        # central widget
+        centralWidgetContainer = QWidget()
+        centralWidgetContainerLayout = QVBoxLayout(centralWidgetContainer)
+
+        # dropdown menu
+        self.comboBox = QComboBox()
+        self.comboBox.addItems(
+            [LAST_ITERATION_STRING, COLUMN_LABEL_MINIMUM_ERROR]
+        )
+        self.comboBox.currentTextChanged.connect(
+            self.onOptimizedSceneSelectorTextChanged
+        )
+
+        # output button
+        outputBtn = QPushButton(text=OUTPUT_TO_JSON_STRING)
+        outputBtn.clicked.connect(self.onOutputBtnPressed)
+
+        centralWidgetContainerLayout.addWidget(self.comboBox)
+        centralWidgetContainerLayout.addWidget(outputBtn)
+        self.setCentralWidget(centralWidgetContainer)
+
         self.show()
         lastIteration = len(self.sceneParamsHist) - 1
         self.showOptimizedPlot(lastIteration)
+
+    def onOutputBtnPressed(self):
+        selectedIteration = len(self.sceneParamsHist) - 1
+        if self.comboBox.currentText() == COLUMN_LABEL_MINIMUM_ERROR:
+            selectedIteration = MaterialOptimizerModel.minIdxInDrList(
+                self.lossHist
+            )
+
+        outputFileName = f"{OUTPUT_DIR_PATH}scene_paramaters_iteration_{selectedIteration}_{datetime.datetime.now().isoformat('_', 'seconds')}.json"
+        outputFileName = outputFileName.replace(":", "_")
+        with open(outputFileName, "w") as outfile:
+            outputDict = {
+                k: str(v)
+                for k, v in self.sceneParamsHist[selectedIteration].items()
+            }
+            json.dump(outputDict, outfile, indent=4)
 
     def onOptimizedSceneSelectorTextChanged(self, text: str):
         if text == COLUMN_LABEL_MINIMUM_ERROR:

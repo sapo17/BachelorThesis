@@ -5,6 +5,7 @@ import re
 """ Configuration Constants """
 IMAGES_DIR_PATH: str = "images/"
 SCENES_DIR_PATH: str = "scenes/"
+OUTPUT_DIR_PATH: str = "output/"
 MY_APP_ID: str = "sapo.material-optimizer.0.1"  # arbitrary string
 LOG_FILE: Path = Path("material-optimizer.log")
 DEFAULT_MIN_ERR_ON_CUSTOM_IMG: float = 0.001
@@ -41,6 +42,7 @@ REFERENCE_IMAGE_STRING: str = "Reference Image"
 XML_FILE_FILTER_STRING: str = "Xml File (*.xml)"
 IMAGES_FILE_FILTER_STRING: str = "Images (*.png *.jpg)"
 RESTART_OPTIMIZATION_STRING: str = "Restart Optimization"
+OUTPUT_TO_JSON_STRING: str = "Output to JSON"
 
 
 """ 
