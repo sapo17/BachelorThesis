@@ -26,3 +26,7 @@ Saip Can Hasbay, 01428723, University of Vienna, [saipcanhasbay@gmail.com](saipc
     - ``` python material_optimizer.py ```
 - Or IDE to your liking
     - e.g. vscode: Click to run icon on top right corner of *material_opt_gui.py*
+
+### Optional data
+- To retrieve additional [mitsuba-data](https://github.com/mitsuba-renderer/mitsuba-data) (e.g. test scenes provided from the mitsuba team), then run the following:
+  - ``` git submodule update --init --recursive ```

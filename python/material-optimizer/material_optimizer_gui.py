@@ -17,6 +17,7 @@ from constants import *
 
 mi.set_variant(CUDA_AD_RGB)
 
+
 class MaterialOptimizerModel:
     def __init__(self) -> None:
         self.refImage = None
@@ -50,15 +51,32 @@ class MaterialOptimizerModel:
         tmpScene = mi.load_file(fileName)
         tmpParams = mi.traverse(tmpScene)
         integratorType = MITSUBA_PRB_INTEGRATOR
-        if self.anyParamsProducesDiscontinuities(tmpParams):
+        if self.anyInPatterns(
+            tmpParams, PATTERNS_REQUIRE_VOLUMETRIC_INTEGRATOR
+        ):
+            if self.anyInPatterns(
+                tmpParams, PATTERNS_INTRODUCE_DISCONTINUITIES
+            ):
+                msg = f"Beware that {integratorType} is in use, however the "
+                msg += "scene contains some parameters that may introduce "
+                msg += "discontinuities! Information from the mitsuba "
+                msg += "documentation: No reparameterization. This means that "
+                msg += " the integrator cannot be used for shape optimization "
+                msg += "(it will return incorrect/biased gradients for "
+                msg += "geometric parameters like vertex positions.)"
+                logging.warning(msg)
+            integratorType = MITSUBA_PRBVOLPATH_INTEGRATOR
+        elif self.anyInPatterns(tmpParams, PATTERNS_INTRODUCE_DISCONTINUITIES):
             integratorType = MITSUBA_PRB_REPARAM_INTEGRATOR
+
+        logging.info(f"Integrator type: {integratorType}")
         return integratorType
 
-    def anyParamsProducesDiscontinuities(self, tmpParams):
+    def anyInPatterns(self, tmpParams, patterns: list):
         return any(
             pattern.search(k)
             for k in tmpParams.properties
-            for pattern in PATTERNS_INTRODUCE_DISCONTINUITIES
+            for pattern in patterns
         )
 
     def resetReferenceImage(self):
@@ -140,6 +158,10 @@ class MaterialOptimizerModel:
             opt[key] = dr.clamp(opt[key], 0.0, MAX_DIFF_TRANS_VALUE)
         elif DELTA_PATTERN.search(key):
             opt[key] = dr.clamp(opt[key], 0.0, MAX_DELTA_VALUE)
+        elif SIGMA_T_PATTERN.search(key):
+            opt[key] = dr.clamp(opt[key], 0.0, MAX_SIGMA_T_VALUE)
+        elif PHASE_G_PATTERN.search(key):
+            opt[key] = dr.clamp(opt[key], MIN_PHASE_G_VALUE, MAX_PHASE_G_VALUE)
         else:
             opt[key] = dr.clamp(opt[key], 0.0, 1.0)
 
@@ -277,6 +299,11 @@ class MaterialOptimizerModel:
             raise ValueError("Please provide a valid float value (e.g. 0.001)")
         self.minErrOnCustomImage = float(value)
 
+    def setIterationCountOnCustomImage(self, value: str):
+        if not MaterialOptimizerModel.is_int(value):
+            raise ValueError("Please provide a valid integer value (e.g. 50)")
+        self.iterationCountOnCustomImage = int(value)
+
     def setSamplesPerPixelOnCustomImage(self, value: str):
         if not MaterialOptimizerModel.is_int(value):
             raise ValueError("Please provide a valid integer value (e.g. 4)")
@@ -292,7 +319,9 @@ class MaterialOptimizerView(QMainWindow):
     def __init__(self):
         super().__init__()
         self.initUI()
-        self.setWindowIcon(QtGui.QIcon(IMAGES_DIR_PATH + WINDOW_ICON_FILE_NAME))
+        self.setWindowIcon(
+            QtGui.QIcon(IMAGES_DIR_PATH + WINDOW_ICON_FILE_NAME)
+        )
         self.show()
 
     def initUI(self):
@@ -391,15 +420,29 @@ class MaterialOptimizerView(QMainWindow):
         self.sppContainerLayout.addWidget(samplesPerPixelLabel)
         self.sppContainerLayout.addWidget(self.samplesPerPixelBox)
 
+        # iteration count input
+        self.iterationContainer = QWidget(self.configContainer)
+        self.iterationContainerLayout = QHBoxLayout(self.iterationContainer)
+        iterationCountLabel = QLabel(text=COLUMN_LABEL_ITERATION_COUNT)
+        self.iterationCountLine = QLineEdit()
+        self.iterationCountLine.setText(
+            str(DEFAULT_ITERATION_COUNT_ON_CUSTOM_IMG)
+        )
+        self.iterationContainerLayout.addWidget(iterationCountLabel)
+        self.iterationContainerLayout.addWidget(self.iterationCountLine)
+
         self.configContainerLayout.addWidget(self.minErrContainer)
         self.configContainerLayout.addWidget(self.sppContainer)
+        self.configContainerLayout.addWidget(self.iterationContainer)
         self.configContainer.hide()
 
     def initProgessContainer(self, centralWidget):
         self.progressContainer = QWidget(self.bottomContainer)
         self.progressContainerLayout = QHBoxLayout(self.progressContainer)
         self.progressBar = QProgressBar(self.bottomContainer)
-        self.optimizeButton = QPushButton(START_OPTIMIZATION_STRING, centralWidget)
+        self.optimizeButton = QPushButton(
+            START_OPTIMIZATION_STRING, centralWidget
+        )
         self.progressContainerLayout.addWidget(self.progressBar)
         self.progressContainerLayout.addWidget(self.optimizeButton)
 
@@ -459,7 +502,9 @@ class MaterialOptimizerView(QMainWindow):
 class PopUpWindow(QMainWindow):
     def __init__(self, parent: MaterialOptimizerView):
         super(PopUpWindow, self).__init__(parent)
-        self.setWindowIcon(QtGui.QIcon(IMAGES_DIR_PATH + WINDOW_ICON_FILE_NAME))
+        self.setWindowIcon(
+            QtGui.QIcon(IMAGES_DIR_PATH + WINDOW_ICON_FILE_NAME)
+        )
         parent.setDisabled(True)
         self.setDisabled(False)
 
@@ -495,6 +540,9 @@ class PopUpWindow(QMainWindow):
             self.showOptimizedPlot(len(self.sceneParamsHist) - 1)
 
     def showOptimizedPlot(self, iteration: int):
+        logging.info(
+            f"Scene parameters in {iteration}:\n {self.sceneParamsHist[iteration]}"
+        )
         self.model.sceneParams.update(values=self.sceneParamsHist[iteration])
         sc = MplCanvas()
         lossHistKey = "MSE(Current-Image, Reference-Image)"
@@ -601,7 +649,9 @@ class MaterialOptimizerController:
 
     def loadReferenceImage(self):
         try:
-            refImgFileName = self.view.showFileDialog(IMAGES_FILE_FILTER_STRING)
+            refImgFileName = self.view.showFileDialog(
+                IMAGES_FILE_FILTER_STRING
+            )
             readImg = self.model.readImage(refImgFileName)
             self.model.refImage = readImg
             msg = "Selected image size is " + str(readImg.shape)
@@ -736,14 +786,15 @@ class MaterialOptimizerController:
         opts = self.model.initOptimizersWithCustomValues(checkedRows)
         self.model.updateSceneParamsWithOptimizers(opts)
         initImg = self.model.render(self.model.scene, spp=256)
-        iterationCount = 100
         sceneParamsHist = []
         lossHist = []
         self.view.progressBar.setValue(100)
 
         self.view.progressBar.reset()
-        for it in range(iterationCount):
-            self.view.progressBar.setValue(int(it / iterationCount * 100))
+        for it in range(self.model.iterationCountOnCustomImage):
+            self.view.progressBar.setValue(
+                int(it / self.model.iterationCountOnCustomImage * 100)
+            )
 
             # Perform a (noisy) differentiable rendering of the scene
             image = self.model.render(
@@ -775,6 +826,7 @@ class MaterialOptimizerController:
             self.model.updateAfterStep(opts, self.model.sceneParams)
 
         self.view.progressBar.setValue(self.view.progressBar.maximum())
+        logging.info(f"Initial scene parameters:\n {sceneParamsHist[0]}")
 
         if it <= 0:
             self.view.showInfoMessageBox("No optimization was necessary")
@@ -811,6 +863,9 @@ class MaterialOptimizerController:
             self.onDefaultRefImgBtnChecked
         )
         self.view.minErrLine.editingFinished.connect(self.onMinErrLineChanged)
+        self.view.iterationCountLine.editingFinished.connect(
+            self.onIterationCountLineChanged
+        )
         self.view.samplesPerPixelBox.currentTextChanged.connect(
             self.onSamplesPerPixelChanged
         )
@@ -820,6 +875,17 @@ class MaterialOptimizerController:
             self.model.setMinErrOnCustomImage(self.view.minErrLine.text())
         except Exception as err:
             self.view.minErrLine.setText(str(DEFAULT_MIN_ERR_ON_CUSTOM_IMG))
+            self.view.showInfoMessageBox(str(err))
+
+    def onIterationCountLineChanged(self):
+        try:
+            self.model.setIterationCountOnCustomImage(
+                self.view.iterationCountLine.text()
+            )
+        except Exception as err:
+            self.view.iterationCountLine.setText(
+                str(DEFAULT_ITERATION_COUNT_ON_CUSTOM_IMG)
+            )
             self.view.showInfoMessageBox(str(err))
 
     def onSamplesPerPixelChanged(self, text: str):
@@ -843,6 +909,9 @@ class MaterialOptimizerController:
         self.hideTableColumn(COLUMN_LABEL_MINIMUM_ERROR, True)
         self.hideTableColumn(COLUMN_LABEL_OPTIMIZE, False)
         self.model.setMinErrOnCustomImage(self.view.minErrLine.text())
+        self.model.setIterationCountOnCustomImage(
+            self.view.iterationCountLine.text()
+        )
         self.view.configContainer.show()
         self.loadReferenceImage()
 
