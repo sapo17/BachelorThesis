@@ -5,6 +5,7 @@
 	<default name="max_depth" value="-1"/>
 	<default name="resx" value="960"/>
 	<default name="resy" value="720"/>
+	<default name="sample_border" value="true"/>
 
 
 	<integrator type="$integrator">
@@ -29,6 +30,7 @@
 			<integer name="height" value="$resy"/>
 			<string name="pixel_format" value="rgb"/>
 			<rfilter type="gaussian"/>
+			<boolean name="sample_border" value="$sample_border"/>
 		</film>
 	</sensor>
 
