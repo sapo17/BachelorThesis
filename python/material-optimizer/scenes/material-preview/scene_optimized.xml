@@ -31,6 +31,7 @@
             <integer name="height" value="$resy" />
             <string name="pixel_format" value="rgb" />
             <rfilter type="gaussian" />
+            <boolean name="sample_border" value="$sample_border"/>
         </film>
     </sensor>
 
@@ -60,10 +61,10 @@
     </bsdf>
 
     <bsdf type="principled" id="bsdf-matpreview">
-        <rgb name="base_color" value="0.412, 0.824, 0.999"/>
-		<float name="roughness" value="0.01"/>
-		<float name="spec_trans" value="0.9"/>
-        <float name="eta" value="1.49"/>
+        <rgb name="base_color" value="0.4047388732433319, 0.8164107203483582, 1.0"/>
+		<float name="roughness" value="0.009411572478711605"/>
+		<float name="spec_trans" value="0.8998571634292603"/>
+        <float name="eta" value="1.491925835609436"/>
     </bsdf>
 
     <shape type="serialized" id="shape-plane">
