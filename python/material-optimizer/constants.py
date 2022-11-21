@@ -47,6 +47,8 @@ MSE_STRING = 'Mean Squared Error (MSE)'
 DUAL_BUFFER_STRING = 'Deng et al. Dual Buffer Method'
 LOSS_FUNCTION_STRING = "Loss function"
 SPP_DURING_OPT_STRING = "Samples per pixel during optimization"
+DEFAULT_MIN_CLAMP_VALUE: float = 0.002
+DEFAULT_MAX_CLAMP_VALUE: float = 0.998
 
 
 

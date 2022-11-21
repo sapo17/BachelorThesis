@@ -155,17 +155,27 @@ class MaterialOptimizerModel:
     def ensureLegalParamValues(self, opt, key):
         # Post-process the optimized parameters to ensure legal values
         if ETA_PATTERN.search(key):
-            opt[key] = dr.clamp(opt[key], 0.0, MAX_ETA_VALUE)
+            opt[key] = dr.clamp(
+                opt[key], DEFAULT_MIN_CLAMP_VALUE, MAX_ETA_VALUE
+            )
         elif DIFF_TRANS_PATTERN.search(key):
-            opt[key] = dr.clamp(opt[key], 0.0, MAX_DIFF_TRANS_VALUE)
+            opt[key] = dr.clamp(
+                opt[key], DEFAULT_MIN_CLAMP_VALUE, MAX_DIFF_TRANS_VALUE
+            )
         elif DELTA_PATTERN.search(key):
-            opt[key] = dr.clamp(opt[key], 0.0, MAX_DELTA_VALUE)
+            opt[key] = dr.clamp(
+                opt[key], DEFAULT_MIN_CLAMP_VALUE, MAX_DELTA_VALUE
+            )
         elif SIGMA_T_PATTERN.search(key):
-            opt[key] = dr.clamp(opt[key], 0.0, MAX_SIGMA_T_VALUE)
+            opt[key] = dr.clamp(
+                opt[key], DEFAULT_MIN_CLAMP_VALUE, MAX_SIGMA_T_VALUE
+            )
         elif PHASE_G_PATTERN.search(key):
             opt[key] = dr.clamp(opt[key], MIN_PHASE_G_VALUE, MAX_PHASE_G_VALUE)
         else:
-            opt[key] = dr.clamp(opt[key], 0.0, 1.0)
+            opt[key] = dr.clamp(
+                opt[key], DEFAULT_MIN_CLAMP_VALUE, DEFAULT_MAX_CLAMP_VALUE
+            )
 
     def mse(self, image, refImage):
         return dr.mean(dr.sqr(refImage - image))
