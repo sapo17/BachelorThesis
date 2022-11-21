@@ -1,3 +1,7 @@
+"""
+Deprecated: 11.21.22
+"""
+
 
 from matplotlib import pyplot as plt
 import drjit as dr
