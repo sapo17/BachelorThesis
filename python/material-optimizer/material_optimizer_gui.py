@@ -311,10 +311,41 @@ class MaterialOptimizerModel:
             raise ValueError("Please provide a valid integer value (e.g. 4)")
         self.samplesPerPixelOnCustomImage = int(value)
 
+    def setLossFunctionOnCustomImage(self, value: str):
+        self.lossFunctionOnCustomImage = value
+
     @staticmethod
     def minIdxInDrList(lis: list):
         minValue = dr.min(lis)
         return lis.index(minValue)
+
+    def computeLoss(self, seed: int = 0):
+        # Perform a (noisy) differentiable rendering of the scene
+        image = self.render(
+            self.scene,
+            spp=self.samplesPerPixelOnCustomImage,
+            params=self.sceneParams,
+            seed=seed,
+        )
+        image = dr.clamp(image, 0.0, 1.0)
+
+        # Evaluate the objective function from the current rendered image
+        if self.lossFunctionOnCustomImage == DUAL_BUFFER_STRING:
+            image2 = self.render(
+                self.scene,
+                spp=self.samplesPerPixelOnCustomImage,
+                params=self.sceneParams,
+                seed=seed + 1,
+            )
+            image2 = dr.clamp(image2, 0.0, 1.0)
+            result = self.dualBufferError(image, image2)
+        else:
+            result = self.mse(image, self.refImage)
+
+        return result
+
+    def dualBufferError(self, image, image2):
+        return dr.mean((image - self.refImage) * (image2 - self.refImage))
 
 
 class MaterialOptimizerView(QMainWindow):
@@ -414,13 +445,22 @@ class MaterialOptimizerView(QMainWindow):
         # samples per pixel dropdown
         self.sppContainer = QWidget(self.configContainer)
         self.sppContainerLayout = QHBoxLayout(self.sppContainer)
-        samplesPerPixelLabel = QLabel(
-            text="Samples per pixel during optimization"
-        )
+        samplesPerPixelLabel = QLabel(text=SPP_DURING_OPT_STRING)
         self.samplesPerPixelBox = QComboBox()
         self.samplesPerPixelBox.addItems(SUPPORTED_SPP_VALUES)
         self.sppContainerLayout.addWidget(samplesPerPixelLabel)
         self.sppContainerLayout.addWidget(self.samplesPerPixelBox)
+
+        # loss function dropdown
+        self.lossFunctionContainer = QWidget(self.configContainer)
+        self.lossFunctionContainerLayout = QHBoxLayout(
+            self.lossFunctionContainer
+        )
+        lossFunctionLabel = QLabel(text=LOSS_FUNCTION_STRING)
+        self.lossFunctionBox = QComboBox()
+        self.lossFunctionBox.addItems([MSE_STRING, DUAL_BUFFER_STRING])
+        self.lossFunctionContainerLayout.addWidget(lossFunctionLabel)
+        self.lossFunctionContainerLayout.addWidget(self.lossFunctionBox)
 
         # iteration count input
         self.iterationContainer = QWidget(self.configContainer)
@@ -435,6 +475,7 @@ class MaterialOptimizerView(QMainWindow):
 
         self.configContainerLayout.addWidget(self.minErrContainer)
         self.configContainerLayout.addWidget(self.sppContainer)
+        self.configContainerLayout.addWidget(self.lossFunctionContainer)
         self.configContainerLayout.addWidget(self.iterationContainer)
         self.configContainer.hide()
 
@@ -828,17 +869,7 @@ class MaterialOptimizerController:
                 int(it / self.model.iterationCountOnCustomImage * 100)
             )
 
-            # Perform a (noisy) differentiable rendering of the scene
-            image = self.model.render(
-                self.model.scene,
-                spp=self.model.samplesPerPixelOnCustomImage,
-                params=self.model.sceneParams,
-                seed=it,
-            )
-            image = dr.clamp(image, 0.0, 1.0)
-
-            # Evaluate the objective function from the current rendered image
-            loss = self.model.mse(image, self.model.refImage)
+            loss = self.model.computeLoss(it)
             lossHist.append(loss)
             sceneParamsHist.append(
                 self.model.createSubsetSceneParams(
@@ -901,6 +932,9 @@ class MaterialOptimizerController:
         self.view.samplesPerPixelBox.currentTextChanged.connect(
             self.onSamplesPerPixelChanged
         )
+        self.view.lossFunctionBox.currentTextChanged.connect(
+            self.onLossFunctionChanged
+        )
 
     def onMinErrLineChanged(self):
         try:
@@ -933,6 +967,9 @@ class MaterialOptimizerController:
                 SUPPORTED_SPP_VALUES[0]
             )
             self.view.showInfoMessageBox(str(err))
+
+    def onLossFunctionChanged(self, text: str):
+        self.model.setLossFunctionOnCustomImage(text)
 
     def onCustomRefImgBtnChecked(self):
         if not self.view.customRefImgBtn.isChecked():

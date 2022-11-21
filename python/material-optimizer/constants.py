@@ -43,6 +43,11 @@ XML_FILE_FILTER_STRING: str = "Xml File (*.xml)"
 IMAGES_FILE_FILTER_STRING: str = "Images (*.png *.jpg)"
 RESTART_OPTIMIZATION_STRING: str = "Restart Optimization"
 OUTPUT_TO_JSON_STRING: str = "Output to JSON"
+MSE_STRING = 'Mean Squared Error (MSE)'
+DUAL_BUFFER_STRING = 'Deng et al. Dual Buffer Method'
+LOSS_FUNCTION_STRING = "Loss function"
+SPP_DURING_OPT_STRING = "Samples per pixel during optimization"
+
 
 
 """ 
