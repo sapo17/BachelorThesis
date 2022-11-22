@@ -29,6 +29,7 @@ class MaterialOptimizerModel:
         self.setInitialSceneParams(self.sceneParams)
         self.setDefaultOptimizationParams(self.initialSceneParams)
         self.setSamplesPerPixelOnCustomImage(SUPPORTED_SPP_VALUES[0])
+        self.setLossFunctionOnCustomImage(LOSS_FUNCTION_STRING[0])
 
     def setScene(self, fileName: str, sceneRes: tuple, integratorType: str):
         self.scene = mi.load_file(
