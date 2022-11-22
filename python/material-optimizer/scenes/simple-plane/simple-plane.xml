@@ -1,0 +1,80 @@
+<scene version="2.1.0">
+
+<!-- Defaults, these can be set via the command line: -Darg=value -->
+
+	<default name="spp" value="64"/>
+	<default name="resx" value="512"/>
+	<default name="resy" value="512"/>
+	<default name="sample_border" value="true"/>
+	<default name="integrator" value="prbvolpath"/>
+	<default name="rr_depth" value="64"/>
+	<default name="max_depth" value="64"/>
+
+<!-- Camera and Rendering Parameters -->
+
+	<integrator type="path">
+		<integer name="max_depth" value="12"/>
+	</integrator>
+	<sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="39.597755"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="100.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="179.999991348578"/>
+			<rotate y="1" angle="5.008956130975331e-06"/>
+			<rotate z="1" angle="180.00000500895632"/>
+			<translate value="-0.083592 -0.000000 2.397311"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/>
+		</film>
+	</sensor>
+
+<!-- Materials -->
+
+	<bsdf type="roughdielectric" id="object_bsdf">
+		<string name="distribution" value="ggx"/>
+		<float name="alpha" value="0.01"/>
+		<string name="int_ior" value="bk7"/>
+		<string name="ext_ior" value="air"/>
+	</bsdf>
+
+	<medium id="medium1" type="homogeneous">
+        <float name="scale" value="5"/>
+        <!-- <ref id="hg_phase1" name="phase_hg"/> -->
+        <phase type="isotropic" />
+        <float name="sigma_t" value="0.99"/>
+        <rgb name="albedo" value="0.75, 0.75, 0.75"/>
+        <boolean name="has_spectral_extinction" value="false"/>
+        <boolean name="sample_emitters" value="false"/>
+    </medium>
+
+<!-- Emitters -->
+
+	<shape type="rectangle">
+		<boolean name="flip_normals" value="true"/>
+		<transform name="to_world">
+			<matrix value="0.050000 0.000000 0.000000 -5.000000 0.000000 0.000000 0.500000 1.000000 0.000000 -0.050000 0.000000 1.000000 0.000000 0.000000 0.000000 1.000000"/>
+		</transform>
+		<emitter type="area">
+			<rgb value="25000.000000 25000.000000 25000.000000" name="radiance"/>
+		</emitter>
+		<bsdf type="null"/>
+	</shape>
+
+<!-- Shapes -->
+
+	<shape type="ply">
+		<string name="filename" value="meshes/Plane.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="object_bsdf" name="bsdf"/>
+		<ref id="medium1" name="interior"/>
+	</shape>
+</scene>

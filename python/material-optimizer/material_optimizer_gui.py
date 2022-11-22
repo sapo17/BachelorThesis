@@ -628,7 +628,7 @@ class PopUpWindow(QMainWindow):
         )
         self.model.sceneParams.update(values=self.sceneParamsHist[iteration])
         sc = MplCanvas()
-        lossHistKey = "MSE(Current-Image, Reference-Image)"
+        lossHistKey = self.model.lossFunctionOnCustomImage
         lossHistDict = {lossHistKey: self.lossHist}
         sc.plotOptimizationResults(
             self.model.refImage,
