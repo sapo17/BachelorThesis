@@ -43,10 +43,11 @@ XML_FILE_FILTER_STRING: str = "Xml File (*.xml)"
 IMAGES_FILE_FILTER_STRING: str = "Images (*.png *.jpg)"
 RESTART_OPTIMIZATION_STRING: str = "Restart Optimization"
 OUTPUT_TO_JSON_STRING: str = "Output to JSON"
-MSE_STRING = 'Mean Squared Error (MSE)'
-DUAL_BUFFER_STRING = 'Deng et al. Dual Buffer Method'
-LOSS_FUNCTION_STRING = "Loss function"
-SPP_DURING_OPT_STRING = "Samples per pixel during optimization"
+MSE_STRING: str = 'Mean Squared Error (MSE)'
+DUAL_BUFFER_STRING: str = 'Deng et al. Dual Buffer Method'
+LOSS_FUNCTION_STRINGS: list = [MSE_STRING, DUAL_BUFFER_STRING]
+LOSS_FUNCTION_STRING: str = "Loss function"
+SPP_DURING_OPT_STRING: str = "Samples per pixel during optimization"
 DEFAULT_MIN_CLAMP_VALUE: float = 0.002
 DEFAULT_MAX_CLAMP_VALUE: float = 0.998
 
