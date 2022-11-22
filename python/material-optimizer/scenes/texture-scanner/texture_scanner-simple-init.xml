@@ -1,1064 +1,144 @@
 <scene version="2.1.0">
 
-<!-- Defaults, these can be set via the command line: -Darg=value -->
+	<!-- Defaults, these can be set via the command line: -Darg=value -->
+	
+		<default name="spp" value="1024"/>
+		<default name="resx" value="512"/>
+		<default name="resy" value="512"/>
+	
+	<!-- Camera and Rendering Parameters -->
+	
+		<integrator type="path">
+			<integer name="max_depth" value="12"/>
+		</integrator>
+		<sensor type="perspective">
+			<string name="fov_axis" value="x"/>
+			<float name="fov" value="67.380137"/>
+			<float name="principal_point_offset_x" value="0.000000"/>
+			<float name="principal_point_offset_y" value="-0.000000"/>
+			<float name="near_clip" value="0.100000"/>
+			<float name="far_clip" value="1000.000000"/>
+			<transform name="to_world">
+				<rotate x="1" angle="89.999995674289"/>
+				<rotate y="1" angle="90.00000250447816"/>
+				<translate value="-0.214875 0.300000 -0.242954"/>
+			</transform>
+			<sampler type="independent">
+				<integer name="sample_count" value="$spp"/>
+			</sampler>
+			<film type="hdrfilm">
+				<integer name="width" value="$resx"/>
+				<integer name="height" value="$resy"/>
+			</film>
+		</sensor>
+		<sensor type="perspective">
+			<string name="fov_axis" value="x"/>
+			<float name="fov" value="61.927515"/>
+			<float name="principal_point_offset_x" value="0.000000"/>
+			<float name="principal_point_offset_y" value="-0.000000"/>
+			<float name="near_clip" value="0.100000"/>
+			<float name="far_clip" value="1000.000000"/>
+			<transform name="to_world">
+				<rotate x="1" angle="31.866510534977536"/>
+				<rotate y="1" angle="0.48683288551091297"/>
+				<rotate z="1" angle="-2.728390336395695e-06"/>
+				<translate value="-0.182229 0.801351 -1.485163"/>
+			</transform>
+			<sampler type="independent">
+				<integer name="sample_count" value="$spp"/>
+			</sampler>
+			<film type="hdrfilm">
+				<integer name="width" value="$resx"/>
+				<integer name="height" value="$resy"/>
+			</film>
+		</sensor>
+	
+	<!-- Materials -->
+	
+		<bsdf type="twosided" id="mat-floor">
+			<bsdf type="diffuse">
+				<rgb value="0.800656 0.800656 0.800656" name="reflectance"/>
+			</bsdf>
+		</bsdf>
+		
+		<bsdf type="principled" id="mat-plane-bsdf">
+			<rgb name="base_color" value="0.01, 0.01, 0.01"/>
+			<float name="roughness" value="0.5"/>
+			<float name="spec_trans" value="0.02"/>
+			<float name="eta" value="1.54"/>
+		</bsdf>
 
-	<default name="spp" value="1024"/>
-	<default name="resx" value="512"/>
-	<default name="resy" value="512"/>
-
-<!-- Camera and Rendering Parameters -->
-
-	<integrator type="path">
-		<integer name="max_depth" value="12"/>
-	</integrator>
-	<sensor type="perspective">
-		<string name="fov_axis" value="x"/>
-		<float name="fov" value="67.380137"/>
-		<float name="principal_point_offset_x" value="0.000000"/>
-		<float name="principal_point_offset_y" value="-0.000000"/>
-		<float name="near_clip" value="0.100000"/>
-		<float name="far_clip" value="1000.000000"/>
-		<transform name="to_world">
-			<rotate x="1" angle="89.999995674289"/>
-			<rotate y="1" angle="90.00000250447816"/>
-			<translate value="-0.214875 0.300000 -0.242954"/>
-		</transform>
-		<sampler type="independent">
-			<integer name="sample_count" value="$spp"/>
-		</sampler>
-		<film type="hdrfilm">
-			<integer name="width" value="$resx"/>
-			<integer name="height" value="$resy"/>
-		</film>
-	</sensor>
-	<sensor type="perspective">
-		<string name="fov_axis" value="x"/>
-		<float name="fov" value="61.927515"/>
-		<float name="principal_point_offset_x" value="0.000000"/>
-		<float name="principal_point_offset_y" value="-0.000000"/>
-		<float name="near_clip" value="0.100000"/>
-		<float name="far_clip" value="1000.000000"/>
-		<transform name="to_world">
-			<rotate x="1" angle="31.866510534977536"/>
-			<rotate y="1" angle="0.48683288551091297"/>
-			<rotate z="1" angle="-2.728390336395695e-06"/>
-			<translate value="-0.182229 0.801351 -1.485163"/>
-		</transform>
-		<sampler type="independent">
-			<integer name="sample_count" value="$spp"/>
-		</sampler>
-		<film type="hdrfilm">
-			<integer name="width" value="$resx"/>
-			<integer name="height" value="$resy"/>
-		</film>
-	</sensor>
-
-<!-- Materials -->
-
-	<bsdf type="twosided" id="mat-floor">
-		<bsdf type="diffuse">
-			<rgb value="0.800656 0.800656 0.800656" name="reflectance"/>
+		<bsdf type="diffuse" id="empty-emitter-bsdf">
+			<rgb value="0.000000" name="reflectance"/>
 		</bsdf>
-	</bsdf>
-	<bsdf type="twosided" id="mat-New material 008">
-		<bsdf type="principled">
-			<rgb value="0.180392 0.172549 0.172549" name="base_color"/>
-			<float name="spec_tint" value="0.000000"/>
-			<float name="spec_trans" value="0.000000"/>
-			<float name="metallic" value="0.000000"/>
-			<float name="anisotropic" value="0.000000"/>
-			<float name="roughness" value="0.000000"/>
-			<float name="sheen" value="0.000000"/>
-			<float name="sheen_tint" value="0.500000"/>
-			<float name="clearcoat" value="0.000000"/>
-			<float name="clearcoat_gloss" value="0.173205"/>
-			<float name="specular" value="0.001000"/>
-		</bsdf>
-	</bsdf>
-	<bsdf type="twosided" id="mat-Black Matte">
-		<bsdf type="principled">
-			<rgb value="0.207843 0.203922 0.203922" name="base_color"/>
-			<float name="spec_tint" value="0.000000"/>
-			<float name="spec_trans" value="0.000000"/>
-			<float name="metallic" value="0.000000"/>
-			<float name="anisotropic" value="0.000000"/>
-			<float name="roughness" value="0.000000"/>
-			<float name="sheen" value="0.000000"/>
-			<float name="sheen_tint" value="0.500000"/>
-			<float name="clearcoat" value="0.000000"/>
-			<float name="clearcoat_gloss" value="0.173205"/>
-			<float name="specular" value="0.001000"/>
-		</bsdf>
-	</bsdf>
-	<bsdf type="twosided" id="mat-New material 006">
-		<bsdf type="principled">
-			<rgb value="0.400000 0.392157 0.392157" name="base_color"/>
-			<float name="spec_tint" value="0.000000"/>
-			<float name="spec_trans" value="0.000000"/>
-			<float name="metallic" value="0.000000"/>
-			<float name="anisotropic" value="0.000000"/>
-			<float name="roughness" value="0.000000"/>
-			<float name="sheen" value="0.000000"/>
-			<float name="sheen_tint" value="0.500000"/>
-			<float name="clearcoat" value="0.000000"/>
-			<float name="clearcoat_gloss" value="0.173205"/>
-			<float name="specular" value="0.001000"/>
-		</bsdf>
-	</bsdf>
-	<bsdf type="principled" id="mat-plane-bsdf">
-        <rgb name="base_color" value="0.412, 0.824, 0.999"/>
-		<float name="roughness" value="0.01"/>
-		<float name="spec_trans" value="0.9"/>
-        <float name="eta" value="1.49"/>
-    </bsdf>
-	<bsdf type="twosided" id="mat-New material 005">
-		<bsdf type="principled">
-			<rgb value="0.054902 0.054902 0.054902" name="base_color"/>
-			<float name="spec_tint" value="0.000000"/>
-			<float name="spec_trans" value="0.000000"/>
-			<float name="metallic" value="0.000000"/>
-			<float name="anisotropic" value="0.000000"/>
-			<float name="roughness" value="0.000000"/>
-			<float name="sheen" value="0.000000"/>
-			<float name="sheen_tint" value="0.500000"/>
-			<float name="clearcoat" value="0.000000"/>
-			<float name="clearcoat_gloss" value="0.173205"/>
-			<float name="specular" value="0.001000"/>
-		</bsdf>
-	</bsdf>
-	<bsdf type="twosided" id="mat-New material 007">
-		<bsdf type="principled">
-			<rgb value="0.043137 0.043137 0.043137" name="base_color"/>
-			<float name="spec_tint" value="0.000000"/>
-			<float name="spec_trans" value="0.000000"/>
-			<float name="metallic" value="0.000000"/>
-			<float name="anisotropic" value="0.000000"/>
-			<float name="roughness" value="0.000000"/>
-			<float name="sheen" value="0.000000"/>
-			<float name="sheen_tint" value="0.500000"/>
-			<float name="clearcoat" value="0.000000"/>
-			<float name="clearcoat_gloss" value="0.173205"/>
-			<float name="specular" value="0.001000"/>
-		</bsdf>
-	</bsdf>
-	<bsdf type="diffuse" id="empty-emitter-bsdf">
-		<rgb value="0.000000" name="reflectance"/>
-	</bsdf>
-	<bsdf type="twosided" id="mat-New material 010">
-		<bsdf type="principled">
-			<rgb value="0.411765 0.411765 0.411765" name="base_color"/>
-			<float name="spec_tint" value="0.000000"/>
-			<float name="spec_trans" value="0.000000"/>
-			<float name="metallic" value="0.000000"/>
-			<float name="anisotropic" value="0.000000"/>
-			<float name="roughness" value="0.000000"/>
-			<float name="sheen" value="0.000000"/>
-			<float name="sheen_tint" value="0.500000"/>
-			<float name="clearcoat" value="0.000000"/>
-			<float name="clearcoat_gloss" value="0.173205"/>
-			<float name="specular" value="0.001000"/>
-		</bsdf>
-	</bsdf>
-	<bsdf type="twosided" id="mat-New material 004">
-		<bsdf type="principled">
-			<rgb value="0.745098 0.745098 0.745098" name="base_color"/>
-			<float name="spec_tint" value="0.000000"/>
-			<float name="spec_trans" value="0.000000"/>
-			<float name="metallic" value="0.000000"/>
-			<float name="anisotropic" value="0.000000"/>
-			<float name="roughness" value="0.000000"/>
-			<float name="sheen" value="0.000000"/>
-			<float name="sheen_tint" value="0.500000"/>
-			<float name="clearcoat" value="0.000000"/>
-			<float name="clearcoat_gloss" value="0.173205"/>
-			<float name="specular" value="0.001000"/>
-		</bsdf>
-	</bsdf>
-	<bsdf type="twosided" id="mat-Granite">
-		<bsdf type="principled">
-			<rgb value="1.000000 1.000000 1.000000" name="base_color"/>
-			<float name="spec_tint" value="0.000000"/>
-			<float name="spec_trans" value="0.000000"/>
-			<float name="metallic" value="0.000000"/>
-			<float name="anisotropic" value="0.000000"/>
-			<float name="roughness" value="0.000000"/>
-			<float name="sheen" value="0.000000"/>
-			<float name="sheen_tint" value="0.500000"/>
-			<float name="clearcoat" value="0.000000"/>
-			<float name="clearcoat_gloss" value="0.173205"/>
-			<float name="specular" value="0.001000"/>
-		</bsdf>
-	</bsdf>
-	<bsdf type="twosided" id="mat-Black Leather">
-		<bsdf type="principled">
-			<rgb value="0.243137 0.239216 0.223529" name="base_color"/>
-			<float name="spec_tint" value="0.000000"/>
-			<float name="spec_trans" value="0.000000"/>
-			<float name="metallic" value="0.000000"/>
-			<float name="anisotropic" value="0.000000"/>
-			<float name="roughness" value="0.000000"/>
-			<float name="sheen" value="0.000000"/>
-			<float name="sheen_tint" value="0.500000"/>
-			<float name="clearcoat" value="0.000000"/>
-			<float name="clearcoat_gloss" value="0.173205"/>
-			<float name="specular" value="1.000000"/>
-		</bsdf>
-	</bsdf>
-
-<!-- Emitters -->
-
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_045.ply"/>
-		<ref id="empty-emitter-bsdf" name="bsdf"/>
-		<emitter type="area">
-			<rgb value="10.000000 10.000000 10.000000" name="radiance"/>
-		</emitter>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_053.ply"/>
-		<ref id="empty-emitter-bsdf" name="bsdf"/>
-		<emitter type="area">
-			<rgb value="10.000000 10.000000 10.000000" name="radiance"/>
-		</emitter>
-	</shape>
-
-<!-- Shapes -->
-
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_100.ply"/>
-		<ref id="mat-floor" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_101.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_102.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_103.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_104.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_105.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_106.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_107.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_108.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_140.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_141.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_142.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_143.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_144.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_145.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_146.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_147.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_148.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_149.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_150.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_151.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_152.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_153.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_162.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_170.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_171.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_172.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_173.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_174.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_175.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_176.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_177.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_178.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_179.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_180.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_181.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_182.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_183.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_184.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_185.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_186.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_187.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_188.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_189.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_190.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_191.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_192.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_193.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_194.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_154.ply"/>
-		<ref id="mat-Black Matte" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_155.ply"/>
-		<ref id="mat-Black Matte" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_156.ply"/>
-		<ref id="mat-Black Matte" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_157.ply"/>
-		<ref id="mat-Black Matte" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_158.ply"/>
-		<ref id="mat-Black Matte" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_159.ply"/>
-		<ref id="mat-Black Matte" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_160.ply"/>
-		<ref id="mat-Black Matte" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_161.ply"/>
-		<ref id="mat-Black Matte" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_163.ply"/>
-		<ref id="mat-Black Matte" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_164.ply"/>
-		<ref id="mat-Black Matte" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_165.ply"/>
-		<ref id="mat-Black Matte" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_166.ply"/>
-		<ref id="mat-Black Matte" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_167.ply"/>
-		<ref id="mat-Black Matte" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_168.ply"/>
-		<ref id="mat-Black Matte" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_169.ply"/>
-		<ref id="mat-Black Matte" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_206.ply"/>
-		<ref id="mat-Black Matte" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_195.ply"/>
-		<ref id="mat-Black Matte" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_196.ply"/>
-		<ref id="mat-Black Matte" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_197.ply"/>
-		<ref id="mat-Black Matte" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_198.ply"/>
-		<ref id="mat-Black Matte" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_199.ply"/>
-		<ref id="mat-Black Matte" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_200.ply"/>
-		<ref id="mat-Black Matte" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_201.ply"/>
-		<ref id="mat-Black Matte" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_202.ply"/>
-		<ref id="mat-Black Matte" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_203.ply"/>
-		<ref id="mat-Black Matte" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_204.ply"/>
-		<ref id="mat-Black Matte" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_205.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_132.ply"/>
-		<ref id="mat-Black Matte" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_133.ply"/>
-		<ref id="mat-Black Matte" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_134.ply"/>
-		<ref id="mat-Black Matte" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_135.ply"/>
-		<ref id="mat-Black Matte" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_136.ply"/>
-		<ref id="mat-Black Matte" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_137.ply"/>
-		<ref id="mat-Black Matte" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_138.ply"/>
-		<ref id="mat-Black Matte" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_139.ply"/>
-		<ref id="mat-Black Matte" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_028.ply"/>
-		<ref id="mat-Black Matte" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_029.ply"/>
-		<ref id="mat-Black Matte" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_030.ply"/>
-		<ref id="mat-Black Matte" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_031.ply"/>
-		<ref id="mat-Black Matte" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_032.ply"/>
-		<ref id="mat-Black Matte" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_033.ply"/>
-		<ref id="mat-Black Matte" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_034.ply"/>
-		<ref id="mat-Black Matte" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_035.ply"/>
-		<ref id="mat-Black Matte" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_036.ply"/>
-		<ref id="mat-Black Matte" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_037.ply"/>
-		<ref id="mat-Black Matte" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_038.ply"/>
-		<ref id="mat-Black Matte" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_039.ply"/>
-		<ref id="mat-Black Matte" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_040.ply"/>
-		<ref id="mat-Black Matte" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_041.ply"/>
-		<ref id="mat-Black Matte" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_109.ply"/>
-		<ref id="mat-New material 006" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_110.ply"/>
-		<ref id="mat-New material 006" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_111.ply"/>
-		<ref id="mat-New material 006" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_112.ply"/>
-		<ref id="mat-New material 006" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_113.ply"/>
-		<ref id="mat-New material 006" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_114.ply"/>
-		<ref id="mat-New material 006" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_115.ply"/>
-		<ref id="mat-New material 006" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_116.ply"/>
-		<ref id="mat-New material 006" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_117.ply"/>
-		<ref id="mat-New material 006" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_118.ply"/>
-		<ref id="mat-New material 006" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_119.ply"/>
-		<ref id="mat-New material 006" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_120.ply"/>
-		<ref id="mat-New material 006" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_121.ply"/>
-		<ref id="mat-New material 006" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_122.ply"/>
-		<ref id="mat-New material 006" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_123.ply"/>
-		<ref id="mat-New material 006" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_124.ply"/>
-		<ref id="mat-New material 006" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_125.ply"/>
-		<ref id="mat-New material 006" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_126.ply"/>
-		<ref id="mat-New material 006" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_127.ply"/>
-		<ref id="mat-New material 006" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_128.ply"/>
-		<ref id="mat-New material 006" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_129.ply"/>
-		<ref id="mat-New material 006" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_130.ply"/>
-		<ref id="mat-New material 006" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_131.ply"/>
-		<ref id="mat-New material 006" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_018.ply"/>
-		<ref id="mat-floor" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_019.ply"/>
-		<ref id="mat-floor" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_020.ply"/>
-		<ref id="mat-floor" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_021.ply"/>
-		<ref id="mat-floor" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_022.ply"/>
-		<ref id="mat-floor" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_023.ply"/>
-		<ref id="mat-floor" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_024.ply"/>
-		<ref id="mat-floor" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_025.ply"/>
-		<ref id="mat-floor" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_026.ply"/>
-		<ref id="mat-floor" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_027.ply"/>
-		<ref id="mat-floor" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/simple-plane.ply"/>
-		<boolean name="face_normals" value="true"/>
-		<ref id="mat-plane-bsdf" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_093.ply"/>
-		<ref id="mat-New material 005" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_065.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_066.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_067.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_068.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_069.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_070.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_071.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_072.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_073.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_074.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_075.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_076.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_077.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_078.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_079.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_080.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_081.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_082.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_083.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_084.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_085.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_086.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_087.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_088.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_089.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_090.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_091.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_092.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_042.ply"/>
-		<ref id="mat-New material 007" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_043.ply"/>
-		<ref id="mat-New material 007" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_044.ply"/>
-		<ref id="mat-New material 007" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_046.ply"/>
-		<ref id="mat-New material 007" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_047.ply"/>
-		<ref id="mat-New material 007" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_048.ply"/>
-		<ref id="mat-New material 007" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_049.ply"/>
-		<ref id="mat-New material 007" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_050.ply"/>
-		<ref id="mat-New material 007" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_051.ply"/>
-		<ref id="mat-New material 007" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_052.ply"/>
-		<ref id="mat-New material 007" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_054.ply"/>
-		<ref id="mat-New material 007" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_055.ply"/>
-		<ref id="mat-New material 007" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_056.ply"/>
-		<ref id="mat-New material 007" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_057.ply"/>
-		<ref id="mat-New material 007" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_058.ply"/>
-		<ref id="mat-New material 007" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_059.ply"/>
-		<ref id="mat-New material 007" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_060.ply"/>
-		<ref id="mat-New material 007" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_061.ply"/>
-		<ref id="mat-New material 007" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_094.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_095.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_096.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_097.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_098.ply"/>
-		<ref id="mat-New material 008" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_062.ply"/>
-		<ref id="mat-New material 010" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_063.ply"/>
-		<ref id="mat-New material 010" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_064.ply"/>
-		<ref id="mat-New material 010" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_001.ply"/>
-		<ref id="mat-New material 006" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_002.ply"/>
-		<ref id="mat-New material 006" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_003.ply"/>
-		<ref id="mat-New material 006" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_004.ply"/>
-		<ref id="mat-New material 006" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_005.ply"/>
-		<ref id="mat-New material 006" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_006.ply"/>
-		<ref id="mat-New material 006" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_007.ply"/>
-		<ref id="mat-New material 006" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_008.ply"/>
-		<ref id="mat-New material 006" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_009.ply"/>
-		<ref id="mat-New material 006" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_010.ply"/>
-		<ref id="mat-New material 006" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_011.ply"/>
-		<ref id="mat-New material 006" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_012.ply"/>
-		<ref id="mat-New material 006" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_013.ply"/>
-		<ref id="mat-New material 006" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_014.ply"/>
-		<ref id="mat-New material 006" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_015.ply"/>
-		<ref id="mat-New material 006" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_016.ply"/>
-		<ref id="mat-New material 006" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_017.ply"/>
-		<ref id="mat-New material 006" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_255.ply"/>
-		<ref id="mat-New material 004" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_256.ply"/>
-		<ref id="mat-New material 004" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_207.ply"/>
-		<ref id="mat-Granite" name="bsdf"/>
-	</shape>
-	<shape type="ply">
-		<string name="filename" value="meshes/Object_099.ply"/>
-		<ref id="mat-Black Leather" name="bsdf"/>
-	</shape>
-</scene>
+	
+	<!-- Emitters -->
+	
+		<shape type="ply">
+			<string name="filename" value="meshes/Object_045.ply"/>
+			<ref id="empty-emitter-bsdf" name="bsdf"/>
+			<emitter type="area">
+				<rgb value="10.000000 10.000000 10.000000" name="radiance"/>
+			</emitter>
+		</shape>
+		<shape type="ply">
+			<string name="filename" value="meshes/Object_053.ply"/>
+			<ref id="empty-emitter-bsdf" name="bsdf"/>
+			<emitter type="area">
+				<rgb value="10.000000 10.000000 10.000000" name="radiance"/>
+			</emitter>
+		</shape>
+	
+	<!-- Shapes -->
+	
+		<shape type="ply">
+			<string name="filename" value="meshes/Object_100.ply"/>
+			<ref id="mat-floor" name="bsdf"/>
+		</shape>
+		<shape type="ply">
+			<string name="filename" value="meshes/Object_018.ply"/>
+			<ref id="mat-floor" name="bsdf"/>
+		</shape>
+		<shape type="ply">
+			<string name="filename" value="meshes/Object_019.ply"/>
+			<ref id="mat-floor" name="bsdf"/>
+		</shape>
+		<shape type="ply">
+			<string name="filename" value="meshes/Object_020.ply"/>
+			<ref id="mat-floor" name="bsdf"/>
+		</shape>
+		<shape type="ply">
+			<string name="filename" value="meshes/Object_021.ply"/>
+			<ref id="mat-floor" name="bsdf"/>
+		</shape>
+		<shape type="ply">
+			<string name="filename" value="meshes/Object_022.ply"/>
+			<ref id="mat-floor" name="bsdf"/>
+		</shape>
+		<shape type="ply">
+			<string name="filename" value="meshes/Object_023.ply"/>
+			<ref id="mat-floor" name="bsdf"/>
+		</shape>
+		<shape type="ply">
+			<string name="filename" value="meshes/Object_024.ply"/>
+			<ref id="mat-floor" name="bsdf"/>
+		</shape>
+		<shape type="ply">
+			<string name="filename" value="meshes/Object_025.ply"/>
+			<ref id="mat-floor" name="bsdf"/>
+		</shape>
+		<shape type="ply">
+			<string name="filename" value="meshes/Object_026.ply"/>
+			<ref id="mat-floor" name="bsdf"/>
+		</shape>
+		<shape type="ply">
+			<string name="filename" value="meshes/Object_027.ply"/>
+			<ref id="mat-floor" name="bsdf"/>
+		</shape>
+		<shape type="ply">
+			<string name="filename" value="meshes/simple-plane.ply"/>
+			<boolean name="face_normals" value="true"/>
+			<ref id="mat-plane-bsdf" name="bsdf"/>
+		</shape>
+	
+	</scene>
