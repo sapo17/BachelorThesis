@@ -326,5 +326,12 @@
     - [Inverse rendering approach for heterogeneous translucent materials](https://dl.acm.org/doi/10.1145/3013971.3013973)
     - [MobileNerF](https://mobile-nerf.github.io/)
 
-### 16.11.22
+### 16/17/18.11.22
 - More work on material-optimizer (see github issues for more info)
+
+### 19.11.22
+- Promising results for optimizing translucent materials using *material-optimizer*. Results:
+  - ![Reference: Principled BSDF](python/material-optimizer/images/material-preview-translucent-reference.png)
+  - ![Optimized: Principled BSDF](python/material-optimizer/images/material-preview-translucent-optimized.png)
+  - ![Reference: Participating Media](python/material-optimizer/images/simple-homogeneous-sphere.png)
+  - ![Optimized: Participating Media](python/material-optimizer/images/medium_homogeneous_sss_181122_optimized.png)
