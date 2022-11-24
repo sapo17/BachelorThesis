@@ -335,3 +335,19 @@
   - ![Optimized: Principled BSDF](python/material-optimizer/images/material-preview-translucent-optimized.png)
   - ![Reference: Participating Media](python/material-optimizer/images/simple-homogeneous-sphere.png)
   - ![Optimized: Participating Media](python/material-optimizer/images/medium_homogeneous_sss_181122_optimized.png)
+
+### 24.11.22
+- Findings:
+  - Naively taking images of objects to optimize their material does not work. The issue is mainly not being able create an initial 3D (mitsuba) scene for the optimization. The optimization through custom images calculates the loss function through the given custom image and the rendered image during optimization (e.g. mean squared error). If the entities (i.e. object of interest, light and camera position etc.) in the inital model does not match with the provided custom image, the calculated loss function will give wrong results. Following steps are necessary to be able to create an initial scene that would match the provided custom image.
+    1. A controlled enviroment for taking sample images (e.g. following video is good example [turntable photogrammetry](https://www.youtube.com/watch?v=LzN1w6BlbZE))
+    2. Taking a background image is necesarry for background removal (so that only the mesh of interest gets reconstructed during photogrammetry)
+    3. If the object of interest is a translucent object, a non translucent object with identical geometry as the object of interest is necessary so that the photogrammetry step (geometry reconstruction) works.
+    4. After taking enough sample images a photogrammetry tool to reconstruct the geometry of the object of interest is necessary (e.g. agisoft metashape)
+      - Steps for agisoft metashape:
+      1. Align photos
+      2. Apply masks for background removal
+      3. Construct model/mesh
+      4. Export model (camera's must be included) as a *.3dm* file
+      5. Import *.3dm* file in Blender
+      6. Export blender scene as a mitsuba scene
+    5. With the acquisition of a mitsuba scene *material-optimizer* could be used to reconstruct materials of the object of interest
