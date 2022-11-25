@@ -135,6 +135,8 @@ class MaterialOptimizerModel:
         elif vType is mi.Float:
             if len(v) == 1:
                 result[k] = mi.Float(v[0])
+        elif vType is mi.TensorXf:
+            result[k] = mi.TensorXf(v)
 
     def updateParamErrors(
         self, params, initialParams, modifiedParams, paramErrors
@@ -525,6 +527,10 @@ class MaterialOptimizerView(QMainWindow):
                             item = QTableWidgetItem(str(value[0]))
                         else:
                             item = QTableWidgetItem(NOT_IMPLEMENTED_STRING)
+                    elif valueType is mi.TensorXf:
+                        item = QTableWidgetItem(str(value))
+                        item.setFlags(~QtCore.Qt.ItemFlag.ItemIsEditable)
+                        item.setBackground(QtGui.QColorConstants.LightGray)
                     else:
                         item = QTableWidgetItem(NOT_IMPLEMENTED_STRING)
                 elif label == COLUMN_LABEL_OPTIMIZE:
@@ -609,10 +615,16 @@ class PopUpWindow(QMainWindow):
         outputFileName = f"{OUTPUT_DIR_PATH}scene_paramaters_iteration_{selectedIteration}_{datetime.datetime.now().isoformat('_', 'seconds')}.json"
         outputFileName = outputFileName.replace(":", "_")
         with open(outputFileName, "w") as outfile:
-            outputDict = {
-                k: str(v)
-                for k, v in self.sceneParamsHist[selectedIteration].items()
-            }
+            outputDict = {}
+            for k, v in self.sceneParamsHist[selectedIteration].items():
+                if type(v) is mi.TensorXf:
+                    outputTextureFileName = f"{OUTPUT_DIR_PATH}texture_{k}_iteration_{selectedIteration}_{datetime.datetime.now().isoformat('_', 'seconds')}.png"
+                    outputTextureFileName = outputTextureFileName.replace(
+                        ":", "_"
+                    )
+                    mi.util.write_bitmap(outputTextureFileName, v)
+                else:
+                    outputDict[k] = str(v)
             json.dump(outputDict, outfile, indent=4)
 
     def onOptimizedSceneSelectorTextChanged(self, text: str):
@@ -759,10 +771,16 @@ class MaterialOptimizerController:
         return result
 
     def optimizeMaterials(self):
-        if self.view.defaultRefImgBtn.isChecked():
-            self.optimizeMaterialsWithDefaultReferenceImage()
-        else:
-            self.optimizeMaterialsWithCustomReferenceImage()
+        try:
+            if self.view.defaultRefImgBtn.isChecked():
+                self.optimizeMaterialsWithDefaultReferenceImage()
+            else:
+                self.optimizeMaterialsWithCustomReferenceImage()
+        except Exception as err:
+            msg = f"Exiting program. Runtime error during optimiztion: {err}"
+            logging.error(msg)
+            self.view.showInfoMessageBox(msg)
+            sys.exit()
 
     def optimizeMaterialsWithDefaultReferenceImage(self):
         if self.view.progressBar.value() is self.view.progressBar.maximum():
@@ -919,10 +937,15 @@ class MaterialOptimizerController:
             key = self.view.table.verticalHeaderItem(row).text()
             initValue = self.model.initialSceneParams[key]
             newValue = self.view.table.item(row, 0).text()
-            if type(initValue) is mi.Color3f:
+            valueType = type(initValue)
+            if valueType is mi.Color3f:
                 currentSceneParams[key] = self.model.stringToColor3f(newValue)
-            elif type(initValue) is mi.Float:
+            elif valueType is mi.Float:
                 currentSceneParams[key] = mi.Float(float(newValue))
+            elif valueType is mi.TensorXf:
+                currentSceneParams[key] = dr.zeros(
+                    mi.TensorXf, initValue.shape
+                )
 
         return currentSceneParams
 
