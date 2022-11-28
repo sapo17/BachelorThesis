@@ -23,7 +23,7 @@ mi.set_variant(CUDA_AD_RGB)
 class MaterialOptimizerModel:
     def __init__(self) -> None:
         self.refImage = None
-        self.sceneRes = (256, 256)
+        self.sceneRes = (384, 384)
         self.loadMitsubaScene()
         self.setSceneParams(self.scene)
         self.setInitialSceneParams(self.sceneParams)
@@ -135,6 +135,8 @@ class MaterialOptimizerModel:
         elif vType is mi.Float:
             if len(v) == 1:
                 result[k] = mi.Float(v[0])
+            else:
+                result[k] = mi.Float(v)
         elif vType is mi.TensorXf:
             result[k] = mi.TensorXf(v)
 
@@ -161,6 +163,12 @@ class MaterialOptimizerModel:
             opt[key] = dr.clamp(
                 opt[key], DEFAULT_MIN_CLAMP_VALUE, MAX_ETA_VALUE
             )
+        if K_PATTERN.search(key):
+            opt[key] = dr.clamp(opt[key], DEFAULT_MIN_CLAMP_VALUE, MAX_K_VALUE)
+        if ALPHA_PATTERN.search(key):
+            opt[key] = dr.clamp(
+                opt[key], DEFAULT_MIN_CLAMP_VALUE, MAX_ALPHA_VALUE
+            )
         elif DIFF_TRANS_PATTERN.search(key):
             opt[key] = dr.clamp(
                 opt[key], DEFAULT_MIN_CLAMP_VALUE, MAX_DIFF_TRANS_VALUE
@@ -175,6 +183,10 @@ class MaterialOptimizerModel:
             )
         elif PHASE_G_PATTERN.search(key):
             opt[key] = dr.clamp(opt[key], MIN_PHASE_G_VALUE, MAX_PHASE_G_VALUE)
+        elif SCALE_PATTERN.search(key):
+            opt[key] = dr.clamp(
+                opt[key], DEFAULT_MIN_CLAMP_VALUE, MAX_SCALE_VALUE
+            )
         else:
             opt[key] = dr.clamp(
                 opt[key], DEFAULT_MIN_CLAMP_VALUE, DEFAULT_MAX_CLAMP_VALUE
@@ -182,6 +194,12 @@ class MaterialOptimizerModel:
 
     def mse(self, image, refImage):
         return dr.mean(dr.sqr(refImage - image))
+
+    def scale_independent_loss(self, image, ref):
+        """Brightness-independent L2 loss function."""
+        scaled_image = image / dr.mean(dr.detach(image))
+        scaled_ref = ref / dr.mean(ref)
+        return dr.mean(dr.sqr(scaled_image - scaled_ref))
 
     def getMinParamErrors(self, optimizationParams: dict):
         return {
@@ -526,7 +544,11 @@ class MaterialOptimizerView(QMainWindow):
                         if len(value) == 1:
                             item = QTableWidgetItem(str(value[0]))
                         else:
-                            item = QTableWidgetItem(NOT_IMPLEMENTED_STRING)
+                            item = QTableWidgetItem(
+                                f"mi.Float(length={len(value)})"
+                            )
+                            item.setFlags(~QtCore.Qt.ItemFlag.ItemIsEditable)
+                            item.setBackground(QtGui.QColorConstants.LightGray)
                     elif valueType is mi.TensorXf:
                         item = QTableWidgetItem(str(value))
                         item.setFlags(~QtCore.Qt.ItemFlag.ItemIsEditable)
@@ -623,6 +645,8 @@ class PopUpWindow(QMainWindow):
                         ":", "_"
                     )
                     mi.util.write_bitmap(outputTextureFileName, v)
+                elif type(v) is mi.Float:
+                    outputDict[k] = [f for f in v]
                 else:
                     outputDict[k] = str(v)
             json.dump(outputDict, outfile, indent=4)
@@ -941,7 +965,8 @@ class MaterialOptimizerController:
             if valueType is mi.Color3f:
                 currentSceneParams[key] = self.model.stringToColor3f(newValue)
             elif valueType is mi.Float:
-                currentSceneParams[key] = mi.Float(float(newValue))
+                if len(initValue) == 1:
+                    currentSceneParams[key] = mi.Float(float(newValue))
             elif valueType is mi.TensorXf:
                 currentSceneParams[key] = dr.zeros(
                     mi.TensorXf, initValue.shape
