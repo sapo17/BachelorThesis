@@ -48,8 +48,8 @@ DUAL_BUFFER_STRING: str = 'Deng et al. Dual Buffer Method'
 LOSS_FUNCTION_STRINGS: list = [MSE_STRING, DUAL_BUFFER_STRING]
 LOSS_FUNCTION_STRING: str = "Loss function"
 SPP_DURING_OPT_STRING: str = "Samples per pixel during optimization"
-DEFAULT_MIN_CLAMP_VALUE: float = 0.002
-DEFAULT_MAX_CLAMP_VALUE: float = 0.998
+DEFAULT_MIN_CLAMP_VALUE: float = 0.001
+DEFAULT_MAX_CLAMP_VALUE: float = 0.999
 
 
 
@@ -93,6 +93,19 @@ CLEARCOAT_GLOSS_PATTERN: re.Pattern = re.compile(r".*\.clearcoat_gloss")
 # https://en.wikipedia.org/wiki/List_of_refractive_indices
 # Germanium: ~4.1
 MAX_ETA_VALUE: float = 4.1
+MAX_K_VALUE: float = 4.1
+
+
+"""
+To get an intuition about the effect of the surface roughness parameter , 
+consider the following approximate classification: a value of [0.001, 0.01] 
+corresponds to a material with slight imperfections on an otherwise smooth 
+surface finish, 0.1 is relatively rough, and [0.3, 0.7] is extremely rough 
+(e.g. an etched or ground finish). Values significantly above that are probably 
+not too realistic.
+https://mitsuba.readthedocs.io/en/stable/src/generated/plugins_bsdfs.html#rough-dielectric-material-roughdielectric
+"""
+MAX_ALPHA_VALUE: float = 0.7
 
 # taken from https://mitsuba.readthedocs.io/en/stable/src/generated/plugins_bsdfs.html#the-thin-principled-bsdf-principledthin
 MAX_DIFF_TRANS_VALUE: float = 2.0
@@ -108,11 +121,11 @@ See also: https://mitsuba.readthedocs.io/en/stable/src/generated/plugins_emitter
 RADIANCE_PATTERN: re.Pattern = re.compile(r".*\.radiance")
 INTENSITY_PATTERN: re.Pattern = re.compile(r".*\.intensity")
 SCALE_PATTERN: re.Pattern = re.compile(r".*\.scale")
-# DATA_PATTERN: re.Pattern = re.compile(r".*\.data") currently not supported, requires support for tensor type
-# TEXTURE_PATTERN: re.Pattern = re.compile(r".*\.texture") currently not supported, requires support for texture type
 IRRADIANCE_PATTERN: re.Pattern = re.compile(
     r".*\.irradiance"
 )  # supports only float/Color3f entry
+
+MAX_SCALE_VALUE: int = 100
 
 
 """ 
@@ -133,6 +146,12 @@ PHASE_G_PATTERN: re.Pattern = re.compile(r".*\.g")
 MAX_PHASE_G_VALUE: float = 1.0
 MIN_PHASE_G_VALUE: float = -1.0
 
+
+""" 
+Texture Patterns Constants
+See also: https://mitsuba.readthedocs.io/en/stable/src/generated/plugins_textures.html#
+"""
+VERTEX_COLOR_PATTERN: re.Pattern = re.compile(r".*\.vertex_(Col|color)")
 
 """ Combine Patterns """
 SUPPORTED_MITSUBA_PARAMETER_PATTERNS: list = [
@@ -168,6 +187,7 @@ SUPPORTED_MITSUBA_PARAMETER_PATTERNS: list = [
     ALBEDO_PATTERN,
     SIGMA_T_PATTERN,
     PHASE_G_PATTERN,
+    VERTEX_COLOR_PATTERN,
 ]
 PATTERNS_INTRODUCE_DISCONTINUITIES: list = [
     # see also parameter 'D' flags https://mitsuba.readthedocs.io/en/stable/src/generated/plugins_bsdfs.html#technical-details
