@@ -5,10 +5,11 @@
 	<default name="spp" value="4096"/>
 	<default name="resx" value="512"/>
 	<default name="resy" value="512"/>
+	<default name="integrator" value="path" />
+	
+	<!-- Camera and Rendering Parameters -->
 
-<!-- Camera and Rendering Parameters -->
-
-	<integrator type="path">
+	<integrator type="$integrator">
 		<integer name="max_depth" value="12"/>
 	</integrator>
 	<sensor type="perspective">
