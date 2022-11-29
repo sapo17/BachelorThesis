@@ -2,6 +2,7 @@
 Author: Can Hasbay
 """
 
+import os
 from PyQt6.QtWidgets import *
 from PyQt6.QtGui import QAction
 from pathlib import Path
@@ -36,19 +37,56 @@ class MaterialOptimizerModel:
             fileName,
             resx=sceneRes[0],
             resy=sceneRes[1],
-            width=sceneRes[0],
-            height=sceneRes[1],
-            resolution=sceneRes,
             integrator=integratorType,
         )
 
     def loadMitsubaScene(self, fileName=None):
         if fileName is None:
             fileName = SCENES_DIR_PATH + DEFAULT_MITSUBA_SCENE
+            self.handleMissingCboxFile(fileName)
 
         self.integratorType = self.findPossibleIntegratorType(fileName)
         self.setScene(fileName, self.sceneRes, self.integratorType)
         self.fileName = fileName
+
+    def handleMissingCboxFile(self, fileName):
+        if not os.path.isfile(fileName):
+            self.createDirectoryIfNotExists(SCENES_DIR_PATH)
+            self.createDirectoryIfNotExists(SCENES_MESHES_DIR_PATH)
+            self.createObjFileIfNotExists(
+                CBOX_LUMINAIRE_OBJ_PATH, CBOX_LUMINAIRE_OBJ_STRING
+            )
+            self.createObjFileIfNotExists(
+                CBOX_FLOOR_OBJ_PATH, CBOX_FLOOR_OBJ_STRING
+            )
+            self.createObjFileIfNotExists(
+                CBOX_CEILING_OBJ_PATH, CBOX_CEILING_OBJ_STRING
+            )
+            self.createObjFileIfNotExists(
+                CBOX_BACK_OBJ_PATH, CBOX_BACK_OBJ_STRING
+            )
+            self.createObjFileIfNotExists(
+                CBOX_GREENWALL_OBJ_PATH, CBOX_GREENWALL_OBJ_STRING
+            )
+            self.createObjFileIfNotExists(
+                CBOX_REDWALL_OBJ_PATH, CBOX_REDWALL_OBJ_STRING
+            )
+            self.createObjFileIfNotExists(CBOX_SCENE_PATH, CBOX_XML_STRING)
+
+    def createDirectoryIfNotExists(self, dirPath: str):
+        if not os.path.exists(dirPath):
+            msg = f"Missing directory on {dirPath}!"
+            logging.error(msg)
+            os.makedirs(dirPath)
+
+    def createObjFileIfNotExists(self, path: str, content: str):
+        if not os.path.isfile(path):
+            msg = f"Missing file on {path}!"
+            logging.error(msg)
+            with open(path, "w") as f:
+                msg = f"Created: {path}"
+                logging.info(msg)
+                f.write(content)
 
     def findPossibleIntegratorType(self, fileName) -> str:
         tmpScene = mi.load_file(fileName)
@@ -60,10 +98,14 @@ class MaterialOptimizerModel:
             if self.anyInPatterns(
                 tmpParams, PATTERNS_INTRODUCE_DISCONTINUITIES
             ):
-                msg = f"Beware that {integratorType} is in use, however the "
-                msg += "scene contains some parameters that may introduce "
-                msg += "discontinuities! Information from the mitsuba "
-                msg += "documentation: No reparameterization. This means that "
+                msg = f"Beware that {MITSUBA_PRBVOLPATH_INTEGRATOR} is in use,"
+                msg += " however the scene contains some parameters that may "
+                msg += (
+                    "introduce discontinuities! Information from the mitsuba"
+                )
+                msg += (
+                    " documentation: No reparameterization. This means that "
+                )
                 msg += " the integrator cannot be used for shape optimization "
                 msg += "(it will return incorrect/biased gradients for "
                 msg += "geometric parameters like vertex positions.)"
@@ -371,13 +413,13 @@ class MaterialOptimizerModel:
         return result
 
     def mse(self, image, refImage):
-        """ L2 Loss: Mean Squared Error """
+        """L2 Loss: Mean Squared Error"""
         return dr.mean(dr.sqr(refImage - image))
 
     def brightnessIndependentMSE(self, image, ref):
         """
-            Brightness-independent L2 loss function.
-            Taken from: https://mitsuba.readthedocs.io/en/stable/src/inverse_rendering/caustics_optimization.html#6.-Running-the-optimization
+        Brightness-independent L2 loss function.
+        Taken from: https://mitsuba.readthedocs.io/en/stable/src/inverse_rendering/caustics_optimization.html#6.-Running-the-optimization
         """
         scaled_image = image / dr.mean(dr.detach(image))
         scaled_ref = ref / dr.mean(ref)
@@ -407,11 +449,11 @@ class MaterialOptimizerModel:
         return dr.mean((image - self.refImage) * (image2 - self.refImage))
 
     def mae(self, image, refImage):
-        """ L1 Loss: Mean Absolute Error """
+        """L1 Loss: Mean Absolute Error"""
         return dr.mean(dr.abs(refImage - image))
 
     def mbe(self, image, refImage):
-        """ Mean Bias Error """
+        """Mean Bias Error"""
         return dr.mean(refImage - image)
 
 
@@ -792,6 +834,9 @@ class MaterialOptimizerController:
         except Exception as err:
             self.model.loadMitsubaScene()
             msg = "Invalid Mitsuba 3 scene file. Setting default scene."
+            msg += " Please make sure that the loaded scene file contains "
+            msg += " the default parameters 'integrator', 'resx', 'resy'. "
+            msg += " Please refer to 'scenes\cbox.xml' for an example."
             msg += f" Mitsuba Error: {err=}"
             self.view.showInfoMessageBox(msg)
 
