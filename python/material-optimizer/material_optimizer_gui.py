@@ -29,7 +29,7 @@ class MaterialOptimizerModel:
         self.setInitialSceneParams(self.sceneParams)
         self.setDefaultOptimizationParams(self.initialSceneParams)
         self.setSamplesPerPixelOnCustomImage(SUPPORTED_SPP_VALUES[0])
-        self.setLossFunctionOnCustomImage(LOSS_FUNCTION_STRING[0])
+        self.setLossFunctionOnCustomImage(LOSS_FUNCTION_STRINGS[0])
 
     def setScene(self, fileName: str, sceneRes: tuple, integratorType: str):
         self.scene = mi.load_file(
@@ -192,15 +192,6 @@ class MaterialOptimizerModel:
                 opt[key], DEFAULT_MIN_CLAMP_VALUE, DEFAULT_MAX_CLAMP_VALUE
             )
 
-    def mse(self, image, refImage):
-        return dr.mean(dr.sqr(refImage - image))
-
-    def scale_independent_loss(self, image, ref):
-        """Brightness-independent L2 loss function."""
-        scaled_image = image / dr.mean(dr.detach(image))
-        scaled_ref = ref / dr.mean(ref)
-        return dr.mean(dr.sqr(scaled_image - scaled_ref))
-
     def getMinParamErrors(self, optimizationParams: dict):
         return {
             sceneParam: optimizationParam[COLUMN_LABEL_MINIMUM_ERROR]
@@ -361,7 +352,11 @@ class MaterialOptimizerModel:
         image = dr.clamp(image, 0.0, 1.0)
 
         # Evaluate the objective function from the current rendered image
-        if self.lossFunctionOnCustomImage == DUAL_BUFFER_STRING:
+        if self.lossFunctionOnCustomImage == MSE_STRING:
+            result = self.mse(image, self.refImage)
+        elif self.lossFunctionOnCustomImage == BRIGHTNESS_IDP_MSE_STRING:
+            result = self.brightnessIndependentMSE(image, self.refImage)
+        elif self.lossFunctionOnCustomImage == DUAL_BUFFER_STRING:
             image2 = self.render(
                 self.scene,
                 spp=self.samplesPerPixelOnCustomImage,
@@ -370,13 +365,58 @@ class MaterialOptimizerModel:
             )
             image2 = dr.clamp(image2, 0.0, 1.0)
             result = self.dualBufferError(image, image2)
+        elif self.lossFunctionOnCustomImage == MAE_STRING:
+            result = self.mae(image, self.refImage)
+        elif self.lossFunctionOnCustomImage == MBE_STRING:
+            result = self.mbe(image, self.refImage)
         else:
             result = self.mse(image, self.refImage)
 
         return result
 
+    def mse(self, image, refImage):
+        """ L2 Loss: Mean Squared Error """
+        return dr.mean(dr.sqr(refImage - image))
+
+    def brightnessIndependentMSE(self, image, ref):
+        """
+            Brightness-independent L2 loss function.
+            Taken from: https://mitsuba.readthedocs.io/en/stable/src/inverse_rendering/caustics_optimization.html#6.-Running-the-optimization
+        """
+        scaled_image = image / dr.mean(dr.detach(image))
+        scaled_ref = ref / dr.mean(ref)
+        return dr.mean(dr.sqr(scaled_image - scaled_ref))
+
     def dualBufferError(self, image, image2):
+        """
+        Loss Function mentioned in: Reconstructing Translucent Objects Using Differentiable Rendering, Deng et al.
+        @inproceedings{10.1145/3528233.3530714,
+        author = {Deng, Xi and Luan, Fujun and Walter, Bruce and Bala, Kavita and Marschner, Steve},
+        title = {Reconstructing Translucent Objects Using Differentiable Rendering},
+        year = {2022},
+        isbn = {9781450393379},
+        publisher = {Association for Computing Machinery},
+        address = {New York, NY, USA},
+        url = {https://doi.org/10.1145/3528233.3530714},
+        doi = {10.1145/3528233.3530714},
+        abstract = {Inverse rendering is a powerful approach to modeling objects from photographs, and we extend previous techniques to handle translucent materials that exhibit subsurface scattering. Representing translucency using a heterogeneous bidirectional scattering-surface reflectance distribution function (BSSRDF), we extend the framework of path-space differentiable rendering to accommodate both surface and subsurface reflection. This introduces new types of paths requiring new methods for sampling moving discontinuities in material space that arise from visibility and moving geometry. We use this differentiable rendering method in an end-to-end approach that jointly recovers heterogeneous translucent materials (represented by a BSSRDF) and detailed geometry of an object (represented by a mesh) from a sparse set of measured 2D images in a coarse-to-fine framework incorporating Laplacian preconditioning for the geometry. To efficiently optimize our models in the presence of the Monte Carlo noise introduced by the BSSRDF integral, we introduce a dual-buffer method for evaluating the L2 image loss. This efficiently avoids potential bias in gradient estimation due to the correlation of estimates for image pixels and their derivatives and enables correct convergence of the optimizer even when using low sample counts in the renderer. We validate our derivatives by comparing against finite differences and demonstrate the effectiveness of our technique by comparing inverse-rendering performance with previous methods. We show superior reconstruction quality on a set of synthetic and real-world translucent objects as compared to previous methods that model only surface reflection.},
+        booktitle = {ACM SIGGRAPH 2022 Conference Proceedings},
+        articleno = {38},
+        numpages = {10},
+        keywords = {differentiable rendering, ray tracing, appearance acquisition, subsurface scattering},
+        location = {Vancouver, BC, Canada},
+        series = {SIGGRAPH '22}
+        }
+        """
         return dr.mean((image - self.refImage) * (image2 - self.refImage))
+
+    def mae(self, image, refImage):
+        """ L1 Loss: Mean Absolute Error """
+        return dr.mean(dr.abs(refImage - image))
+
+    def mbe(self, image, refImage):
+        """ Mean Bias Error """
+        return dr.mean(refImage - image)
 
 
 class MaterialOptimizerView(QMainWindow):
@@ -489,7 +529,7 @@ class MaterialOptimizerView(QMainWindow):
         )
         lossFunctionLabel = QLabel(text=LOSS_FUNCTION_STRING)
         self.lossFunctionBox = QComboBox()
-        self.lossFunctionBox.addItems([MSE_STRING, DUAL_BUFFER_STRING])
+        self.lossFunctionBox.addItems(LOSS_FUNCTION_STRINGS)
         self.lossFunctionContainerLayout.addWidget(lossFunctionLabel)
         self.lossFunctionContainerLayout.addWidget(self.lossFunctionBox)
 
