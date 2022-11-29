@@ -177,10 +177,6 @@ class MaterialOptimizerModel:
             opt[key] = dr.clamp(
                 opt[key], DEFAULT_MIN_CLAMP_VALUE, MAX_DELTA_VALUE
             )
-        elif SIGMA_T_PATTERN.search(key):
-            opt[key] = dr.clamp(
-                opt[key], DEFAULT_MIN_CLAMP_VALUE, MAX_SIGMA_T_VALUE
-            )
         elif PHASE_G_PATTERN.search(key):
             opt[key] = dr.clamp(opt[key], MIN_PHASE_G_VALUE, MAX_PHASE_G_VALUE)
         elif SCALE_PATTERN.search(key):

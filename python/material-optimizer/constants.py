@@ -143,8 +143,6 @@ See also: https://mitsuba.readthedocs.io/en/stable/src/generated/plugins_media.h
 ALBEDO_PATTERN: re.Pattern = re.compile(r".*\.albedo")
 SIGMA_T_PATTERN: re.Pattern = re.compile(r".*\.sigma_t")
 
-MAX_SIGMA_T_VALUE: float = 10.0
-
 
 """ 
 Phase functions Patterns Constants
