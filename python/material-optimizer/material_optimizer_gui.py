@@ -2,6 +2,7 @@
 Author: Can Hasbay
 """
 
+import os
 from PyQt6.QtWidgets import *
 from PyQt6.QtGui import QAction
 from pathlib import Path
@@ -14,6 +15,8 @@ import logging
 from PyQt6 import QtGui, QtWidgets, QtCore
 import ctypes
 from constants import *
+import json
+import datetime
 
 mi.set_variant(CUDA_AD_RGB)
 
@@ -21,31 +24,69 @@ mi.set_variant(CUDA_AD_RGB)
 class MaterialOptimizerModel:
     def __init__(self) -> None:
         self.refImage = None
-        self.sceneRes = (256, 256)
+        self.sceneRes = (384, 384)
         self.loadMitsubaScene()
         self.setSceneParams(self.scene)
         self.setInitialSceneParams(self.sceneParams)
         self.setDefaultOptimizationParams(self.initialSceneParams)
         self.setSamplesPerPixelOnCustomImage(SUPPORTED_SPP_VALUES[0])
+        self.setLossFunctionOnCustomImage(LOSS_FUNCTION_STRINGS[0])
 
     def setScene(self, fileName: str, sceneRes: tuple, integratorType: str):
         self.scene = mi.load_file(
             fileName,
             resx=sceneRes[0],
             resy=sceneRes[1],
-            width=sceneRes[0],
-            height=sceneRes[1],
-            resolution=sceneRes,
             integrator=integratorType,
         )
 
     def loadMitsubaScene(self, fileName=None):
         if fileName is None:
             fileName = SCENES_DIR_PATH + DEFAULT_MITSUBA_SCENE
+            self.handleMissingCboxFile(fileName)
 
         self.integratorType = self.findPossibleIntegratorType(fileName)
         self.setScene(fileName, self.sceneRes, self.integratorType)
         self.fileName = fileName
+
+    def handleMissingCboxFile(self, fileName):
+        if not os.path.isfile(fileName):
+            self.createDirectoryIfNotExists(SCENES_DIR_PATH)
+            self.createDirectoryIfNotExists(SCENES_MESHES_DIR_PATH)
+            self.createObjFileIfNotExists(
+                CBOX_LUMINAIRE_OBJ_PATH, CBOX_LUMINAIRE_OBJ_STRING
+            )
+            self.createObjFileIfNotExists(
+                CBOX_FLOOR_OBJ_PATH, CBOX_FLOOR_OBJ_STRING
+            )
+            self.createObjFileIfNotExists(
+                CBOX_CEILING_OBJ_PATH, CBOX_CEILING_OBJ_STRING
+            )
+            self.createObjFileIfNotExists(
+                CBOX_BACK_OBJ_PATH, CBOX_BACK_OBJ_STRING
+            )
+            self.createObjFileIfNotExists(
+                CBOX_GREENWALL_OBJ_PATH, CBOX_GREENWALL_OBJ_STRING
+            )
+            self.createObjFileIfNotExists(
+                CBOX_REDWALL_OBJ_PATH, CBOX_REDWALL_OBJ_STRING
+            )
+            self.createObjFileIfNotExists(CBOX_SCENE_PATH, CBOX_XML_STRING)
+
+    def createDirectoryIfNotExists(self, dirPath: str):
+        if not os.path.exists(dirPath):
+            msg = f"Missing directory on {dirPath}!"
+            logging.error(msg)
+            os.makedirs(dirPath)
+
+    def createObjFileIfNotExists(self, path: str, content: str):
+        if not os.path.isfile(path):
+            msg = f"Missing file on {path}!"
+            logging.error(msg)
+            with open(path, "w") as f:
+                msg = f"Created: {path}"
+                logging.info(msg)
+                f.write(content)
 
     def findPossibleIntegratorType(self, fileName) -> str:
         tmpScene = mi.load_file(fileName)
@@ -57,10 +98,14 @@ class MaterialOptimizerModel:
             if self.anyInPatterns(
                 tmpParams, PATTERNS_INTRODUCE_DISCONTINUITIES
             ):
-                msg = f"Beware that {integratorType} is in use, however the "
-                msg += "scene contains some parameters that may introduce "
-                msg += "discontinuities! Information from the mitsuba "
-                msg += "documentation: No reparameterization. This means that "
+                msg = f"Beware that {MITSUBA_PRBVOLPATH_INTEGRATOR} is in use,"
+                msg += " however the scene contains some parameters that may "
+                msg += (
+                    "introduce discontinuities! Information from the mitsuba"
+                )
+                msg += (
+                    " documentation: No reparameterization. This means that "
+                )
                 msg += " the integrator cannot be used for shape optimization "
                 msg += "(it will return incorrect/biased gradients for "
                 msg += "geometric parameters like vertex positions.)"
@@ -132,6 +177,10 @@ class MaterialOptimizerModel:
         elif vType is mi.Float:
             if len(v) == 1:
                 result[k] = mi.Float(v[0])
+            else:
+                result[k] = mi.Float(v)
+        elif vType is mi.TensorXf:
+            result[k] = mi.TensorXf(v)
 
     def updateParamErrors(
         self, params, initialParams, modifiedParams, paramErrors
@@ -153,20 +202,33 @@ class MaterialOptimizerModel:
     def ensureLegalParamValues(self, opt, key):
         # Post-process the optimized parameters to ensure legal values
         if ETA_PATTERN.search(key):
-            opt[key] = dr.clamp(opt[key], 0.0, MAX_ETA_VALUE)
+            opt[key] = dr.clamp(
+                opt[key], DEFAULT_MIN_CLAMP_VALUE, MAX_ETA_VALUE
+            )
+        if K_PATTERN.search(key):
+            opt[key] = dr.clamp(opt[key], DEFAULT_MIN_CLAMP_VALUE, MAX_K_VALUE)
+        if ALPHA_PATTERN.search(key):
+            opt[key] = dr.clamp(
+                opt[key], DEFAULT_MIN_CLAMP_VALUE, MAX_ALPHA_VALUE
+            )
         elif DIFF_TRANS_PATTERN.search(key):
-            opt[key] = dr.clamp(opt[key], 0.0, MAX_DIFF_TRANS_VALUE)
+            opt[key] = dr.clamp(
+                opt[key], DEFAULT_MIN_CLAMP_VALUE, MAX_DIFF_TRANS_VALUE
+            )
         elif DELTA_PATTERN.search(key):
-            opt[key] = dr.clamp(opt[key], 0.0, MAX_DELTA_VALUE)
-        elif SIGMA_T_PATTERN.search(key):
-            opt[key] = dr.clamp(opt[key], 0.0, MAX_SIGMA_T_VALUE)
+            opt[key] = dr.clamp(
+                opt[key], DEFAULT_MIN_CLAMP_VALUE, MAX_DELTA_VALUE
+            )
         elif PHASE_G_PATTERN.search(key):
             opt[key] = dr.clamp(opt[key], MIN_PHASE_G_VALUE, MAX_PHASE_G_VALUE)
+        elif SCALE_PATTERN.search(key):
+            opt[key] = dr.clamp(
+                opt[key], DEFAULT_MIN_CLAMP_VALUE, MAX_SCALE_VALUE
+            )
         else:
-            opt[key] = dr.clamp(opt[key], 0.0, 1.0)
-
-    def mse(self, image, refImage):
-        return dr.mean(dr.sqr(refImage - image))
+            opt[key] = dr.clamp(
+                opt[key], DEFAULT_MIN_CLAMP_VALUE, DEFAULT_MAX_CLAMP_VALUE
+            )
 
     def getMinParamErrors(self, optimizationParams: dict):
         return {
@@ -299,15 +361,100 @@ class MaterialOptimizerModel:
             raise ValueError("Please provide a valid float value (e.g. 0.001)")
         self.minErrOnCustomImage = float(value)
 
+    def setIterationCountOnCustomImage(self, value: str):
+        if not MaterialOptimizerModel.is_int(value):
+            raise ValueError("Please provide a valid integer value (e.g. 50)")
+        self.iterationCountOnCustomImage = int(value)
+
     def setSamplesPerPixelOnCustomImage(self, value: str):
         if not MaterialOptimizerModel.is_int(value):
             raise ValueError("Please provide a valid integer value (e.g. 4)")
         self.samplesPerPixelOnCustomImage = int(value)
 
+    def setLossFunctionOnCustomImage(self, value: str):
+        self.lossFunctionOnCustomImage = value
+
     @staticmethod
     def minIdxInDrList(lis: list):
         minValue = dr.min(lis)
         return lis.index(minValue)
+
+    def computeLoss(self, seed: int = 0):
+        # Perform a (noisy) differentiable rendering of the scene
+        image = self.render(
+            self.scene,
+            spp=self.samplesPerPixelOnCustomImage,
+            params=self.sceneParams,
+            seed=seed,
+        )
+        image = dr.clamp(image, 0.0, 1.0)
+
+        # Evaluate the objective function from the current rendered image
+        if self.lossFunctionOnCustomImage == MSE_STRING:
+            result = self.mse(image, self.refImage)
+        elif self.lossFunctionOnCustomImage == BRIGHTNESS_IDP_MSE_STRING:
+            result = self.brightnessIndependentMSE(image, self.refImage)
+        elif self.lossFunctionOnCustomImage == DUAL_BUFFER_STRING:
+            image2 = self.render(
+                self.scene,
+                spp=self.samplesPerPixelOnCustomImage,
+                params=self.sceneParams,
+                seed=seed + 1,
+            )
+            image2 = dr.clamp(image2, 0.0, 1.0)
+            result = self.dualBufferError(image, image2)
+        elif self.lossFunctionOnCustomImage == MAE_STRING:
+            result = self.mae(image, self.refImage)
+        elif self.lossFunctionOnCustomImage == MBE_STRING:
+            result = self.mbe(image, self.refImage)
+        else:
+            result = self.mse(image, self.refImage)
+
+        return result
+
+    def mse(self, image, refImage):
+        """L2 Loss: Mean Squared Error"""
+        return dr.mean(dr.sqr(refImage - image))
+
+    def brightnessIndependentMSE(self, image, ref):
+        """
+        Brightness-independent L2 loss function.
+        Taken from: https://mitsuba.readthedocs.io/en/stable/src/inverse_rendering/caustics_optimization.html#6.-Running-the-optimization
+        """
+        scaled_image = image / dr.mean(dr.detach(image))
+        scaled_ref = ref / dr.mean(ref)
+        return dr.mean(dr.sqr(scaled_image - scaled_ref))
+
+    def dualBufferError(self, image, image2):
+        """
+        Loss Function mentioned in: Reconstructing Translucent Objects Using Differentiable Rendering, Deng et al.
+        @inproceedings{10.1145/3528233.3530714,
+        author = {Deng, Xi and Luan, Fujun and Walter, Bruce and Bala, Kavita and Marschner, Steve},
+        title = {Reconstructing Translucent Objects Using Differentiable Rendering},
+        year = {2022},
+        isbn = {9781450393379},
+        publisher = {Association for Computing Machinery},
+        address = {New York, NY, USA},
+        url = {https://doi.org/10.1145/3528233.3530714},
+        doi = {10.1145/3528233.3530714},
+        abstract = {Inverse rendering is a powerful approach to modeling objects from photographs, and we extend previous techniques to handle translucent materials that exhibit subsurface scattering. Representing translucency using a heterogeneous bidirectional scattering-surface reflectance distribution function (BSSRDF), we extend the framework of path-space differentiable rendering to accommodate both surface and subsurface reflection. This introduces new types of paths requiring new methods for sampling moving discontinuities in material space that arise from visibility and moving geometry. We use this differentiable rendering method in an end-to-end approach that jointly recovers heterogeneous translucent materials (represented by a BSSRDF) and detailed geometry of an object (represented by a mesh) from a sparse set of measured 2D images in a coarse-to-fine framework incorporating Laplacian preconditioning for the geometry. To efficiently optimize our models in the presence of the Monte Carlo noise introduced by the BSSRDF integral, we introduce a dual-buffer method for evaluating the L2 image loss. This efficiently avoids potential bias in gradient estimation due to the correlation of estimates for image pixels and their derivatives and enables correct convergence of the optimizer even when using low sample counts in the renderer. We validate our derivatives by comparing against finite differences and demonstrate the effectiveness of our technique by comparing inverse-rendering performance with previous methods. We show superior reconstruction quality on a set of synthetic and real-world translucent objects as compared to previous methods that model only surface reflection.},
+        booktitle = {ACM SIGGRAPH 2022 Conference Proceedings},
+        articleno = {38},
+        numpages = {10},
+        keywords = {differentiable rendering, ray tracing, appearance acquisition, subsurface scattering},
+        location = {Vancouver, BC, Canada},
+        series = {SIGGRAPH '22}
+        }
+        """
+        return dr.mean((image - self.refImage) * (image2 - self.refImage))
+
+    def mae(self, image, refImage):
+        """L1 Loss: Mean Absolute Error"""
+        return dr.mean(dr.abs(refImage - image))
+
+    def mbe(self, image, refImage):
+        """Mean Bias Error"""
+        return dr.mean(refImage - image)
 
 
 class MaterialOptimizerView(QMainWindow):
@@ -407,16 +554,38 @@ class MaterialOptimizerView(QMainWindow):
         # samples per pixel dropdown
         self.sppContainer = QWidget(self.configContainer)
         self.sppContainerLayout = QHBoxLayout(self.sppContainer)
-        samplesPerPixelLabel = QLabel(
-            text="Samples per pixel during optimization"
-        )
+        samplesPerPixelLabel = QLabel(text=SPP_DURING_OPT_STRING)
         self.samplesPerPixelBox = QComboBox()
         self.samplesPerPixelBox.addItems(SUPPORTED_SPP_VALUES)
         self.sppContainerLayout.addWidget(samplesPerPixelLabel)
         self.sppContainerLayout.addWidget(self.samplesPerPixelBox)
 
+        # loss function dropdown
+        self.lossFunctionContainer = QWidget(self.configContainer)
+        self.lossFunctionContainerLayout = QHBoxLayout(
+            self.lossFunctionContainer
+        )
+        lossFunctionLabel = QLabel(text=LOSS_FUNCTION_STRING)
+        self.lossFunctionBox = QComboBox()
+        self.lossFunctionBox.addItems(LOSS_FUNCTION_STRINGS)
+        self.lossFunctionContainerLayout.addWidget(lossFunctionLabel)
+        self.lossFunctionContainerLayout.addWidget(self.lossFunctionBox)
+
+        # iteration count input
+        self.iterationContainer = QWidget(self.configContainer)
+        self.iterationContainerLayout = QHBoxLayout(self.iterationContainer)
+        iterationCountLabel = QLabel(text=COLUMN_LABEL_ITERATION_COUNT)
+        self.iterationCountLine = QLineEdit()
+        self.iterationCountLine.setText(
+            str(DEFAULT_ITERATION_COUNT_ON_CUSTOM_IMG)
+        )
+        self.iterationContainerLayout.addWidget(iterationCountLabel)
+        self.iterationContainerLayout.addWidget(self.iterationCountLine)
+
         self.configContainerLayout.addWidget(self.minErrContainer)
         self.configContainerLayout.addWidget(self.sppContainer)
+        self.configContainerLayout.addWidget(self.lossFunctionContainer)
+        self.configContainerLayout.addWidget(self.iterationContainer)
         self.configContainer.hide()
 
     def initProgessContainer(self, centralWidget):
@@ -453,7 +622,15 @@ class MaterialOptimizerView(QMainWindow):
                         if len(value) == 1:
                             item = QTableWidgetItem(str(value[0]))
                         else:
-                            item = QTableWidgetItem(NOT_IMPLEMENTED_STRING)
+                            item = QTableWidgetItem(
+                                f"mi.Float(length={len(value)})"
+                            )
+                            item.setFlags(~QtCore.Qt.ItemFlag.ItemIsEditable)
+                            item.setBackground(QtGui.QColorConstants.LightGray)
+                    elif valueType is mi.TensorXf:
+                        item = QTableWidgetItem(str(value))
+                        item.setFlags(~QtCore.Qt.ItemFlag.ItemIsEditable)
+                        item.setBackground(QtGui.QColorConstants.LightGray)
                     else:
                         item = QTableWidgetItem(NOT_IMPLEMENTED_STRING)
                 elif label == COLUMN_LABEL_OPTIMIZE:
@@ -498,21 +675,59 @@ class PopUpWindow(QMainWindow):
         lossHist: list,
         sceneParamsHist: list,
     ):
-        comboBox = QComboBox()
-        comboBox.addItems([LAST_ITERATION_STRING, COLUMN_LABEL_MINIMUM_ERROR])
-        self.setCentralWidget(comboBox)
-        comboBox.currentTextChanged.connect(
-            self.onOptimizedSceneSelectorTextChanged
-        )
-
         self.model = model
         self.initImg = initImg
         self.lossHist = lossHist
         self.sceneParamsHist = sceneParamsHist
 
+        # central widget
+        centralWidgetContainer = QWidget()
+        centralWidgetContainerLayout = QVBoxLayout(centralWidgetContainer)
+
+        # dropdown menu
+        self.comboBox = QComboBox()
+        self.comboBox.addItems(
+            [LAST_ITERATION_STRING, COLUMN_LABEL_MINIMUM_ERROR]
+        )
+        self.comboBox.currentTextChanged.connect(
+            self.onOptimizedSceneSelectorTextChanged
+        )
+
+        # output button
+        outputBtn = QPushButton(text=OUTPUT_TO_JSON_STRING)
+        outputBtn.clicked.connect(self.onOutputBtnPressed)
+
+        centralWidgetContainerLayout.addWidget(self.comboBox)
+        centralWidgetContainerLayout.addWidget(outputBtn)
+        self.setCentralWidget(centralWidgetContainer)
+
         self.show()
         lastIteration = len(self.sceneParamsHist) - 1
         self.showOptimizedPlot(lastIteration)
+
+    def onOutputBtnPressed(self):
+        selectedIteration = len(self.sceneParamsHist) - 1
+        if self.comboBox.currentText() == COLUMN_LABEL_MINIMUM_ERROR:
+            selectedIteration = MaterialOptimizerModel.minIdxInDrList(
+                self.lossHist
+            )
+
+        outputFileName = f"{OUTPUT_DIR_PATH}scene_paramaters_iteration_{selectedIteration}_{datetime.datetime.now().isoformat('_', 'seconds')}.json"
+        outputFileName = outputFileName.replace(":", "_")
+        with open(outputFileName, "w") as outfile:
+            outputDict = {}
+            for k, v in self.sceneParamsHist[selectedIteration].items():
+                if type(v) is mi.TensorXf:
+                    outputTextureFileName = f"{OUTPUT_DIR_PATH}texture_{k}_iteration_{selectedIteration}_{datetime.datetime.now().isoformat('_', 'seconds')}.png"
+                    outputTextureFileName = outputTextureFileName.replace(
+                        ":", "_"
+                    )
+                    mi.util.write_bitmap(outputTextureFileName, v)
+                elif type(v) is mi.Float:
+                    outputDict[k] = [f for f in v]
+                else:
+                    outputDict[k] = str(v)
+            json.dump(outputDict, outfile, indent=4)
 
     def onOptimizedSceneSelectorTextChanged(self, text: str):
         if text == COLUMN_LABEL_MINIMUM_ERROR:
@@ -523,9 +738,12 @@ class PopUpWindow(QMainWindow):
             self.showOptimizedPlot(len(self.sceneParamsHist) - 1)
 
     def showOptimizedPlot(self, iteration: int):
+        logging.info(
+            f"Scene parameters in {iteration}:\n {self.sceneParamsHist[iteration]}"
+        )
         self.model.sceneParams.update(values=self.sceneParamsHist[iteration])
         sc = MplCanvas()
-        lossHistKey = "MSE(Current-Image, Reference-Image)"
+        lossHistKey = self.model.lossFunctionOnCustomImage
         lossHistDict = {lossHistKey: self.lossHist}
         sc.plotOptimizationResults(
             self.model.refImage,
@@ -616,6 +834,9 @@ class MaterialOptimizerController:
         except Exception as err:
             self.model.loadMitsubaScene()
             msg = "Invalid Mitsuba 3 scene file. Setting default scene."
+            msg += " Please make sure that the loaded scene file contains "
+            msg += " the default parameters 'integrator', 'resx', 'resy'. "
+            msg += " Please refer to 'scenes\cbox.xml' for an example."
             msg += f" Mitsuba Error: {err=}"
             self.view.showInfoMessageBox(msg)
 
@@ -655,10 +876,16 @@ class MaterialOptimizerController:
         return result
 
     def optimizeMaterials(self):
-        if self.view.defaultRefImgBtn.isChecked():
-            self.optimizeMaterialsWithDefaultReferenceImage()
-        else:
-            self.optimizeMaterialsWithCustomReferenceImage()
+        try:
+            if self.view.defaultRefImgBtn.isChecked():
+                self.optimizeMaterialsWithDefaultReferenceImage()
+            else:
+                self.optimizeMaterialsWithCustomReferenceImage()
+        except Exception as err:
+            msg = f"Exiting program. Runtime error during optimiztion: {err}"
+            logging.error(msg)
+            self.view.showInfoMessageBox(msg)
+            sys.exit()
 
     def optimizeMaterialsWithDefaultReferenceImage(self):
         if self.view.progressBar.value() is self.view.progressBar.maximum():
@@ -766,26 +993,17 @@ class MaterialOptimizerController:
         opts = self.model.initOptimizersWithCustomValues(checkedRows)
         self.model.updateSceneParamsWithOptimizers(opts)
         initImg = self.model.render(self.model.scene, spp=256)
-        iterationCount = 100
         sceneParamsHist = []
         lossHist = []
         self.view.progressBar.setValue(100)
 
         self.view.progressBar.reset()
-        for it in range(iterationCount):
-            self.view.progressBar.setValue(int(it / iterationCount * 100))
-
-            # Perform a (noisy) differentiable rendering of the scene
-            image = self.model.render(
-                self.model.scene,
-                spp=self.model.samplesPerPixelOnCustomImage,
-                params=self.model.sceneParams,
-                seed=it,
+        for it in range(self.model.iterationCountOnCustomImage):
+            self.view.progressBar.setValue(
+                int(it / self.model.iterationCountOnCustomImage * 100)
             )
-            image = dr.clamp(image, 0.0, 1.0)
 
-            # Evaluate the objective function from the current rendered image
-            loss = self.model.mse(image, self.model.refImage)
+            loss = self.model.computeLoss(it)
             lossHist.append(loss)
             sceneParamsHist.append(
                 self.model.createSubsetSceneParams(
@@ -805,6 +1023,7 @@ class MaterialOptimizerController:
             self.model.updateAfterStep(opts, self.model.sceneParams)
 
         self.view.progressBar.setValue(self.view.progressBar.maximum())
+        logging.info(f"Initial scene parameters:\n {sceneParamsHist[0]}")
 
         if it <= 0:
             self.view.showInfoMessageBox("No optimization was necessary")
@@ -823,10 +1042,16 @@ class MaterialOptimizerController:
             key = self.view.table.verticalHeaderItem(row).text()
             initValue = self.model.initialSceneParams[key]
             newValue = self.view.table.item(row, 0).text()
-            if type(initValue) is mi.Color3f:
+            valueType = type(initValue)
+            if valueType is mi.Color3f:
                 currentSceneParams[key] = self.model.stringToColor3f(newValue)
-            elif type(initValue) is mi.Float:
-                currentSceneParams[key] = mi.Float(float(newValue))
+            elif valueType is mi.Float:
+                if len(initValue) == 1:
+                    currentSceneParams[key] = mi.Float(float(newValue))
+            elif valueType is mi.TensorXf:
+                currentSceneParams[key] = dr.zeros(
+                    mi.TensorXf, initValue.shape
+                )
 
         return currentSceneParams
 
@@ -841,8 +1066,14 @@ class MaterialOptimizerController:
             self.onDefaultRefImgBtnChecked
         )
         self.view.minErrLine.editingFinished.connect(self.onMinErrLineChanged)
+        self.view.iterationCountLine.editingFinished.connect(
+            self.onIterationCountLineChanged
+        )
         self.view.samplesPerPixelBox.currentTextChanged.connect(
             self.onSamplesPerPixelChanged
+        )
+        self.view.lossFunctionBox.currentTextChanged.connect(
+            self.onLossFunctionChanged
         )
 
     def onMinErrLineChanged(self):
@@ -850,6 +1081,17 @@ class MaterialOptimizerController:
             self.model.setMinErrOnCustomImage(self.view.minErrLine.text())
         except Exception as err:
             self.view.minErrLine.setText(str(DEFAULT_MIN_ERR_ON_CUSTOM_IMG))
+            self.view.showInfoMessageBox(str(err))
+
+    def onIterationCountLineChanged(self):
+        try:
+            self.model.setIterationCountOnCustomImage(
+                self.view.iterationCountLine.text()
+            )
+        except Exception as err:
+            self.view.iterationCountLine.setText(
+                str(DEFAULT_ITERATION_COUNT_ON_CUSTOM_IMG)
+            )
             self.view.showInfoMessageBox(str(err))
 
     def onSamplesPerPixelChanged(self, text: str):
@@ -866,6 +1108,9 @@ class MaterialOptimizerController:
             )
             self.view.showInfoMessageBox(str(err))
 
+    def onLossFunctionChanged(self, text: str):
+        self.model.setLossFunctionOnCustomImage(text)
+
     def onCustomRefImgBtnChecked(self):
         if not self.view.customRefImgBtn.isChecked():
             return
@@ -873,6 +1118,9 @@ class MaterialOptimizerController:
         self.hideTableColumn(COLUMN_LABEL_MINIMUM_ERROR, True)
         self.hideTableColumn(COLUMN_LABEL_OPTIMIZE, False)
         self.model.setMinErrOnCustomImage(self.view.minErrLine.text())
+        self.model.setIterationCountOnCustomImage(
+            self.view.iterationCountLine.text()
+        )
         self.view.configContainer.show()
         self.loadReferenceImage()
 
