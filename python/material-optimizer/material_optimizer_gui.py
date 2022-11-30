@@ -24,7 +24,7 @@ mi.set_variant(CUDA_AD_RGB)
 class MaterialOptimizerModel:
     def __init__(self) -> None:
         self.refImage = None
-        self.sceneRes = (384, 384)
+        self.sceneRes = (256, 256)
         self.loadMitsubaScene()
         self.setSceneParams(self.scene)
         self.setInitialSceneParams(self.sceneParams)
@@ -718,11 +718,18 @@ class PopUpWindow(QMainWindow):
             outputDict = {}
             for k, v in self.sceneParamsHist[selectedIteration].items():
                 if type(v) is mi.TensorXf:
-                    outputTextureFileName = f"{OUTPUT_DIR_PATH}texture_{k}_iteration_{selectedIteration}_{datetime.datetime.now().isoformat('_', 'seconds')}.png"
-                    outputTextureFileName = outputTextureFileName.replace(
-                        ":", "_"
-                    )
-                    mi.util.write_bitmap(outputTextureFileName, v)
+                    if ALBEDO_DATA_PATTERN.search(k):
+                        outputVolumeFileName = f"{OUTPUT_DIR_PATH}volume_{k}_iteration_{selectedIteration}_{datetime.datetime.now().isoformat('_', 'seconds')}.vol"
+                        outputVolumeFileName = outputVolumeFileName.replace(
+                            ":", "_"
+                        )
+                        mi.VolumeGrid(v).write(outputVolumeFileName)
+                    else:
+                        outputTextureFileName = f"{OUTPUT_DIR_PATH}texture_{k}_iteration_{selectedIteration}_{datetime.datetime.now().isoformat('_', 'seconds')}.png"
+                        outputTextureFileName = outputTextureFileName.replace(
+                            ":", "_"
+                        )
+                        mi.util.write_bitmap(outputTextureFileName, v)
                 elif type(v) is mi.Float:
                     outputDict[k] = [f for f in v]
                 else:

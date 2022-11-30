@@ -160,6 +160,12 @@ See also: https://mitsuba.readthedocs.io/en/stable/src/generated/plugins_texture
 """
 VERTEX_COLOR_PATTERN: re.Pattern = re.compile(r".*\.vertex_(Col|color)")
 
+""" 
+Grid-based volume data source Constants
+See also: https://mitsuba.readthedocs.io/en/stable/src/generated/plugins_volumes.html#volumes
+"""
+ALBEDO_DATA_PATTERN: re.Pattern = re.compile(r".*\.albedo.data")
+
 """ Combine Patterns """
 SUPPORTED_MITSUBA_PARAMETER_PATTERNS: list = [
     REFLECTANCE_PATTERN,
@@ -195,6 +201,7 @@ SUPPORTED_MITSUBA_PARAMETER_PATTERNS: list = [
     SIGMA_T_PATTERN,
     PHASE_G_PATTERN,
     VERTEX_COLOR_PATTERN,
+    ALBEDO_DATA_PATTERN
 ]
 PATTERNS_INTRODUCE_DISCONTINUITIES: list = [
     # see also parameter 'D' flags https://mitsuba.readthedocs.io/en/stable/src/generated/plugins_bsdfs.html#technical-details
