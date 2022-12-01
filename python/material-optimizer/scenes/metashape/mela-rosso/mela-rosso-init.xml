@@ -6,6 +6,7 @@
 	<default name="resx" value="512"/>
 	<default name="resy" value="512"/>
 	<default name="integrator" value="path" />
+	<default name="sample_border" value="true"/>
 	
 	<!-- Camera and Rendering Parameters -->
 
@@ -31,6 +32,7 @@
 		<film type="hdrfilm">
 			<integer name="width" value="$resx"/>
 			<integer name="height" value="$resy"/>
+			<boolean name="sample_border" value="$sample_border"/>
 		</film>
 	</sensor>
 
@@ -40,7 +42,7 @@
 		<bsdf type="principled">
 			<!-- <rgb value="0.341176 0.560784 0.878431" name="base_color"/> -->
 			<texture type="mesh_attribute" name="base_color">
-                <string name="name" value="vertex_Col"/>
+                <string name="name" value="vertex_color"/>
             </texture>
 			<float name="spec_tint" value="0.000000"/>
 			<float name="spec_trans" value="0.000000"/>
@@ -76,7 +78,7 @@
 <!-- Shapes -->
 
 	<shape type="ply">
-		<string name="filename" value="meshes/MelaRosso.ply"/>
+		<string name="filename" value="meshes/MelaRossoInit.ply"/>
 		<boolean name="face_normals" value="true"/>
 		<ref id="mat-Shape" name="bsdf"/>
 	</shape>
