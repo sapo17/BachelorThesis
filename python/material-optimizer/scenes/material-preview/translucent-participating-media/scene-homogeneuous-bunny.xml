@@ -1,0 +1,105 @@
+<scene version="3.0.0">
+    <default name="spp" value="64"/>
+    <default name="integrator" value="volpath"/>
+	<default name="rr_depth" value="64"/>
+	<default name="max_depth" value="64"/>
+    <default name="resx" value="683"/>
+    <default name="resy" value="512"/>
+    <default name="sample_border" value="true"/>
+
+
+    <integrator type="$integrator">
+        <integer name="max_depth" value="$max_depth"/>
+    </integrator>
+
+    <sensor type="perspective" id="camera">
+        <string name="fov_axis" value="smaller" />
+        <float name="focus_distance" value="6.0" />
+        <float name="fov" value="28.8415" />
+        <transform name="to_world">
+            <lookat target="3.04072, -2.85176, 2.80939"
+                    origin="3.69558, -3.46243, 3.25463"
+                    up="-0.317366, 0.312466, 0.895346" />
+        </transform>
+
+        <sampler type="independent">
+            <integer name="sample_count" value="$spp" />
+        </sampler>
+
+        <film type="hdrfilm" id="film">
+            <integer name="width" value="$resx" />
+            <integer name="height" value="$resy" />
+            <string name="pixel_format" value="rgb" />
+            <rfilter type="gaussian" />
+        </film>
+    </sensor>
+
+    <emitter type="envmap" id="emitter-envmap">
+        <string name="filename" value="envmap.exr" />
+        <transform name="to_world">
+            <rotate y="1" angle="-180" />
+            <matrix value="-0.224951 -0.000001 -0.974370 0.000000 -0.974370 0.000000 0.224951 0.000000 0.000000 1.000000 -0.000001 8.870000 0.000000 0.000000 0.000000 1.000000" />
+        </transform>
+        <float name="scale" value="3" />
+    </emitter>
+
+    <bsdf type="diffuse" id="bsdf-diffuse">
+        <rgb name="reflectance" value="0.18 0.18 0.18" />
+    </bsdf>
+
+    <texture type="checkerboard" id="texture-checkerboard">
+        <rgb name="color0" value="0.4" />
+        <rgb name="color1" value="0.2" />
+        <transform name="to_uv">
+            <scale x="8.000000" y="8.000000" />
+        </transform>
+    </texture>
+
+    <bsdf type="diffuse" id="bsdf-plane">
+        <ref name="reflectance" id="texture-checkerboard" />
+    </bsdf>
+
+    <bsdf type="roughdielectric" id="object_bsdf">
+        <string name="distribution" value="ggx"/>
+        <float name="alpha" value="0.01"/>
+        <string name="int_ior" value="acrylic glass"/>
+        <string name="ext_ior" value="air"/>
+    </bsdf>
+
+    <medium id="medium1" type="homogeneous">
+        <float name="scale" value="5"/>
+        <!-- <ref id="hg_phase1" name="phase_hg"/> -->
+        <phase type="isotropic" />
+        <float name="sigma_t" value="0.4"/>
+        <rgb name="albedo" value="0.412, 0.824, 0.999"/>
+        <boolean name="has_spectral_extinction" value="false"/>
+        <boolean name="sample_emitters" value="false"/>
+    </medium>
+
+    <shape type="serialized" id="shape-plane">
+        <string name="filename" value="matpreview.serialized" />
+        <integer name="shape_index" value="0" />
+        <transform name="to_world">
+            <rotate z="1" angle="-4.3" />
+            <matrix value="3.38818 -4.06354 0 -1.74958 4.06354 3.38818 0 1.43683 0 0 5.29076 -0.0120714 0 0 0 1" />
+        </transform>
+        <ref name="bsdf" id="bsdf-plane" />
+    </shape>
+
+    <shape type="ply">
+        <string name="filename" value="scenes\material-preview\meshes\bunny.ply"/>
+		<transform name="to_world">
+			<scale value="13"/>
+			<rotate z="1" angle="130"/>
+			<rotate y="1" angle="70"/>
+			<rotate x="1" angle="-50"/>
+			<rotate z="1" angle="-50"/>
+			<rotate y="1" angle="-2"/>
+			<rotate x="1" angle="12"/>
+			<translate x="0.3" y="0.0" z="-0.5"/>
+		</transform>
+		<ref id="medium1" name="interior"/>
+        <ref id="object_bsdf"/>
+    </shape>
+
+</scene>
