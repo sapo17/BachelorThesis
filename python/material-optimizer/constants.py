@@ -9,8 +9,8 @@ SCENES_MESHES_DIR_PATH: str = SCENES_DIR_PATH + "meshes/"
 OUTPUT_DIR_PATH: str = "output/"
 MY_APP_ID: str = "sapo.material-optimizer.0.1"  # arbitrary string
 LOG_FILE: Path = Path("material-optimizer.log")
-DEFAULT_MIN_ERR_ON_CUSTOM_IMG: float = 0.001
-DEFAULT_ITERATION_COUNT_ON_CUSTOM_IMG: int = 50
+DEFAULT_MIN_ERR: float = 0.001
+DEFAULT_ITERATION_COUNT: int = 50
 SUPPORTED_SPP_VALUES: list = ["4", "8", "16", "32", "64"]
 CUDA_AD_RGB: str = "cuda_ad_rgb"
 DEFAULT_MITSUBA_SCENE: str = "cbox.xml"
@@ -60,6 +60,7 @@ LOSS_FUNCTION_STRING: str = "Loss function"
 SPP_DURING_OPT_STRING: str = "Samples per pixel during optimization"
 DEFAULT_MIN_CLAMP_VALUE: float = 0.001
 DEFAULT_MAX_CLAMP_VALUE: float = 0.999
+LOAD_REF_IMG_LABEL: str = "Load a reference image"
 
 
 """ 
