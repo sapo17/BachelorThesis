@@ -17,6 +17,7 @@ import ctypes
 from constants import *
 import json
 import datetime
+import numpy as np
 
 mi.set_variant(CUDA_AD_RGB)
 
@@ -731,7 +732,15 @@ class PopUpWindow(QMainWindow):
                         )
                         mi.util.write_bitmap(outputTextureFileName, v)
                 elif type(v) is mi.Float:
-                    outputDict[k] = [f for f in v]
+                    floatArray = [f for f in v]
+                    if VERTEX_COLOR_PATTERN.search(k):
+                        outputVertexColorFileName = f"{OUTPUT_DIR_PATH}vertex_color_numpy_array_{k}_iteration_{selectedIteration}_{datetime.datetime.now().isoformat('_', 'seconds')}.npy"
+                        outputVertexColorFileName = outputVertexColorFileName.replace(
+                            ":", "_"
+                        )
+                        np.save(outputVertexColorFileName, np.array(floatArray))
+                    else:
+                        outputDict[k] = floatArray
                 else:
                     outputDict[k] = str(v)
             json.dump(outputDict, outfile, indent=4)
