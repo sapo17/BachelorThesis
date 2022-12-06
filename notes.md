@@ -351,3 +351,37 @@
       5. Import *.3dm* file in Blender
       6. Export blender scene as a mitsuba scene
     5. With the acquisition of a mitsuba scene *material-optimizer* could be used to reconstruct materials of the object of interest
+
+
+### 6.12.22
+After including the functionality for supporting texture optimization, the optimization procedure is being able to successfully reconstruct varying color values of the object, although in a biased manner and this will be also discussed in the following paragraph.
+
+Currently, mitsuba 3 supports following textures and from the supported textures it allows limited parameters to differentiate (i.e. to reconstruct in an inverse rendering scheme):
+
+- Bitmap (bitmap)
+  - parameter: data
+    - type: tensor
+    - description: Tensor array containing the texture data
+- Checkerboard (checkerboard)
+  - Unrelated differentiable parameters ommitted for the sake of conciseness. Please refer to mitsuba 3 documentation.
+- Mesh attribute (mesh_attribute)
+  - parameter: 'vertex_' or 'face_'
+    - type: string
+    - description: Name of the attribute to evaluate. It should always start with "vertex_" or "face_".
+- Volumetric (volume)
+  - parameter: volume
+    - type: float, spectrum or volume
+    - description: Volumetric texture (Default: 0.75)
+
+'material-optimizer' which is based on mitsuba 3 renderer, supports above mentioned texture scene parameters and as many others.
+In the bottom right corner of the [Figure X](#figure-x), we can see the reference image that is being used for the material reconstruction. In the top right corner of [Figure X](#figure-x) the initial state and on the bottom left the optimized state of is shown. In this example the optimization procedure took 100 iterations, used mean squared error (L2 Loss) as the optimization function, and used the Adam optimizer with the learning rate 0.03 for all the scene parameters that are being optimized, as shown in the top left corner of the [Figure X](#figure-x). More specifically, the following scene parameters have been optimized during the reconstruction procedure:
+
+- The bottom plate, which is completly black and can bee seen in the initial image. The bottom plate has a diffuse BSDF and its albedo value is assigned to a bitmap texture. The initial value of the bitmap texture is a 64x64 black image.
+- The circular material object, which is gray in the initial image. It has a Principled BSDF and its base color value is assigned to a bitmap texture. The initial value of the bitmap texture is a 512x512 black image.
+
+As mentioned previously, the optimized image in [Figure X](#figure-x) is not actually accurate. Although at the first glance the properties of the green material seems to look reconstructed accurately as in the reference image, the translucent property (specifically 'spec_trans' parameter of the Principled BSDF) is unchanged after optimization. The optimization procedure for the circular object is actually resulted in a bitmap texture that shows the background in various part of the circular-object [[Figure X2]](#figure-x2), however the object is still completly opaque. Thus, if the circular object is moved to another location, the background that it shows would be completly inaccurate. [Figure X](#figure-x)
+
+#### Figure X
+![Figure X](python\material-optimizer\images\material-optimizer-result-figure-green-translucent.png)
+#### Figure X2: Bitmap texture after the optimization procedure
+![Figure X2](python\material-optimizer\images\green-translucent-texture.png)
