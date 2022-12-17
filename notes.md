@@ -398,11 +398,11 @@ As mentioned previously, the optimized image in [Figure X](#figure-x) is not act
 
 #### Figure X
 
-![Figure X](python\material-optimizer\images\material-optimizer-result-figure-green-translucent.png)
+![Figure X](python\material-optimizer\images\figures\material-optimizer-result-figure-green-translucent.png)
 
 #### Figure X2: Bitmap texture after the optimization procedure
 
-![Figure X2](python\material-optimizer\images\green-translucent-texture.png)
+![Figure X2](python\material-optimizer\images\optimized\green-translucent-texture.png)
 
 ### 7.12.22
 
@@ -412,32 +412,26 @@ In this section, we examine material reconstruction from synthethic data. More s
 
 In [Figure X3](#figure-x3) material reconstruction of a bunny is shown. As in the previous cases, the top left corner of the figure shows the parameter error plot, where x axis displays the iteration count and y axis shows the loss during optimization. The top right corner shows the initial state, top left the optimized image and lastly the top right corner shows the reference image. As mentioned previously, in the case of synthethic data, the reference scene is manipulated to arbitrary values that results in the initial image shown in [Figure X3](#figure-x3).
 
-The bunny object that is shown in [Figure X3](#figure-x3) and [Figure X4](#figure-x4) is assigned to a Principled BSDF. The only difference between [Figure X3](#figure-x3) and [Figure X4](#figure-x4) is the used loss function. As can be seen in [Figure X4](#figure-x4), the material properties of the bunny converges more quickly to the reference image shown with the use of the Dual-Buffer Method by Deng et al. 2022. The details of the material optimization procedure - such as the scene parameters that are being used - can be found in the [Table X](#table-x).
+The bunny object that is shown in [Figure X3](#figure-x3) and [Figure X4](#figure-x4) is assigned to a Principled BSDF. The only difference between [Figure X3](#figure-x3) and [Figure X4](#figure-x4) is the used loss function during optimization. As can be seen in [Figure X4](#figure-x4), the material properties of the bunny converges more quickly to the reference image shown with the use of the Dual-Buffer Method by Deng et al. 2022. The details of the material optimization procedure - such as the scene parameters that are being used - can be found in the [Table X](#table-x).
 
 #### Table X
 
-| Parameters                            | Reference           | Figure X3                                                   | Figure X4                                                  |
-| ------------------------------------- | ------------------- | ----------------------------------------------------------- | ---------------------------------------------------------- |
-| Optimized Principled BSDF: roughness  | 0.01                | 0.0010000000474974513                                       | 0.0010000000474974513                                      |
-| Initial Principled BSDF: roughness    | 0.01                | 0.5                                                         | 0.5                                                        |
-| Optimized Principled BSDF: base_color | 0.412, 0.824, 0.999 | 0.40266287326812744, 0.8450221419334412, 0.9990000128746033 | 0.4148377776145935, 0.8116224408149719, 0.9704205989837646 |
-| Initial Principled BSDF: base_color   | 0.412, 0.824, 0.999 | 0.1, 0.1, 0.1                                               | 0.1, 0.1, 0.1                                              |
-| Optimized Principled BSDF: spec_trans | 0.9                 | 0.9112842082977295                                          | 0.9149118065834045                                         |
-| Initial Principled BSDF: spec_trans   | 0.9                 | 0.02                                                        | 0.02                                                       |
-| Loss Function                         | X                   | Mean Squared Error                                          | Dual Buffer Method Deng et al. 2022                        |
-| Samples Per Pixel During Iteration    | X                   | 16                                                          | 8                                                          |
-| Iteration Count                       | X                   | 100                                                         | 90                                                         |
-| Minimum Error                         | X                   | 0.001                                                       | 0.001                                                      |
-| Optimized Principled BSDF: eta        | 1.49                | Unable to converge if included                              | Unable to converge if included                             |
-| Initial Principled BSDF: eta          | 1.49                | 1.54                                                        | 1.54                                                       |
+| Parameters                            | Reference           | Figure X3                                                  | Figure X4                                                 |
+| ------------------------------------- | ------------------- | ---------------------------------------------------------- | --------------------------------------------------------- |
+| Optimized Principled BSDF: roughness  | 0.01                | 0.0010000000474974513                                      | 0.05581555888056755                                       |
+| Initial Principled BSDF: roughness    | 0.01                | 0.5                                                        | 0.5                                                       |
+| Optimized Principled BSDF: base_color | 0.412, 0.824, 0.999 | 0.4085944890975952, 0.8463479280471802, 0.9990000128746033 | 0.4110097289085388, 0.848652720451355, 0.9990000128746033 |
+| Initial Principled BSDF: base_color   | 0.412, 0.824, 0.999 | 0.1, 0.1, 0.1                                              | 0.1, 0.1, 0.1                                             |
+| Optimized Principled BSDF: spec_trans | 0.9                 | 0.9011966586112976                                         | 0.8804255723953247                                        |
+| Initial Principled BSDF: spec_trans   | 0.9                 | 0.02                                                       | 0.02                                                      |
+| Optimized Principled BSDF: eta        | 1.49                | 1.4877701997756958                                         | 1.4983259439468384                                        |
+| Initial Principled BSDF: eta          | 1.49                | 1.54                                                       | 1.54                                                      |
+| Loss Function                         | X                   | Mean Squared Error                                         | Dual Buffer Method Deng et al. 2022                       |
+| Samples Per Pixel During Iteration    | X                   | 32                                                         | 16                                                        |
+| Iteration Count                       | X                   | 100                                                        | 100                                                       |
+| Minimum Error                         | X                   | 0.001                                                      | 0.0001                                                    |
 
-In [Table X](#table-x) samples per pixel during iteration and iteration count is also shown. The Dual Buffer Method by Deng et al. 2022 reaches the defined minimum error by material-optimizer in the 90th iteration and consequently stops the optimization. The difference in samples per pixel during iteration is mainly how the Dual Buffer Method by Deng et al. 2022 is introduced. For further details please refer to the corresponding paper.
-
-Interestingly, for the bunny object introducing the index of refraction (eta) parameter into the optimization procedure results in inaccurate results. This inability to optimize the index of refraction parameter of the bunny object does not only occur including into the optimization parameters such as roughness, but also trying to reconstruct it after the optimization is finished for the parameters such as roughness, base color and specular transmission. However, for a simple shape like in Figure X5, the index of refraction parameter converges into the correct result. In this example, the index of refraction value is optimized after reconstructing roughness, base color and specular transmission value.
-
-The author would like to speculate that this inability of reconstructing the index of refraction value might be related to the geometry of the optimized shape (i.e. in this case the high-poly bunny object). Nonetheless, the causation requires a further scientific analysis, which is not the scope of this paper.
-
-TODO show material-preview object example
+In [Table X](#table-x) samples per pixel during iteration and iteration count is also shown. In the case of [Figure X4](#figure-x4) where the Dual Buffer Method by Deng et al. 2022 is in use, the chosen minimum error is lower compared to [Figure X3](#figure-x3). This is mainly because of the expected faster convergence rate of the Dual-Buffer Method. The difference in samples per pixel during iteration is mainly how the Dual Buffer Method by Deng et al. 2022 is introduced. For further details please refer to the corresponding paper.
 
 #### Figure X3
 
@@ -447,65 +441,83 @@ TODO show material-preview object example
 
 ![Figure X4](python\material-optimizer\images\figures\material-optimizer-result-figure-bunny-principled-dual-buffer.png)
 
-Similar to the previous example in [Figure X3](#figure-x3), material reconstruction of a bunny object is shown in [Figure X6](#figure-x6) and [Figure X7](#figure-x7). However, in this figure the bunny object is assigned to a Roughdielectric BSDF with a volume (participating media: medium) inside. Consequently, this example uses a differentiable volumetric path tracer (_prbvolpath_) and reconstructs volumetric material properties. Thus, material-optimizer provides two way to reconstruct translucent objects: one via reconstructing Principled BSDF properties and the other with (Rough/Thin)Dielectric BSDF including a participating media interior. The [Table X2](#table-x2) shows the results of Figure 6 and Figure 7.
+Another material reconstruction example is shown in Figure [Figure X5](#figure-x5). However, in this example the material optimization procedure is applied to another shape that blends two BSDF's that is defined in mitsuba, namely Bump map BSDF adapter and Principled BSDF. Additionally, the base color value of the object is defined as a bitmap texture to show the capability of reconstructing materials of translucent objects with varying color values using Principled BSDF. [Table X2](#table-x2) shows the corresponding results. Please note that for the sake of conciseness [Figure X3](#figure-x3) and [Table X2](#table-x2) shows only the results where the used loss function during optimization is the Dual-Buffer Method by Deng et al. 2022.
 
 #### Table X2
 
-| Parameters                            | Reference                               | Figure 6                                | Figure 7                                |
-| ------------------------------------- | --------------------------------------- | --------------------------------------- | --------------------------------------- |
-| Optimized Roughdielectric BSDF: alpha | 0.01                                    | 0.0010000000474974513                   | 0.042617008090019226                    |
-| Initial Roughdielectric BSDF: alpha   | 0.01                                    | 0.98                                    | 0.98                                    |
-| Optimized Homogeneous Medium: sigma_t | 0.4                                     | 0.5923337340354919                      | 0.38419654965400696                     |
-| Initial Homogeneous Medium: sigma_t   | 0.4                                     | 0.7                                     | 0.7                                     |
-| Optimized Homogeneous Medium: albedo  | Colored Volume (resolution: 16x16x16x3) | Colored Volume (resolution: 16x16x16x3) | Colored Volume (resolution: 16x16x16x3) |
-| Initial Homogeneous Medium: albedo    | Colored Volume (resolution: 16x16x16x3) | Empty Volume (resolution: 16x16x16x3)   | Empty Volume (resolution: 16x16x16x3)   |
-| Loss Function                         | X                                       | Mean Squared Error                      | Dual Buffer Method Deng et al. 2022     |
-| Samples Per Pixel During Iteration    | X                                       | 16                                      | 8                                       |
-| Iteration Count                       | X                                       | 100                                     | 32                                      |
-| Minimum Error                         | X                                       | 0.001                                   | 0.001                                   |
+| Parameters                            | Reference                              | Figure X3                                            |
+| ------------------------------------- | -------------------------------------- | ---------------------------------------------------- |
+| Optimized Principled BSDF: roughness  | 0.001                                  | 0.011701240204274654                                 |
+| Initial Principled BSDF: roughness    | 0.001                                  | 0.7                                                  |
+| Optimized Principled BSDF: base_color | Bitmap Texture (supplemented material) | Reconstructed Bitmap Texture (resolution: 512x512x3) |
+| Initial Principled BSDF: base_color   | Bitmap Texture (supplemented material) | Empty(Black) Bitmap Texture (resolution: 512x512x3)  |
+| Optimized Principled BSDF: spec_trans | 1.0                                    | 0.9990000128746033                                   |
+| Initial Principled BSDF: spec_trans   | 1.0                                    | 0.1                                                  |
+| Optimized Principled BSDF: eta        | 1.49                                   | 1.4977041482925415                                   |
+| Initial Principled BSDF: eta          | 1.49                                   | 1.64                                                 |
+| Learning rate: eta                    | X                                      | 0.01                                                 |
+| Loss Function                         | X                                      | Dual Buffer Method Deng et al. 2022                  |
+| Samples Per Pixel During Iteration    | X                                      | 8                                                    |
+| Iteration Count                       | X                                      | 129                                                  |
+| Minimum Error                         | X                                      | 0.0005                                               |
 
+#### Figure X5
 
-Similar to the previous examples, the [Table X2](#table-x2) shows that the Dual Buffer Method introduced by Deng et al. 2022 produces quicker acceptable results. However, it is important to note that the optimized 'alpha' parameter for Figure 7 is still quite far away from the reference value. This is mainly caused from the chosen minimum error, thus the short iteration count and the fast convergence rate of the Dual Buffer Method. Assuming lower minimum error rate (i.e. longer iteration count), we would observe a closer alpha value to the reference. Another important thing to note is the optimized volume albedo. Similar to optimization of bitmap texture, the optimized volume may produced biased results, since in both cases the optized parameter (bitmap texture or volume) is a multidimensional array and during optimization tries to imitate the value/s in the provided reference image. The user must make sure that the provided scene and the reference image does not containe any indirect effects (such as background objects that can be seen through the transparent objects - these effects will be imitated inside the transparent object (i.e. bitmap texture or volume) during optimization) that would effect the optimization.
-Parameters to optmize:
+![Figure X5](python\material-optimizer\images\figures\material-optimizer-result-figure-varying-texture-principled.png)
 
-- orig:
+Similar to the previous example in [Figure X3](#figure-x3), material reconstruction of a bunny object is shown in [Figure X6](#figure-x6), [Figure X7](#figure-x7), [Figure X8](#figure-x8) and [Figure X9](#figure-x9). However, in these examples the bunny object is assigned to a Roughdielectric BSDF with a volume (participating media: medium) inside. Consequently, these examples uses a differentiable volumetric path tracer (_prbvolpath_) and reconstructs volumetric material properties. Thus, material-optimizer provides two way to reconstruct translucent objects: one via reconstructing Principled BSDF properties and the other with (Rough/Thin)Dielectric BSDF including a participating media interior. Note that a constant RGB value is being optimized in [Figure X6](#figure-x6) to represent the albedo value of the object. On the other hand, the color values from the examples in Figure X7, X8 and X9 are being represented as a grid-based volume data source with a resolution 16x16x16x3. This is similar to the difference between [Figure X3](#figure-x3) and [Figure X5](#figure-x5), where in Figure X3 a constant RGB value and in Figure X5 a bitmap texture represented the color value of the object. The [Table X3](#table-x3) shows the results of [Figure X6](#figure-x6).
 
-        <float name="alpha" value="0.01"/>
-        <float name="sigma_t" value="0.4"/>
-        <rgb name="albedo" value="0.412, 0.824, 0.999"/>
+#### Table X3
 
-  - volume data - see scenes\material-preview\textures\colored_albedo.vol
+| Parameters                            | Reference           | Figure 6                                                      |
+| ------------------------------------- | ------------------- | ------------------------------------------------------------- |
+| Optimized Roughdielectric BSDF: alpha | 0.01                | 0.0010000000474974513                                         |
+| Initial Roughdielectric BSDF: alpha   | 0.01                | 0.98                                                          |
+| Optimized Roughdielectric BSDF: eta   | 1.49                | 1.5032265186309814                                            |
+| Initial Roughdielectric BSDF: eta     | 1.49                | 1.544                                                         |
+| Optimized Homogeneous Medium: sigma_t | 0.4                 | 0.6096177697181702                                            |
+| Initial Homogeneous Medium: sigma_t   | 0.4                 | 0.99                                                          |
+| Optimized Homogeneous Medium: albedo  | 0.412, 0.824, 0.999 | 0.18000000715255737, 0.18000000715255737, 0.18000000715255737 |
+| Initial Homogeneous Medium: albedo    | 0.412, 0.824, 0.999 | 0.01, 0.01, 0.01                                              |
+| Loss Function                         | X                   | Dual Buffer Method Deng et al. 2022                           |
+| Samples Per Pixel During Iteration    | X                   | 8                                                             |
+| Iteration Count                       | X                   | 100                                                           |
+| Minimum Error                         | X                   | 0.0008                                                        |
 
-- optimized
-  "object_bsdf.alpha.value": [
-  0.0010000000474974513
-  ],
-  "medium1.sigma_t.value.value": [
-  0.5923337340354919
-  ](python\material-optimizer\images\material-optimizer-result-figure-bunny-principled-dual-buffer.png)
-  - volume data: scenes\material-preview\textures\colored_albedo_optimized_mse.vol
-  - ![result](python\material-optimizer\images\material-optimizer-result-figure-bunny-varying-volume-mse.png)
+#### Figure X6
 
-Optimization stopped at #32, since it reached min. error threshold 0.001
-Parameters to optmize:
+![Figure X6](python\material-optimizer\images\figures\material-optimizer-result-figure-constant-volume.png)
 
-- orig:
+Analogous to the previous examples, the [Table X4](#table-x4) shows that the Dual Buffer Method introduced by Deng et al. 2022 produces quicker acceptable results. However, it is important to note that the optimized 'eta' parameter for Figure X8 is still quite far away from the reference value. Another capability of 'material-optimizer' is to switch between the last and minimum-error scene state of the optimization. After the optimization procedure is finished the user receives a figure just like in [Figure X9](#figure-x9). Subsequently, on the error plot of the top left corner of the figure the user may observe that a minimum error rate is achieved previously than the last iteration of the optimization. Infact, [Figure X9](#figure-x9) and the values on the fifth column of [Table X4](#table-x4) is the result of the use of this functionality.
 
-        <float name="alpha" value="0.01"/>
-        <float name="sigma_t" value="0.4"/>
-        <rgb name="albedo" value="0.412, 0.824, 0.999"/>
+Another important thing to note is the optimized volume albedo. Similar to optimization of bitmap texture, the optimized volume may produced biased results, since in both cases the optized parameter (bitmap texture or volume) is a multidimensional array and the optimization procedure tries to imitate the value/s in the provided reference image. The user must make sure that the provided scene and the reference image does not contain any indirect effects (such as background objects that can be seen through the transparent objects - these effects will be imitated inside the transparent object (i.e. bitmap texture or volume) during optimization) that might effect the optimization procedure.
 
-  - volume data - see scenes\material-preview\textures\colored_albedo.vol
+The user may observe that a minimum error rate is achieved previously than the last iteration of the optimization.
+#### Table X4
 
-- optimized
-  "object_bsdf.alpha.value": [
-  0.042617008090019226
-  ],
-  "medium1.sigma_t.value.value": [
-  0.38419654965400696
-  ](python\material-optimizer\images\material-optimizer-result-figure-bunny-principled-dual-buffer.png)
+| Parameters                            | Reference                               | Figure 7                                | Figure 8                                | Figure 9                                |
+| ------------------------------------- | --------------------------------------- | --------------------------------------- | --------------------------------------- | --------------------------------------- |
+| Optimized Roughdielectric BSDF: alpha | 0.01                                    | 0.01794576644897461                     | 0.012510540895164013                    | 0.011586922220885754                    |
+| Initial Roughdielectric BSDF: alpha   | 0.01                                    | 0.98                                    | 0.98                                    | 0.98                                    |
+| Optimized Roughdielectric BSDF: eta   | 1.49                                    | 1.6646206378936768                      | 1.6183195114135742                      | 1.5124317407608032                      |
+| Initial Roughdielectric BSDF: eta     | 1.49                                    | 1.544                                   | 1.544                                   | 1.544                                   |
+| Optimized Homogeneous Medium: sigma_t | 0.4                                     | 0.6594341993331909                      | 0.5636458992958069                      | 0.5403354167938232                      |
+| Initial Homogeneous Medium: sigma_t   | 0.4                                     | 0.7                                     | 0.7                                     | 0.7                                     |
+| Optimized Homogeneous Medium: albedo  | Colored Volume (resolution: 16x16x16x3) | Colored Volume (resolution: 16x16x16x3) | Colored Volume (resolution: 16x16x16x3) | Colored Volume (resolution: 16x16x16x3) |
+| Initial Homogeneous Medium: albedo    | Colored Volume (resolution: 16x16x16x3) | Empty Volume (resolution: 16x16x16x3)   | Empty Volume (resolution: 16x16x16x3)   | Empty Volume (resolution: 16x16x16x3)   |
+| Loss Function                         | X                                       | Mean Squared Error                      | Dual Buffer Method Deng et al. 2022     | Dual Buffer Method Deng et al. 2022     |
+| Samples Per Pixel During Iteration    | X                                       | 16                                      | 8                                       | 8                                       |
+| Iteration Count                       | X                                       | 100                                     | 100                                     | 75                                      |
+| Minimum Error                         | X                                       | 0.001                                   | 0.0002                                  | 0.0002                                  |
 
-  - volume data: scenes\material-preview\textures\colored_albedo_optimized_mse.vol
-  - - ![result](python\material-optimizer\images\material-optimizer-result-figure-varying-volume-dual-buffer.png)
+#### Figure X7
 
-- TODO SHOW HOMOGENEOUS EXAMPLE, SHOW PRINCIPLED TEXTURED TRANSLUCENT EXAMPLE
+![Figure X7](python/material-optimizer/images/figures/material-optimizer-result-figure-bunny-varying-volume-mse.png)
+
+#### Figure X8
+
+![Figure X8](python\material-optimizer\images\figures\material-optimizer-result-figure-varying-volume-dual-buffer.png)
+
+#### Figure X9
+
+![Figure X9](python/material-optimizer/images/figures/material-optimizer-result-figure-bunny-varying-volume-dual-buffer-min-err.png)
