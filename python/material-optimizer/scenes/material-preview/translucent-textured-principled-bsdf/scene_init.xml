@@ -60,13 +60,20 @@
         <ref name="reflectance" id="texture-checkerboard" />
     </bsdf>
 
-    <bsdf type="principled" id="bsdf-matpreview">
-        <texture name="base_color" type="bitmap">
-            <string name="filename" value="init-texture.png"/>
+    <bsdf type="bumpmap" id="bsdf-matpreview">
+        <float name="scale" value="0.02"/>
+        <texture name="floor_tiles_bumpmap" type="bitmap">
+            <boolean name="raw" value="true"/>
+            <string name="filename" value="floor_tiles_bumpmap.png"/>
         </texture>
-		<float name="roughness" value="0.5"/>
-		<float name="spec_trans" value="0.02"/>
-        <float name="eta" value="1.54"/>
+        <bsdf type="principled">
+            <texture name="base_color" type="bitmap">
+                <string name="filename" value="scenes\material-preview\textures\init-texture-512.png"/>
+            </texture>
+            <float name="roughness" value="0.7"/>
+            <float name="spec_trans" value="0.1"/>
+            <float name="eta" value="1.64"/>
+        </bsdf>
     </bsdf>
 
     <shape type="serialized" id="shape-plane">

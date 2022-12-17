@@ -62,7 +62,7 @@
     <bsdf type="roughdielectric" id="object_bsdf">
         <string name="distribution" value="ggx"/>
         <float name="alpha" value="0.98"/>
-        <string name="int_ior" value="bk7"/>
+        <string name="int_ior" value="sodium chloride"/>
         <string name="ext_ior" value="air"/>
     </bsdf>
 

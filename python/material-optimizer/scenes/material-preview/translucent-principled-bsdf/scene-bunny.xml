@@ -1,6 +1,6 @@
 <scene version="3.0.0">
     <default name="spp" value="64"/>
-    <default name="integrator" value="path"/>
+    <default name="integrator" value="prb_reparam"/>
     <default name="rr_depth" value="5"/>
     <default name="resx" value="683"/>
     <default name="resy" value="512"/>
@@ -10,6 +10,7 @@
 
     <integrator type="$integrator">
         <integer name="max_depth" value="$max_depth"/>
+        <integer name="reparam_rays" value="16"/>
     </integrator>
 
     <sensor type="perspective" id="camera">

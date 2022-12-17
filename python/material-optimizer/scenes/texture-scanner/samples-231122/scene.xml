@@ -41,8 +41,7 @@
 	<bsdf type="twosided" id="mat-floor">
 		<bsdf type="diffuse">
 			<texture name="reflectance" type="bitmap">
-				<!-- <string name="filename" value="scenes\texture-scanner\textures\init-texture-64.png"/> -->
-				<string name="filename" value="output\texture_mat-floor.brdf_0.reflectance.data_iteration_99_2022-12-06_13_22_48.png"/>
+				<string name="filename" value="scenes\texture-scanner\textures\init-texture-64.png"/>
 			</texture>
 		</bsdf>
 	</bsdf>
@@ -54,10 +53,8 @@
 	<bsdf type="twosided" id="mat-material-bsdf">
 		<bsdf type="principled">
 			<texture name="base_color" type="bitmap">
-				<string name="filename" value="output\texture_mat-material-bsdf.brdf_0.base_color.data_iteration_99_2022-12-06_13_22_48.png"/>
-				<!-- <string name="filename" value="scenes\texture-scanner\textures\init-texture-512.png"/> -->
+				<string name="filename" value="scenes\texture-scanner\textures\init-texture-512.png"/>
 			</texture>
-			<!-- <rgb value="0.100000 0.100000 0.100000" name="base_color"/> -->
 			<float name="spec_tint" value="0.000000"/>
 			<float name="spec_trans" value="0.000000"/>
 			<float name="metallic" value="0.000000"/>
