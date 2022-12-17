@@ -197,9 +197,9 @@ class MaterialOptimizerModel:
             opt[key] = dr.clamp(
                 opt[key], DEFAULT_MIN_CLAMP_VALUE, MAX_ETA_VALUE
             )
-        if K_PATTERN.search(key):
+        elif K_PATTERN.search(key):
             opt[key] = dr.clamp(opt[key], DEFAULT_MIN_CLAMP_VALUE, MAX_K_VALUE)
-        if ALPHA_PATTERN.search(key):
+        elif ALPHA_PATTERN.search(key):
             opt[key] = dr.clamp(
                 opt[key], DEFAULT_MIN_CLAMP_VALUE, MAX_ALPHA_VALUE
             )
