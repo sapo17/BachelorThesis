@@ -521,3 +521,41 @@ The user may observe that a minimum error rate is achieved previously than the l
 #### Figure X9
 
 ![Figure X9](python/material-optimizer/images/figures/material-optimizer-result-figure-bunny-varying-volume-dual-buffer-min-err.png)
+
+
+### 20.12.22
+__Introduction__ (until the rendering equation, remains: inverse rendering and accomplished tasks):
+Introduction
+In this section, we are going to present the main ideas that this thesis lies upon. Firstly, we will introduce a relatively well-known field of computer graphics: physically-based rendering and the rendering equation. Following that, we will explore inverse rendering - a growing branch of computer graphics that is becoming extremely popular every other day. Lastly, borrowing from the ideas we introduced, we will summarize this thesis's work and list our contributions.
+
+Physical Based Rendering
+The main goal of physically based rendering is to create imagery of how our eyes basically see the world. Moreover, our goal is to generate fascinating but often unnoticed visuals constrained by the physical rules we encounter daily using our computers. More formally, as stated in the bible of physically based rendering book: "At the highest level of abstraction, rendering is the process of converting a description of a three-dimensional scene into an image. Algorithms for animation, geometric modeling, texturing, and other areas of computer graphics all must pass their results through some sort of rendering process so that they can be made visible in an image.". (TODO: cite pbrt)
+
+Photorealistic rendering is often easier said than done. However, with the research work accomplished in the last fifty years by the scientific community and industry, we can create imagery that one might argue is hard to separate from reality (TODO: insert a figure).
+
+Ray Tracing
+Ray tracing is one of the most known methods to generate photorealistic images. As the name suggests, the idea is to send out rays from a pixel of a virtual camera and trace them throughout the scene. In their journey, most rays interact with the objects defined in the scene (e.g., a table). Rays continue their journey by getting scattered from the objects defined in the scene. Eventually, each ray in the scene finishes its journey by getting absorbed by the objects of the scene and providing color information for its original pixel location. The combination of these pixels makes the rendered image. In other words: "Almost all photorealistic rendering systems are based on the ray-tracing algorithm. Ray tracing is actually a very simple algorithm; it is based on following the path of a ray of light through a scene as it interacts with and bounces off objects in an environment (TODO cite pbrt)". It must be noted that both explanations are a highly simplified and shortened version of the ray tracing procedure. Still, in essence, this is how we create photorealistic images with computers. The process is also shown visually in Figure X.
+
+Figure X: Ray Tracing
+By Henrik - Own work, CC BY-SA 4.0, https://commons.wikimedia.org/w/index.php?curid=3869326
+
+The BSDF
+ The introduction of ray tracing brings another critical point that one must consider: how rays are scattered around in a scene. Since one of the things we underlined so far was physically based rendering, we must ensure that the rays we are tracing follow physical rules while they scatter around the scene. 
+
+For a moment, if we stop and observe our environment, we will see that light is scattered around from objects in our environment. Consequently, if we could model that interaction of light bouncing from one object to another in mathematical terms, then we could apply those rules to our ray tracing procedure. This abstraction of how rays are scattered around when they interact with objects in the scene is often modeled through the BSDF.
+
+The BSDF, known as the bidirectional scattering distribution function, is a function that describes the material properties of an object in the scene. The BSDF is often also described as BSDF = BRDF + BTDF. The BRDF (bidirectional reflectance distribution function) describes an object's reflective and the BTDF (bidirectional transmissive distribution function) transmissive material properties. In other words: "Each object in the scene provides a material, which is a description of its appearance properties at each point on the surface. This description is given by the bidirectional reflectance distribution function (BRDF). This function tells us how much energy is reflected from an incoming direction to an outgoing direction. We will write the BRDF at as. " (TODO: cite pbrt and write mathematical omega). Add figure from PBRT: https://www.pbr-book.org/3ed-2018/Introduction/Surface%20scattering%20geometry.svg
+
+The Rendering Equation
+The rendering equation, also mentioned as the light transport equation, is a recursive mathematical formulation of balanced light-energy distribution. It provides a mathematical model to compute the lighting at a surface. In other words, it gives the total reflected radiance at a point on a surface in terms of emission from the surface, its BSDF, and the distribution of incident illumination arriving at the point. (TODO: cite pbrt)
+
+The detail that makes evaluating the LTE difficult is the fact that incident radiance at a point is affected by the geometry and scattering properties of all of the objects in the scene. For example, a bright light shining on a red object may cause a reddish tint on nearby objects in the scene, or glass may focus light into caustic patterns on a tabletop. Rendering algorithms that account for this complexity are often called global illumination algorithms, to differentiate them from local illumination algorithms that use only information about the local surface properties in their shading computations. (TODO: cite PBRT)
+
+The outgoing radiance X is described as the sum of the emitted radiance of the underlying surface and the reflected radiance:
+https://cs.dartmouth.edu/wjarosz/publications/dissertation/chapter2.pdf (TODO: show eq. 2.16)
+
+The hemispherical form of the rendering equation is described as:
+https://cs.dartmouth.edu/wjarosz/publications/dissertation/chapter2.pdf (TODO: show eq. 2.17)
+
+This equation basically describes the radiance at position 'p' in the direction of 'w', including the emitted radiance 'Le' at point 'p' and the reflected (or indirect) emission at point 'p' in the direction of 'w prime.'. The reflected radiance can further be described as an integral over the hemisphere of light from direction 'w prime' at point 'p' weighted by the cosine and the BSDF. The formulation is also shown in Figure X. (TODO: add figure https://www.cg.tuwien.ac.at/courses/Rendering/2020/slides/04_The_Rendering_Equation_v20200515.pdf)
+
