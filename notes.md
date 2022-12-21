@@ -559,3 +559,32 @@ https://cs.dartmouth.edu/wjarosz/publications/dissertation/chapter2.pdf (TODO: s
 
 This equation basically describes the radiance at position 'p' in the direction of 'w', including the emitted radiance 'Le' at point 'p' and the reflected (or indirect) emission at point 'p' in the direction of 'w prime.'. The reflected radiance can further be described as an integral over the hemisphere of light from direction 'w prime' at point 'p' weighted by the cosine and the BSDF. The formulation is also shown in Figure X. (TODO: add figure https://www.cg.tuwien.ac.at/courses/Rendering/2020/slides/04_The_Rendering_Equation_v20200515.pdf)
 
+Physical Based Inverse Rendering
+In physical-based rendering, our goal is to generate photorealistic images from a well-defined scene description. As mentioned previously, physical-based rendering is a relatively mature branch of computer graphics. In the last fifty years, the scientific community and industry have managed to solve many problems and will continue to understand the field of image synthesis. 
+
+On the other hand, inverse rendering - although not new - is a relatively young branch of computer graphics. However, the recent developments in computer graphics and hardware have awoken much interest and made the field of inverse rendering accessible. 
+
+As the name suggests, in inverse rendering, we have to think in the opposite manner. In inverse rendering, our task is to regain a scene description from an image. Intuitively, one would maybe think that it is not a complicated problem. For example, if we have an image of a red book, one would instinctively argue that the scene description should contain a book object with red material. However, we should remember that our goal is to describe things in a physically accurate manner. The red book in the image is actually a combination of red pixels, and there could be several reasons why the image contains red pixels. In the simplest case, the red pixel might result from the red-colored diffuse material. However, it might also be the result of an indirect global illumination effect, such as a reflection of a red object on the book. Figure X illustrates the complexity (TODO: show image from https://shuangz.com/courses/pbdr-course-sg20/downloads/pbdr-course-sg20-notes.pdf)
+
+So far, we have described the rendering of an image as a function of f(x) = y, where y is the rendered image, and x is the scene description (TODO: math symbols). In inverse rendering, we aim to invert this function and estimate x. This goal is often achieved by differentiating f(x), thus the rendering equation.
+
+Differential Rendering Equation
+In this short section, we are going to present the differential rendering equation. Please refer to Physics-Based Differentiable Rendering: A Comprehensive Introduction for the complete derivation of the differential rendering equation.
+
+We showed the rendering equation in (TODO: refer to the equation). The differential rendering equation is another integral equation that can be solved with Reynold's transport theorem (Todo: cite Reynold's transport theorem). The differentiable rendering equation can be described as a combination of interior and boundary terms:
+
+(TODO: show inverse rendering equation)
+
+As previously in the case of the volumetric rendering equation, we omit the equation of Differentiable Rendering of Participating Media. For further understanding, please refer to Physics-Based Differentiable Rendering: A Comprehensive Introduction and A Differential Theory of Radiative Transfer. (TODO: cite sources)
+
+To summarize, to accomplish the task of estimating scene parameters x from a given image y, we need to use a technique known as differentiable rendering. With this technique, we can estimate the physical attributes of a scene, e.g., material properties (BSDF attributes), lighting properties, and geometry of the objects. 
+
+The differentiable rendered is used in the following manner: The function f is mathematically differentiated to obtain dydx, providing a first-order approximation of how a desired change in the output y (the rendering) can be achieved by changing the inputs x (the scene description). Together with a differentiable objective function g(y) that quantifies the suitability of tentative scene parameters, a gradient-based optimization algorithm such as stochastic gradient descent or Adam can be used to find a sequence of scene parameters x0, x1, x2, etc., that successively improve the objective function. Figure X describes this procedure. (Todo: Cite https://mitsuba.readthedocs.io/en/stable/src/inverse_rendering/gradient_based_opt.html)
+
+(TODO: show figure in https://mitsuba.readthedocs.io/en/stable/src/inverse_rendering/gradient_based_opt.html)
+
+Contributions
+So far, we have accumulated background information from the field of computer graphics. Now that we can roughly understand how a computer can generate beautiful images and simultaneously reacquire scene descriptions from an image, we can explore what this thesis covers. Respectively, our contributions include the following:
+An optimization procedure to acquire scene parameters (i.e., material properties) from an image using the mitsuba renderer. Specifically, the goal is to be able to reconstruct translucent material properties from real and synthetic images. However, the procedure can additionally reconstruct opaque material properties. 
+A mini GUI tool that incorporates the full power of the mitsuba renderer and various features to accomplish the task of inverse rendering.
+A flexible code base in python that makes use of the parallel computing power of NVIDIA GPUs to accomplish the task of inverse rendering. 
