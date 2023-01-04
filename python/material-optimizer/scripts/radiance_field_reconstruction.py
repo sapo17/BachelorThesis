@@ -3,6 +3,9 @@ import drjit as dr
 import mitsuba as mi
 import matplotlib.pyplot as plt
 
+from skimage import measure
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+
 mi.set_variant('cuda_ad_rgb', 'llvm_ad_rgb')
 
 
@@ -14,21 +17,87 @@ def plot_list(images, title=None):
     if title is not None:
         plt.suptitle(title)
 
+def convert_obj_to_br(verts, faces, voxel_size):
+    """
+    Note from Hasbay: Code taken from:
+    https://programtalk.com/vs4/python/brainglobe/brainreg-segment/brainreg_segment/regions/IO.py/
+    """
+    if voxel_size != 1:
+        verts = verts * voxel_size
+
+    faces = faces + 1
+    return verts, faces
+
+def marching_cubes_to_obj(marching_cubes_out, output_file):
+    """
+    Note from Hasbay: Code taken from:
+    https://programtalk.com/vs4/python/brainglobe/brainreg-segment/brainreg_segment/regions/IO.py/
+    Saves the output of skimage.measure.marching_cubes as an .obj file
+    :param marching_cubes_out: tuple
+    :param output_file: str
+    """
+
+    verts, faces, normals, _ = marching_cubes_out
+    with open(output_file, "w") as f:
+        for item in verts:
+            f.write(f"v {item[0]} {item[1]} {item[2]}\n")
+        for item in normals:
+            f.write(f"vn {item[0]} {item[1]} {item[2]}\n")
+        for item in faces:
+            f.write(
+                f"f {item[0]}//{item[0]} {item[1]}//{item[1]} "
+                f"{item[2]}//{item[2]}\n"
+            )
+        f.close()
+
+def convert_obj_to_br(verts, faces, voxel_size):
+    """
+    Note from Hasbay: Code taken from:
+    https://programtalk.com/vs4/python/brainglobe/brainreg-segment/brainreg_segment/regions/IO.py/
+    """
+    if voxel_size != 1:
+        verts = verts * voxel_size
+
+    faces = faces + 1
+    return verts, faces
+
+def marching_cubes_to_obj(marching_cubes_out, output_file):
+    """
+    Note from Hasbay: Code taken from:
+    https://programtalk.com/vs4/python/brainglobe/brainreg-segment/brainreg_segment/regions/IO.py/
+    Saves the output of skimage.measure.marching_cubes as an .obj file
+    :param marching_cubes_out: tuple
+    :param output_file: str
+    """
+
+    verts, faces, normals, _ = marching_cubes_out
+    with open(output_file, "w") as f:
+        for item in verts:
+            f.write(f"v {item[0]} {item[1]} {item[2]}\n")
+        for item in normals:
+            f.write(f"vn {item[0]} {item[1]} {item[2]}\n")
+        for item in faces:
+            f.write(
+                f"f {item[0]}//{item[0]} {item[1]}//{item[1]} "
+                f"{item[2]}//{item[2]}\n"
+            )
+        f.close()
+
 
 # Rendering resolution
 render_res = 256
 
 # Number of stages
-num_stages = 4
+num_stages = 5
 
 # Number of training iteration per stage
 num_iterations_per_stage = 100
 
 # learning rate
-learning_rate = 0.1
+learning_rate = 0.03
 
 # Initial grid resolution
-grid_init_res = 16
+grid_init_res = 4
 
 # Spherical harmonic degree to be use for view-dependent appearance modeling
 sh_degree = 2
@@ -37,7 +106,7 @@ sh_degree = 2
 use_relu = True
 
 # Number of sensors
-sensor_count = 7
+sensor_count = 20
 
 sensors = []
 
@@ -199,12 +268,18 @@ print('')
 print('Done')
 
 final_images = [mi.render(scene, sensor=sensors[i], spp=128) for i in range(sensor_count)]
-# for stage, inter in enumerate(intermediate_images):
-#     plot_list(inter, f'Stage {stage}')
 plot_list(final_images, 'Final')
 plot_list(ref_images, 'Reference')
 
 plt.plot(losses)
 plt.xlabel('Iterations')
 plt.ylabel('Loss')
+plt.show()
 
+# Use marching cubes to obtain the surface mesh of these ellipsoids
+verts, faces, normals, values = measure.marching_cubes(np.array(opt['sh_coeffs'])[:, :, :, 0], 0)
+
+verts, faces = convert_obj_to_br(verts, faces, np.array(opt['sh_coeffs']).shape[0])
+marching_cubes_to_obj(
+    (verts, faces, normals, values), "output\\test_marching_cubes.obj"
+)

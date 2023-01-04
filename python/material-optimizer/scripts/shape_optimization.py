@@ -86,8 +86,16 @@ def optimize(
                 spp=spp,
                 seed=it + it * stage_count,
             )
+            img2 = mi.render(
+                scene,
+                params,
+                sensor=sensors[sensor_idx],
+                spp=spp,
+                seed=(it + it * stage_count)+1,
+            )
 
-            loss = dr.mean(dr.sqr(img - ref_images[sensor_idx]))
+            # loss = dr.mean(dr.sqr(img - ref_images[sensor_idx]))
+            loss = dr.mean((img - ref_images[sensor_idx]) * (img2 - ref_images[sensor_idx]))
 
             # # Backpropagate gradients
             dr.backward(loss)
@@ -103,16 +111,19 @@ def optimize(
 
             total_loss += loss[0]
 
-        if len(opt_hist) > 1 and total_loss > (loss_hist[-1] * 1.05):
+        if len(opt_hist) > 1 and total_loss > loss_hist[-1]:
             opt.reset(key)
-            params.update(opt_hist[-1])
-            total_loss = loss_hist[-1]
-            learning_rate = max(0.00005, learning_rate - 0.00005)
+            # params.update(opt_hist[-1])
+            # total_loss = loss_hist[-1]
+            learning_rate = max(0.0003, learning_rate - 0.00005)
             opt.set_learning_rate({key: learning_rate})
         else:
             opt_hist.append(opt)
-            loss_hist.append(total_loss)
+        loss_hist.append(total_loss)
         print(f"Iteration {it:02d}: error={total_loss:6f}", end="\r")
+
+        if total_loss < 0.03:
+            break
 
 
 scene_dict = {
@@ -130,10 +141,10 @@ scene_dict = {
 scene_ref = mi.load_dict(scene_dict)
 
 # Number of samples per pixel for reference images
-sensor_count = 12
+sensor_count = 16
 sensors = []
-prepare_sensors(int(sensor_count/2), sensors, [1, 0, 0])
-prepare_sensors(int(sensor_count/2), sensors)
+prepare_sensors(int(sensor_count / 2), sensors, [1, 0, 0])
+prepare_sensors(int(sensor_count / 2), sensors)
 ref_spp = 256
 ref_images = [
     mi.render(scene_ref, sensor=sensors[i], spp=ref_spp)
@@ -143,8 +154,8 @@ ref_images = [
 # Modify the scene dictionary
 scene_dict["object"] = {
     "type": "obj",
-    "filename": "scripts\\common\\meshes\\bunny_test.obj",
-    "to_world": T.translate([0.2, -1.1, 0]).rotate([1, 0, 0], 90).scale(13),
+    "filename": "scripts\\common\\meshes\\Sphere.obj",
+    # "to_world": T.translate([0.2, -1.1, 0]).rotate([1, 0, 0], 90).scale(13),
     "bsdf": {"type": "diffuse"},
 }
 
@@ -160,9 +171,9 @@ learning_rate = 0.003
 opt = mi.ad.Adam(lr=learning_rate)
 opt[key] = params[key]
 params.update(opt)
-iteration_count = 100
-stage_count = 5
-spp = 4
+iteration_count = 500
+stage_count = 10
+spp = 1
 loss_hist = []
 opt_hist = []
 
