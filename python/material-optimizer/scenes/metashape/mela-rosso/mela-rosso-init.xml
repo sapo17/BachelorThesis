@@ -42,7 +42,7 @@
 		<bsdf type="principled">
 			<!-- <rgb value="0.341176 0.560784 0.878431" name="base_color"/> -->
 			<texture type="bitmap" name="base_color">
-                <string name="filename" value="scenes\metashape\textures\init-texture-128.png"/>
+                <string name="filename" value="scenes\metashape\textures\init-texture-512.png"/>
             </texture>
 			<float name="spec_tint" value="0.000000"/>
 			<float name="spec_trans" value="0.000000"/>
