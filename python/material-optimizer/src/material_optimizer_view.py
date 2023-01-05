@@ -264,38 +264,55 @@ class PopUpWindow(QMainWindow):
                 self.lossHist
             )
 
-        outputFileName = f"{OUTPUT_DIR_PATH}scene_paramaters_iteration_{selectedIteration}_{datetime.datetime.now().isoformat('_', 'seconds')}.json"
-        outputFileName = outputFileName.replace(":", "_")
+        outputFileDir = (
+            OUTPUT_DIR_PATH
+            + datetime.datetime.now().isoformat("_", "seconds")
+            + "_iteration_"
+            + str(selectedIteration)
+        )
+        outputFileDir = outputFileDir.replace(":", "-")
+        Path(outputFileDir).mkdir(parents=True, exist_ok=True)
+        outputFileName = outputFileDir + "/optimized_params.json"
+
+        # fill the dictionary with appropriate parameter values and output
+        # if scene parameter is special (e.g. bitmap texture) then output it in
+        # another file (e.g. bitmap texture: output .png), otherwise fill it in
+        # the dictionary and finally output as a .json file
         with open(outputFileName, "w") as outfile:
             outputDict = {}
             for k, v in self.sceneParamsHist[selectedIteration].items():
                 if type(v) is mi.TensorXf:
+                    # special output: volume
                     if ALBEDO_DATA_PATTERN.search(k):
-                        outputVolumeFileName = f"{OUTPUT_DIR_PATH}volume_{k}_iteration_{selectedIteration}_{datetime.datetime.now().isoformat('_', 'seconds')}.vol"
-                        outputVolumeFileName = outputVolumeFileName.replace(
-                            ":", "_"
+                        outputVolumeFileName = (
+                            outputFileDir + f"//optimized_volume_{k}.vol"
                         )
                         mi.VolumeGrid(v).write(outputVolumeFileName)
                     else:
-                        outputTextureFileName = f"{OUTPUT_DIR_PATH}texture_{k}_iteration_{selectedIteration}_{datetime.datetime.now().isoformat('_', 'seconds')}.png"
-                        outputTextureFileName = outputTextureFileName.replace(
-                            ":", "_"
+                        # special output: bitmap texture
+                        outputTextureFileName = (
+                            outputFileDir + f"/optimized_texture_{k}.png"
                         )
                         mi.util.write_bitmap(outputTextureFileName, v)
                 elif type(v) is mi.Float:
                     floatArray = [f for f in v]
                     if VERTEX_COLOR_PATTERN.search(k):
-                        outputVertexColorFileName = f"{OUTPUT_DIR_PATH}vertex_color_numpy_array_{k}_iteration_{selectedIteration}_{datetime.datetime.now().isoformat('_', 'seconds')}.npy"
+                        # special output: vertex colors as numpy array
                         outputVertexColorFileName = (
-                            outputVertexColorFileName.replace(":", "_")
+                            outputFileDir
+                            + f"/optimized_vertex_color_array_{k}.npy"
                         )
                         np.save(
                             outputVertexColorFileName, np.array(floatArray)
                         )
                     else:
+                        # otherwise: fill the dictionary
                         outputDict[k] = floatArray
                 else:
+                    # default case: fill the dictionary
                     outputDict[k] = str(v)
+
+            # output: filled dictionary
             json.dump(outputDict, outfile, indent=4)
 
     def onOptimizedSceneSelectorTextChanged(self, text: str):
