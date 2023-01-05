@@ -209,6 +209,11 @@ class MaterialOptimizerModel:
             opt[key] = dr.clamp(
                 opt[key], DEFAULT_MIN_CLAMP_VALUE, MAX_SCALE_VALUE
             )
+        elif VERTEX_POSITIONS_PATTERN.search(key):
+            opt[key] = dr.clamp(
+                # currently arbitrary: maybe let the user to decide?
+                opt[key], -10.0, 10.0
+            )
         else:
             opt[key] = dr.clamp(
                 opt[key], DEFAULT_MIN_CLAMP_VALUE, DEFAULT_MAX_CLAMP_VALUE

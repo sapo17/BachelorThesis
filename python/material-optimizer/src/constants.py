@@ -167,6 +167,12 @@ See also: https://mitsuba.readthedocs.io/en/stable/src/generated/plugins_volumes
 """
 ALBEDO_DATA_PATTERN: re.Pattern = re.compile(r".*\.albedo.data")
 
+""" 
+Shapes Constants
+See also: https://mitsuba.readthedocs.io/en/stable/src/generated/plugins_shapes.html#
+"""
+VERTEX_POSITIONS_PATTERN: re.Pattern = re.compile(r".*\.vertex_positions")
+
 """ Combine Patterns """
 SUPPORTED_MITSUBA_PARAMETER_PATTERNS: list = [
     REFLECTANCE_PATTERN,
@@ -202,7 +208,8 @@ SUPPORTED_MITSUBA_PARAMETER_PATTERNS: list = [
     SIGMA_T_PATTERN,
     PHASE_G_PATTERN,
     VERTEX_COLOR_PATTERN,
-    ALBEDO_DATA_PATTERN
+    ALBEDO_DATA_PATTERN,
+    VERTEX_POSITIONS_PATTERN
 ]
 PATTERNS_INTRODUCE_DISCONTINUITIES: list = [
     # see also parameter 'D' flags https://mitsuba.readthedocs.io/en/stable/src/generated/plugins_bsdfs.html#technical-details
@@ -218,6 +225,7 @@ PATTERNS_INTRODUCE_DISCONTINUITIES: list = [
     CLEARCOAT_PATTERN,
     CLEARCOAT_GLOSS_PATTERN,
     PHASE_G_PATTERN,
+    VERTEX_POSITIONS_PATTERN
 ]
 PATTERNS_REQUIRE_VOLUMETRIC_INTEGRATOR = [ALBEDO_PATTERN, SIGMA_T_PATTERN]
 
