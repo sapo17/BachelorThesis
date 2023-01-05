@@ -41,7 +41,10 @@ def main():
     )
 
     # execute the application
-    sys.exit(app.exec())
+    try:
+        sys.exit(app.exec())
+    except SystemExit:
+        print('Closing material-optmizer...')
 
 
 if __name__ == "__main__":

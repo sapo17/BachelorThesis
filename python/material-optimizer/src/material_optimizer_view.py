@@ -8,17 +8,13 @@ from pathlib import Path
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from matplotlib import pyplot as plt
 import mitsuba as mi
-import logging
 from PyQt6 import QtGui, QtWidgets, QtCore
 from src.constants import *
-import json
-import datetime
-import numpy as np
-
-from src.material_optimizer_model import MaterialOptimizerModel
 
 
 class MaterialOptimizerView(QMainWindow):
+    """This class contains information of how to represent and display data."""
+
     def __init__(self):
         super().__init__()
         self.initUI()
@@ -220,130 +216,16 @@ class PopUpWindow(QMainWindow):
         parent.setDisabled(True)
         self.setDisabled(False)
 
-    def initOptimizedSceneSelector(
-        self,
-        model: MaterialOptimizerModel,
-        initImg,
-        lossHist: list,
-        sceneParamsHist: list,
-    ):
-        self.model = model
-        self.initImg = initImg
-        self.lossHist = lossHist
-        self.sceneParamsHist = sceneParamsHist
-
-        # central widget
-        centralWidgetContainer = QWidget()
-        centralWidgetContainerLayout = QVBoxLayout(centralWidgetContainer)
-
-        # dropdown menu
-        self.comboBox = QComboBox()
-        self.comboBox.addItems(
-            [LAST_ITERATION_STRING, COLUMN_LABEL_MINIMUM_ERROR]
-        )
-        self.comboBox.currentTextChanged.connect(
-            self.onOptimizedSceneSelectorTextChanged
-        )
-
-        # output button
-        outputBtn = QPushButton(text=OUTPUT_TO_JSON_STRING)
-        outputBtn.clicked.connect(self.onOutputBtnPressed)
-
-        centralWidgetContainerLayout.addWidget(self.comboBox)
-        centralWidgetContainerLayout.addWidget(outputBtn)
-        self.setCentralWidget(centralWidgetContainer)
-
-        self.show()
-        lastIteration = len(self.sceneParamsHist) - 1
-        self.showOptimizedPlot(lastIteration)
-
-    def onOutputBtnPressed(self):
-        selectedIteration = len(self.sceneParamsHist) - 1
-        if self.comboBox.currentText() == COLUMN_LABEL_MINIMUM_ERROR:
-            selectedIteration = MaterialOptimizerModel.minIdxInDrList(
-                self.lossHist
-            )
-
-        outputFileDir = (
-            OUTPUT_DIR_PATH
-            + datetime.datetime.now().isoformat("_", "seconds")
-            + "_iteration_"
-            + str(selectedIteration)
-        )
-        outputFileDir = outputFileDir.replace(":", "-")
-        Path(outputFileDir).mkdir(parents=True, exist_ok=True)
-        outputFileName = outputFileDir + "/optimized_params.json"
-
-        # fill the dictionary with appropriate parameter values and output
-        # if scene parameter is special (e.g. bitmap texture) then output it in
-        # another file (e.g. bitmap texture: output .png), otherwise fill it in
-        # the dictionary and finally output as a .json file
-        with open(outputFileName, "w") as outfile:
-            outputDict = {}
-            for k, v in self.sceneParamsHist[selectedIteration].items():
-                if type(v) is mi.TensorXf:
-                    # special output: volume
-                    if ALBEDO_DATA_PATTERN.search(k):
-                        outputVolumeFileName = (
-                            outputFileDir + f"//optimized_volume_{k}.vol"
-                        )
-                        mi.VolumeGrid(v).write(outputVolumeFileName)
-                    else:
-                        # special output: bitmap texture
-                        outputTextureFileName = (
-                            outputFileDir + f"/optimized_texture_{k}.png"
-                        )
-                        mi.util.write_bitmap(outputTextureFileName, v)
-                elif type(v) is mi.Float:
-                    floatArray = [f for f in v]
-                    if VERTEX_COLOR_PATTERN.search(k):
-                        # special output: vertex colors as numpy array
-                        outputVertexColorFileName = (
-                            outputFileDir
-                            + f"/optimized_vertex_color_array_{k}.npy"
-                        )
-                        np.save(
-                            outputVertexColorFileName, np.array(floatArray)
-                        )
-                    else:
-                        # otherwise: fill the dictionary
-                        outputDict[k] = floatArray
-                else:
-                    # default case: fill the dictionary
-                    outputDict[k] = str(v)
-
-            # output: filled dictionary
-            json.dump(outputDict, outfile, indent=4)
-
-    def onOptimizedSceneSelectorTextChanged(self, text: str):
-        if text == COLUMN_LABEL_MINIMUM_ERROR:
-            self.showOptimizedPlot(
-                MaterialOptimizerModel.minIdxInDrList(self.lossHist)
-            )
-        else:
-            self.showOptimizedPlot(len(self.sceneParamsHist) - 1)
-
-    def showOptimizedPlot(self, iteration: int):
-        logging.info(
-            f"Scene parameters in {iteration}:\n {self.sceneParamsHist[iteration]}"
-        )
-        self.model.sceneParams.update(values=self.sceneParamsHist[iteration])
-        sc = MplCanvas()
-        lossHistKey = self.model.lossFunction
-        lossHistDict = {lossHistKey: self.lossHist}
-        sc.plotOptimizationResults(
-            self.model.refImage,
-            self.initImg,
-            mi.util.convert_to_bitmap(
-                self.model.render(self.model.scene, 512)
-            ),
-            lossHistDict,
-            iteration,
-            self.lossHist[iteration][0],
-        )
-
     def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
         self.parent().setDisabled(False)
+
+        # part of it causes dr.jit to warn about leaked variables (specifically
+        # sceneParamsHist, lossHist). Setting them to None at least lessens
+        # the amount of warned leaked parameters.
+        self.lossHist = None
+        self.sceneParamsHist = None
+        self.initImg = None
+
         return super().closeEvent(a0)
 
 
@@ -351,38 +233,3 @@ class MplCanvas(FigureCanvasQTAgg):
     def __init__(self, parent=None):
         fig, self.axes = plt.subplots(2, 2, figsize=(10, 10))
         super(MplCanvas, self).__init__(fig)
-
-    def plotOptimizationResults(
-        self,
-        refImage,
-        initImg,
-        finalImg,
-        paramErrors,
-        iterationNumber: int,
-        loss: float,
-    ):
-
-        for k, v in paramErrors.items():
-            self.axes[0][0].plot(v, label=k)
-
-        self.axes[0][0].set_xlabel(ITERATION_STRING)
-        self.axes[0][0].set_ylabel(LOSS_STRING)
-        self.axes[0][0].legend()
-        self.axes[0][0].set_title(PARAMETER_ERROR_PLOT_STRING)
-
-        self.axes[0][1].imshow(mi.util.convert_to_bitmap(initImg))
-        self.axes[0][1].axis(OFF_STRING)
-        self.axes[0][1].set_title(INITIAL_IMAGE_STRING)
-
-        self.axes[1][0].imshow(mi.util.convert_to_bitmap(finalImg))
-        self.axes[1][0].axis(OFF_STRING)
-        self.axes[1][0].set_title(
-            f"Optimized image: Iteration #{iterationNumber}, Loss: {loss:6f}"
-        )
-
-        self.axes[1][1].imshow(mi.util.convert_to_bitmap(refImage))
-        self.axes[1][1].axis(OFF_STRING)
-        self.axes[1][1].set_title(REFERENCE_IMAGE_STRING)
-        plt.savefig(IMAGES_DIR_PATH + FIGURE_FILE_NAME)
-
-        self.show()

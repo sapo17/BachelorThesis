@@ -13,6 +13,8 @@ mi.set_variant(CUDA_AD_RGB)
 
 
 class MaterialOptimizerModel:
+    """This class contains the business logic of material-optimizer."""
+    
     def __init__(self) -> None:
         self.refImage = None
         self.sceneRes = (256, 256)
@@ -224,7 +226,8 @@ class MaterialOptimizerModel:
         )
         return [opt]
 
-    def render(self, scene: mi.Scene, spp: int, params=None, seed=0):
+    @staticmethod
+    def render(scene: mi.Scene, spp: int, params=None, seed=0):
         return mi.render(scene, params, seed=seed, spp=spp)
 
     def updateSceneParam(self, key, value):
@@ -438,3 +441,7 @@ class MaterialOptimizerModel:
             self.updateAfterStep(opts, self.sceneParams)
 
         return lossHist, sceneParamsHist
+
+    @staticmethod
+    def convertToBitmap(image: mi.TensorXf):
+        return mi.util.convert_to_bitmap(image)
