@@ -66,6 +66,9 @@ class MaterialOptimizerController:
             )
             readImg = self.model.readImage(refImgFileName)
             self.model.refImage = readImg
+            self.view.showInfoMessageBox(
+                "Reference image loaded successfully."
+            )
         except Exception as err:
             logging.error(str(err))
             self.view.showInfoMessageBox("Cannot load the reference image.")
@@ -375,15 +378,13 @@ class MaterialOptimizerController:
                         mi.util.write_bitmap(outputTextureFileName, v)
                 elif type(v) is mi.Float:
                     floatArray = [f for f in v]
-                    if VERTEX_COLOR_PATTERN.search(k):
-                        # special output: vertex colors as numpy array
-                        outputVertexColorFileName = (
+                    if len(v) > 1:
+                        # special output: multi dimensional mi.Float as numpy array
+                        outputNDimArrayFileName = (
                             outputFileDir
-                            + f"/optimized_vertex_color_array_{k}.npy"
+                            + f"/optimized_multi_dimensional_array_{k}.npy"
                         )
-                        np.save(
-                            outputVertexColorFileName, np.array(floatArray)
-                        )
+                        np.save(outputNDimArrayFileName, np.array(floatArray))
                     else:
                         # otherwise: fill the dictionary
                         outputDict[k] = floatArray
