@@ -22,6 +22,8 @@ COLUMN_LABEL_LEARNING_RATE: str = "Learning Rate"
 COLUMN_LABEL_MINIMUM_ERROR: str = "Minimum Error"
 COLUMN_LABEL_ITERATION_COUNT: str = "Iteration Count"
 COLUMN_LABEL_OPTIMIZE: str = "Optimize"
+COLUMN_LABEL_MIN_CLAMP_LABEL: str = "Min. Clamp Value"
+COLUMN_LABEL_MAX_CLAMP_LABEL: str = "Max. Clamp Value"
 WINDOW_ICON_FILE_NAME: str = "sloth.png"
 MATERIAL_OPTIMIZER_STRING: str = "Material Optimizer"
 IMPORT_STRING: str = "Import"
@@ -61,12 +63,15 @@ SPP_DURING_OPT_STRING: str = "Samples per pixel during optimization"
 DEFAULT_MIN_CLAMP_VALUE: float = 0.001
 DEFAULT_MAX_CLAMP_VALUE: float = 0.999
 LOAD_REF_IMG_LABEL: str = "Load a reference image"
-
+DEFAULT_LEARNING_RATE: float = 0.03
+MAX_LEARNING_RATE: float = 0.9
+MIN_LEARNING_RATE: float = 0.0001
 
 """ 
 BSDF Parameter Patterns Constants
 See also: https://mitsuba.readthedocs.io/en/stable/src/generated/plugins_bsdfs.html#
 """
+EMPTY_PATTERN: re.Pattern = re.compile(r"")
 REFLECTANCE_PATTERN: re.Pattern = re.compile(r".*\.reflectance")
 ETA_PATTERN: re.Pattern = re.compile(r".*\.eta")
 ALPHA_PATTERN: re.Pattern = re.compile(r".*\.alpha")
@@ -135,6 +140,8 @@ IRRADIANCE_PATTERN: re.Pattern = re.compile(
     r".*\.irradiance"
 )  # supports only float/Color3f entry
 
+# TODO: what can be the max radiance value
+MAX_RADIANCE_VALUE: float = 10000.0 
 MAX_SCALE_VALUE: int = 100
 
 
@@ -172,6 +179,8 @@ Shapes Constants
 See also: https://mitsuba.readthedocs.io/en/stable/src/generated/plugins_shapes.html#
 """
 VERTEX_POSITIONS_PATTERN: re.Pattern = re.compile(r".*\.vertex_positions")
+# TODO: what can be the min/max vertex position value?
+MAX_VERTEX_POSITION_VALUE: float = 10.0
 
 """ Combine Patterns """
 SUPPORTED_MITSUBA_PARAMETER_PATTERNS: list = [
@@ -209,7 +218,7 @@ SUPPORTED_MITSUBA_PARAMETER_PATTERNS: list = [
     PHASE_G_PATTERN,
     VERTEX_COLOR_PATTERN,
     ALBEDO_DATA_PATTERN,
-    VERTEX_POSITIONS_PATTERN
+    VERTEX_POSITIONS_PATTERN,
 ]
 PATTERNS_INTRODUCE_DISCONTINUITIES: list = [
     # see also parameter 'D' flags https://mitsuba.readthedocs.io/en/stable/src/generated/plugins_bsdfs.html#technical-details
@@ -225,9 +234,41 @@ PATTERNS_INTRODUCE_DISCONTINUITIES: list = [
     CLEARCOAT_PATTERN,
     CLEARCOAT_GLOSS_PATTERN,
     PHASE_G_PATTERN,
-    VERTEX_POSITIONS_PATTERN
+    VERTEX_POSITIONS_PATTERN,
 ]
 PATTERNS_REQUIRE_VOLUMETRIC_INTEGRATOR = [ALBEDO_PATTERN, SIGMA_T_PATTERN]
+
+### Constant dictionary: key: Pattern, value: default min and max clamp value
+def getDefaultLegalValues(pattern: re.Pattern) -> tuple([int, int]):
+    result = (DEFAULT_MIN_CLAMP_VALUE, DEFAULT_MAX_CLAMP_VALUE)
+
+    if pattern is ETA_PATTERN:
+        result = (DEFAULT_MIN_CLAMP_VALUE, MAX_ETA_VALUE)
+    elif pattern is K_PATTERN:
+        result = (DEFAULT_MIN_CLAMP_VALUE, MAX_K_VALUE)
+    elif pattern is ALPHA_PATTERN:
+        result = (DEFAULT_MIN_CLAMP_VALUE, MAX_ALPHA_VALUE)
+    elif pattern is DIFF_TRANS_PATTERN:
+        result = (DEFAULT_MIN_CLAMP_VALUE, MAX_DIFF_TRANS_VALUE)
+    elif pattern is DELTA_PATTERN:
+        result = (DEFAULT_MIN_CLAMP_VALUE, MAX_DELTA_VALUE)
+    elif pattern is PHASE_G_PATTERN:
+        result = (MIN_PHASE_G_VALUE, MAX_PHASE_G_VALUE)
+    elif pattern is SCALE_PATTERN:
+        result = (DEFAULT_MIN_CLAMP_VALUE, MAX_SCALE_VALUE)
+    elif pattern is RADIANCE_PATTERN:
+        result = (DEFAULT_MIN_CLAMP_VALUE, MAX_RADIANCE_VALUE)
+    elif pattern is VERTEX_POSITIONS_PATTERN:
+        # currently arbitrary: more or less user responsibility
+        result = (-MAX_VERTEX_POSITION_VALUE, MAX_VERTEX_POSITION_VALUE)
+
+    return result
+
+
+DEFAULT_CLAMP_VALUES: dict[re.Pattern, tuple([int, int])] = {
+    pattern: getDefaultLegalValues(pattern)
+    for pattern in SUPPORTED_MITSUBA_PARAMETER_PATTERNS
+}
 
 """ Scene Constants """
 CBOX_SCENE_PATH = SCENES_DIR_PATH + DEFAULT_MITSUBA_SCENE

@@ -14,7 +14,7 @@ mi.set_variant(CUDA_AD_RGB)
 
 class MaterialOptimizerModel:
     """This class contains the business logic of material-optimizer."""
-    
+
     def __init__(self) -> None:
         self.refImage = None
         self.sceneRes = (256, 256)
@@ -121,10 +121,12 @@ class MaterialOptimizerModel:
         if self.refImage is not None:
             self.refImage = None
 
-    def getDefaultOptimizationParams(self, params):
+    def getDefaultOptimizationParams(self, params) -> dict:
         return {
             param: {
-                COLUMN_LABEL_LEARNING_RATE: 0.03,
+                COLUMN_LABEL_LEARNING_RATE: DEFAULT_LEARNING_RATE,
+                COLUMN_LABEL_MIN_CLAMP_LABEL: DEFAULT_MIN_CLAMP_VALUE,
+                COLUMN_LABEL_MAX_CLAMP_LABEL: DEFAULT_MAX_CLAMP_VALUE,
                 COLUMN_LABEL_OPTIMIZE: False,
             }
             for param in params
@@ -185,39 +187,18 @@ class MaterialOptimizerModel:
 
     def ensureLegalParamValues(self, opt, key):
         # Post-process the optimized parameters to ensure legal values
-        if ETA_PATTERN.search(key):
-            opt[key] = dr.clamp(
-                opt[key], DEFAULT_MIN_CLAMP_VALUE, MAX_ETA_VALUE
-            )
-        elif K_PATTERN.search(key):
-            opt[key] = dr.clamp(opt[key], DEFAULT_MIN_CLAMP_VALUE, MAX_K_VALUE)
-        elif ALPHA_PATTERN.search(key):
-            opt[key] = dr.clamp(
-                opt[key], DEFAULT_MIN_CLAMP_VALUE, MAX_ALPHA_VALUE
-            )
-        elif DIFF_TRANS_PATTERN.search(key):
-            opt[key] = dr.clamp(
-                opt[key], DEFAULT_MIN_CLAMP_VALUE, MAX_DIFF_TRANS_VALUE
-            )
-        elif DELTA_PATTERN.search(key):
-            opt[key] = dr.clamp(
-                opt[key], DEFAULT_MIN_CLAMP_VALUE, MAX_DELTA_VALUE
-            )
-        elif PHASE_G_PATTERN.search(key):
-            opt[key] = dr.clamp(opt[key], MIN_PHASE_G_VALUE, MAX_PHASE_G_VALUE)
-        elif SCALE_PATTERN.search(key):
-            opt[key] = dr.clamp(
-                opt[key], DEFAULT_MIN_CLAMP_VALUE, MAX_SCALE_VALUE
-            )
-        elif VERTEX_POSITIONS_PATTERN.search(key):
-            opt[key] = dr.clamp(
-                # currently arbitrary: maybe let the user to decide?
-                opt[key], -10.0, 10.0
-            )
-        else:
-            opt[key] = dr.clamp(
-                opt[key], DEFAULT_MIN_CLAMP_VALUE, DEFAULT_MAX_CLAMP_VALUE
-            )
+        mostLikelyPattern = self.getClosestPattern(key)
+        opt[key] = dr.clamp(
+            opt[key],
+            DEFAULT_CLAMP_VALUES[mostLikelyPattern][0],
+            DEFAULT_CLAMP_VALUES[mostLikelyPattern][1],
+        )
+
+    def getClosestPattern(self, key: str) -> re.Pattern:
+        for pattern in SUPPORTED_MITSUBA_PARAMETER_PATTERNS:
+            if pattern.search(key):
+                return pattern
+        return EMPTY_PATTERN
 
     def initOptimizers(self, params: list) -> list:
         opt = mi.ad.Adam(
