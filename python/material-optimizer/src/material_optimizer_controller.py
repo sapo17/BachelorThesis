@@ -79,9 +79,23 @@ class MaterialOptimizerController:
     def combineTableValues(self, params, optimizationParams):
         result = {}
         for key in params:
+            self.updateOptimizationParameters(optimizationParams, key)
             result[key] = {COLUMN_LABEL_VALUE: params[key]}
             result[key].update(optimizationParams[key])
         return result
+
+    def updateOptimizationParameters(self, optimizationParams, key):
+        # update min and max clamp values to the key's clamp value
+        # for example, if key contains .reflectance string then it will
+        # be most likely a REFLECTANCE_PATTERN, thus the corresponding clamp
+        # value will be assigned to the optimization parameters
+        mostLikelyPattern: re.Pattern = self.model.getClosestPattern(key)
+        optimizationParams[key][
+            COLUMN_LABEL_MIN_CLAMP_LABEL
+        ] = DEFAULT_CLAMP_VALUES[mostLikelyPattern][0]
+        optimizationParams[key][
+            COLUMN_LABEL_MAX_CLAMP_LABEL
+        ] = DEFAULT_CLAMP_VALUES[mostLikelyPattern][1]
 
     def onOptimizeBtnClicked(self):
         try:
@@ -240,7 +254,8 @@ class MaterialOptimizerController:
         return result
 
     def onCellChanged(self, row, col):
-        if col == 0:
+        if col == self.getColumnIndex(COLUMN_LABEL_VALUE):
+            # value has changed
             isSuccess, param, newValue = self.onSceneParamChanged(row, col)
             if isSuccess:
                 self.model.updateSceneParam(param, newValue)
@@ -256,15 +271,75 @@ class MaterialOptimizerController:
                     paramCol, paramRow, newValue
                 )
 
+    def isLegalClampValue(
+        self,
+        colIdx: int,
+        rowIdx: int,
+        paramCol: str,
+        paramRow: str,
+        newValue: float,
+    ):
+        mostLikelyPattern = self.model.getClosestPattern(paramRow)
+        if (
+            paramCol == COLUMN_LABEL_MIN_CLAMP_LABEL
+            or paramCol == COLUMN_LABEL_MAX_CLAMP_LABEL
+        ):
+            if paramCol == COLUMN_LABEL_MIN_CLAMP_LABEL:
+                if newValue < DEFAULT_CLAMP_VALUES[mostLikelyPattern][0]:
+                    msg = "Optimization parameter is not changed. Please make"
+                    msg += " sure that the clamp value is not smaller than"
+                    msg += f" '{DEFAULT_CLAMP_VALUES[mostLikelyPattern][0]}'."
+                    self.view.showInfoMessageBox(msg)
+                    self.view.table.item(rowIdx, colIdx).setText(
+                        str(DEFAULT_CLAMP_VALUES[mostLikelyPattern][0])
+                    )
+                    return False
+            elif paramCol == COLUMN_LABEL_MAX_CLAMP_LABEL:
+                if newValue > DEFAULT_CLAMP_VALUES[mostLikelyPattern][1]:
+                    msg = "Optimization parameter is not changed. Please make"
+                    msg += " sure that the clamp value is not larger than"
+                    msg += f" '{DEFAULT_CLAMP_VALUES[mostLikelyPattern][1]}'."
+                    self.view.showInfoMessageBox(msg)
+                    self.view.table.item(rowIdx, colIdx).setText(
+                        str(DEFAULT_CLAMP_VALUES[mostLikelyPattern][1])
+                    )
+                    return False
+
+        return True
+
+    def isLegalLearningRate(
+        self, row: int, col: int, paramCol: str, newValue: float
+    ):
+        if paramCol == COLUMN_LABEL_LEARNING_RATE:
+            if newValue > MAX_LEARNING_RATE:
+                msg = "Optimization parameter is not changed. Please make"
+                msg += " sure that the learning rate is not larger than"
+                msg += f" '{MAX_LEARNING_RATE}'."
+                self.view.showInfoMessageBox(msg)
+                self.view.table.item(row, col).setText(str(MAX_LEARNING_RATE))
+                return False
+            elif newValue < MIN_LEARNING_RATE:
+                msg = "Optimization parameter is not changed. Please make"
+                msg += " sure that the learning rate is not smaller than"
+                msg += f" '{MIN_LEARNING_RATE}'."
+                self.view.showInfoMessageBox(msg)
+                self.view.table.item(row, col).setText(str(MIN_LEARNING_RATE))
+                return False
+
+        return True
+
     def onOptimizationParamChanged(self, row, col):
-        paramRow = self.view.table.verticalHeaderItem(
-            self.view.table.currentRow()
-        ).text()
-        paramCol = self.view.table.horizontalHeaderItem(
-            self.view.table.currentColumn()
-        ).text()
+        paramRow = self.getRowLabelText()
+        paramCol = self.getColumnLabelText()
         try:
             newValue = float(self.view.table.item(row, col).text())
+
+            if not self.isLegalLearningRate(row, col, paramCol, newValue):
+                return False, None, None, None
+            if not self.isLegalClampValue(
+                col, row, paramCol, paramRow, newValue
+            ):
+                return False, None, None, None
         except:
             self.view.table.item(row, col).setText(
                 str(self.model.optimizationParams[paramRow][paramCol])
@@ -274,10 +349,13 @@ class MaterialOptimizerController:
             return False, None, None, None
         return True, paramRow, paramCol, newValue
 
-    def onSceneParamChanged(self, row, col):
-        param = self.view.table.verticalHeaderItem(
-            self.view.table.currentRow()
+    def getColumnLabelText(self):
+        return self.view.table.horizontalHeaderItem(
+            self.view.table.currentColumn()
         ).text()
+
+    def onSceneParamChanged(self, row, col):
+        param = self.getRowLabelText()
         newValue = self.view.table.item(row, col).text()
         paramType = type(self.model.sceneParams[param])
         if paramType is mi.Color3f:
@@ -305,6 +383,12 @@ class MaterialOptimizerController:
                 return False, None, None
             newValue = mi.Float(float(newValue))
         return True, param, newValue
+
+    def getRowLabelText(self) -> str:
+        # returns scene parameter key
+        return self.view.table.verticalHeaderItem(
+            self.view.table.currentRow()
+        ).text()
 
     def initOptimizedSceneSelector(
         self, popUpWindow: PopUpWindow, initImg, lossHist, sceneParamsHist
