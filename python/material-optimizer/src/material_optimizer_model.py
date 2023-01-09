@@ -16,7 +16,7 @@ class MaterialOptimizerModel:
     """This class contains the business logic of material-optimizer."""
 
     def __init__(self) -> None:
-        self.refImage = None
+        self.sensorToReferenceImageDict = None
         self.sceneRes = (256, 256)
         self.loadMitsubaScene()
         self.setSceneParams(self.scene)
@@ -117,9 +117,9 @@ class MaterialOptimizerModel:
             for pattern in patterns
         )
 
-    def resetReferenceImage(self):
-        if self.refImage is not None:
-            self.refImage = None
+    def resetSensorToReferenceImageDict(self):
+        if self.sensorToReferenceImageDict is not None:
+            self.sensorToReferenceImageDict = None
 
     def getDefaultOptimizationParams(self, params) -> dict:
         return {
@@ -213,8 +213,10 @@ class MaterialOptimizerModel:
         return [opt]
 
     @staticmethod
-    def render(scene: mi.Scene, spp: int, params=None, seed=0):
-        return mi.render(scene, params, seed=seed, spp=spp)
+    def render(
+        scene: mi.Scene, sensor: mi.Sensor, spp: int, params=None, seed=0
+    ):
+        return mi.render(scene, params, sensor=sensor, seed=seed, spp=spp)
 
     def updateSceneParam(self, key, value):
         if self.sceneParams[key] == value:
@@ -316,10 +318,11 @@ class MaterialOptimizerModel:
         minValue = dr.min(lis)
         return lis.index(minValue)
 
-    def computeLoss(self, seed: int = 0):
+    def computeLoss(self, sensor: mi.Sensor, seed: int = 0):
         # Perform a (noisy) differentiable rendering of the scene
         image = self.render(
             self.scene,
+            sensor=sensor,
             spp=self.samplesPerPixel,
             params=self.sceneParams,
             seed=seed,
@@ -328,24 +331,29 @@ class MaterialOptimizerModel:
 
         # Evaluate the objective function from the current rendered image
         if self.lossFunction == MSE_STRING:
-            result = self.mse(image, self.refImage)
+            result = self.mse(image, self.sensorToReferenceImageDict[sensor])
         elif self.lossFunction == BRIGHTNESS_IDP_MSE_STRING:
-            result = self.brightnessIndependentMSE(image, self.refImage)
+            result = self.brightnessIndependentMSE(
+                image, self.sensorToReferenceImageDict[sensor]
+            )
         elif self.lossFunction == DUAL_BUFFER_STRING:
             image2 = self.render(
                 self.scene,
+                sensor=sensor,
                 spp=self.samplesPerPixel,
                 params=self.sceneParams,
                 seed=seed + 1,
             )
             image2 = dr.clamp(image2, 0.0, 1.0)
-            result = self.dualBufferError(image, image2)
+            result = self.dualBufferError(
+                image, image2, self.sensorToReferenceImageDict[sensor]
+            )
         elif self.lossFunction == MAE_STRING:
-            result = self.mae(image, self.refImage)
+            result = self.mae(image, self.sensorToReferenceImageDict[sensor])
         elif self.lossFunction == MBE_STRING:
-            result = self.mbe(image, self.refImage)
+            result = self.mbe(image, self.sensorToReferenceImageDict[sensor])
         else:
-            result = self.mse(image, self.refImage)
+            result = self.mse(image, self.sensorToReferenceImageDict[sensor])
 
         return result
 
@@ -362,7 +370,7 @@ class MaterialOptimizerModel:
         scaled_ref = ref / dr.mean(ref)
         return dr.mean(dr.sqr(scaled_image - scaled_ref))
 
-    def dualBufferError(self, image, image2):
+    def dualBufferError(self, image, image2, refImage):
         """
         Loss Function mentioned in: Reconstructing Translucent Objects Using Differentiable Rendering, Deng et al.
         @inproceedings{10.1145/3528233.3530714,
@@ -383,7 +391,7 @@ class MaterialOptimizerModel:
         series = {SIGGRAPH '22}
         }
         """
-        return dr.mean((image - self.refImage) * (image2 - self.refImage))
+        return dr.mean((image - refImage) * (image2 - refImage))
 
     def mae(self, image, refImage):
         """L1 Loss: Mean Absolute Error"""
@@ -396,7 +404,7 @@ class MaterialOptimizerModel:
     def prepareOptimization(self, checkedRows: list):
         opts = self.initOptimizers(checkedRows)
         self.updateSceneParamsWithOptimizers(opts)
-        initImg = self.render(self.scene, spp=256)
+        initImg = self.render(self.scene, self.scene.sensors()[0], spp=256)
         return opts, initImg
 
     def optimizationLoop(self, opts: list, setProgressValue: callable = None):
@@ -407,27 +415,51 @@ class MaterialOptimizerModel:
             if setProgressValue is not None:
                 setProgressValue(int(it / self.iterationCount * 100))
 
-            loss = self.computeLoss(it)
-            lossHist.append(loss)
+            total_loss = 0.0
+            for sensorIdx, sensor in enumerate(self.scene.sensors()):
+
+                loss = self.computeLoss(sensor=sensor, seed=it)
+                logging.info(f"Sensor {sensorIdx:02d}")
+                logging.info(f"\tcurrent loss= {loss[0]:6f}")
+
+                # Backpropagate through the rendering process
+                dr.backward(loss)
+
+                self.updateAfterStep(opts, self.sceneParams)
+
+                total_loss += loss[0]
+
+            # update loss and scene parameter histograms
             sceneParamsHist.append(
                 self.createSubsetSceneParams(
                     self.sceneParams,
                     SUPPORTED_MITSUBA_PARAMETER_PATTERNS,
                 )
             )
-            logging.info(f"Iteration {it:02d}")
-            logging.info(f"\tcurrent loss= {loss[0]:6f}")
+            lossHist.append(total_loss)
 
-            if loss[0] < self.minError:
+            if total_loss < self.minError:
                 break
 
-            # Backpropagate through the rendering process
-            dr.backward(loss)
-
-            self.updateAfterStep(opts, self.sceneParams)
+            logging.info(f"Iteration {it:02d}")
+            logging.info(f"\ttotal loss= {total_loss:6f}")
 
         return lossHist, sceneParamsHist
 
     @staticmethod
     def convertToBitmap(image: mi.TensorXf):
         return mi.util.convert_to_bitmap(image)
+
+    def setSensorToReferenceImageDict(self, readImages: list):
+        # check length of reference images is equal to # of sensors
+        sensors = self.scene.sensors()
+        if len(readImages) != len(sensors):
+            err = "The amount of selected reference images do not match "
+            err += "with the available sensors loaded in the scene file."
+            raise RuntimeError(err)
+
+        # assuming the order of the loaded images corresponds to the appropriate
+        # sensors defined in the loaded scene file
+        self.sensorToReferenceImageDict = {
+            sensors[idx]: readImg for idx, readImg in enumerate(readImages)
+        }
