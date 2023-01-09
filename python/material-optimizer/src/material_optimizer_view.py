@@ -43,8 +43,16 @@ class MaterialOptimizerView(QMainWindow):
         fileMenu = menubar.addMenu(FILE_STRING)
         fileMenu.addAction(self.importFile)
 
-    def showFileDialog(self, filterStr: str):
+    def showFileDialog(
+        self, filterStr: str, isMultipleSelectionOk=False
+    ) -> list:
         homeDir = str(Path.home())
+        if isMultipleSelectionOk:
+            return QFileDialog.getOpenFileNames(
+                self, IMPORT_FILE_STRING, homeDir, filterStr
+            )[0]
+        
+        # Single selection
         return QFileDialog.getOpenFileName(
             self, IMPORT_FILE_STRING, homeDir, filterStr
         )[0]

@@ -34,7 +34,7 @@ class MaterialOptimizerController:
         try:
             fileName = self.view.showFileDialog(XML_FILE_FILTER_STRING)
             self.model.loadMitsubaScene(fileName)
-            self.model.resetReferenceImage()
+            self.model.resetSensorToReferenceImageDict()
             self.model.setSceneParams(self.model.scene)
             self.model.setInitialSceneParams(self.model.sceneParams)
             self.model.setDefaultOptimizationParams(
@@ -59,19 +59,38 @@ class MaterialOptimizerController:
         self.view.replaceTable(newTable)
         self.updateSignals()
 
-    def loadReferenceImage(self):
+    def loadReferenceImages(self):
         try:
-            refImgFileName = self.view.showFileDialog(
-                IMAGES_FILE_FILTER_STRING
+            refImgFileNames = self.view.showFileDialog(
+                IMAGES_FILE_FILTER_STRING, isMultipleSelectionOk=True
             )
-            readImg = self.model.readImage(refImgFileName)
-            self.model.refImage = readImg
-            self.view.showInfoMessageBox(
-                "Reference image loaded successfully."
+
+            # check length of reference images is equal to # of sensors
+            if len(refImgFileNames) != len(self.model.scene.sensors()):
+                err = "The amount of selected reference images do not match "
+                err += "with the available sensors loaded in the scene file."
+                raise RuntimeError(err)
+
+            readImgs = [
+                self.model.readImage(refImgFileName)
+                for refImgFileName in refImgFileNames
+            ]
+
+            # Create a dictionary where key: sensor, value: refImage
+            self.model.setSensorToReferenceImageDict(readImgs)
+
+            msg = (
+                "Reference image/s loaded successfully. Assuming the order of "
             )
+            msg += " the loaded images corresponds to the appropriate sensors "
+            msg += "defined in the loaded scene file (i.e. first image "
+            msg += "corresponds to the first sensor in the loaded scene)."
+            self.view.showInfoMessageBox(msg)
         except Exception as err:
             logging.error(str(err))
-            self.view.showInfoMessageBox("Cannot load the reference image.")
+            self.view.showInfoMessageBox(
+                f"Cannot load reference image/s. {str(err)}"
+            )
 
     def updateSignals(self):
         self.view.table.cellChanged.connect(self.onCellChanged)
@@ -108,11 +127,15 @@ class MaterialOptimizerController:
 
     def optimizeMaterials(self):
 
-        # Precondition: (1) reference image is loaded, and
+        # Precondition: (1) reference image/s is/are loaded, and
         #               (2) at least one checked scene parameter
         checkedRows = self.getCheckedRows()
-        if self.model.refImage is None or len(checkedRows) <= 0:
-            msg = "Please make sure to load a reference image and to check at least one scene parameter for the optimization."
+        if (
+            self.model.sensorToReferenceImageDict is None
+            or len(checkedRows) <= 0
+        ):
+            msg = "Please make sure to load a reference image/s and to check "
+            msg += "at least one scene parameter for the optimization."
             self.view.showInfoMessageBox(msg)
             return
 
@@ -221,7 +244,7 @@ class MaterialOptimizerController:
     def onLoadReferenceImageBtnClicked(self):
         self.model.setMinError(self.view.minErrLine.text())
         self.model.setIterationCount(self.view.iterationCountLine.text())
-        self.loadReferenceImage()
+        self.loadReferenceImages()
 
     def getColumnIndex(self, columnLabel: str):
         for colIdx in range(self.view.table.columnCount()):
@@ -401,12 +424,29 @@ class MaterialOptimizerController:
         centralWidgetContainer = QWidget()
         centralWidgetContainerLayout = QVBoxLayout(centralWidgetContainer)
 
-        # dropdown menu
-        popUpWindow.comboBox = QComboBox()
-        popUpWindow.comboBox.addItems(
+        # dropdown menu: sensor selection
+        sensorSelectionContainer = QWidget()
+        sensorSelectionLabel = QLabel(SENSOR_IDX_LABEL)
+        sensorSelectionContainerLayout = QHBoxLayout(sensorSelectionContainer)
+        popUpWindow.sensorDropdown = QComboBox()
+        popUpWindow.sensorDropdown.addItems(
+            [
+                str(sensorIdx)
+                for sensorIdx, sensor in enumerate(self.model.scene.sensors())
+            ]
+        )
+        popUpWindow.sensorDropdown.currentTextChanged.connect(
+            lambda: self.onSensorIdxChanged(popUpWindow)
+        )
+        sensorSelectionContainerLayout.addWidget(sensorSelectionLabel)
+        sensorSelectionContainerLayout.addWidget(popUpWindow.sensorDropdown)
+
+        # dropdown menu: last iteration or minimum loss selection
+        popUpWindow.optimizationDropdown = QComboBox()
+        popUpWindow.optimizationDropdown.addItems(
             [LAST_ITERATION_STRING, COLUMN_LABEL_MINIMUM_ERROR]
         )
-        popUpWindow.comboBox.currentTextChanged.connect(
+        popUpWindow.optimizationDropdown.currentTextChanged.connect(
             lambda: self.onOptimizedSceneSelectorTextChanged(popUpWindow)
         )
 
@@ -414,7 +454,10 @@ class MaterialOptimizerController:
         outputBtn = QPushButton(text=OUTPUT_TO_JSON_STRING)
         outputBtn.clicked.connect(lambda: self.onOutputBtnPressed(popUpWindow))
 
-        centralWidgetContainerLayout.addWidget(popUpWindow.comboBox)
+        centralWidgetContainerLayout.addWidget(
+            popUpWindow.optimizationDropdown
+        )
+        centralWidgetContainerLayout.addWidget(sensorSelectionContainer)
         centralWidgetContainerLayout.addWidget(outputBtn)
         popUpWindow.setCentralWidget(centralWidgetContainer)
 
@@ -425,7 +468,10 @@ class MaterialOptimizerController:
 
     def onOutputBtnPressed(self, popUpWindow: PopUpWindow):
         selectedIteration = len(popUpWindow.sceneParamsHist) - 1
-        if popUpWindow.comboBox.currentText() == COLUMN_LABEL_MINIMUM_ERROR:
+        if (
+            popUpWindow.optimizationDropdown.currentText()
+            == COLUMN_LABEL_MINIMUM_ERROR
+        ):
             selectedIteration = MaterialOptimizerModel.minIdxInDrList(
                 popUpWindow.lossHist
             )
@@ -486,7 +532,10 @@ class MaterialOptimizerController:
             )
 
     def onOptimizedSceneSelectorTextChanged(self, popUpWindow: PopUpWindow):
-        if popUpWindow.comboBox.currentText() == COLUMN_LABEL_MINIMUM_ERROR:
+        if (
+            popUpWindow.optimizationDropdown.currentText()
+            == COLUMN_LABEL_MINIMUM_ERROR
+        ):
             self.showOptimizedPlot(
                 popUpWindow,
                 MaterialOptimizerModel.minIdxInDrList(popUpWindow.lossHist),
@@ -494,7 +543,16 @@ class MaterialOptimizerController:
         else:
             popUpWindow.showOptimizedPlot(len(popUpWindow.sceneParamsHist) - 1)
 
-    def showOptimizedPlot(self, popUpWindow: PopUpWindow, iteration: int):
+    def onSensorIdxChanged(self, popUpWindow: PopUpWindow):
+        self.showOptimizedPlot(
+            popUpWindow,
+            MaterialOptimizerModel.minIdxInDrList(popUpWindow.lossHist),
+            int(popUpWindow.sensorDropdown.currentText()),
+        )
+
+    def showOptimizedPlot(
+        self, popUpWindow: PopUpWindow, iteration: int, sensorIdx: int = 0
+    ):
         logging.info(
             f"Scene parameters in {iteration}:\n {popUpWindow.sceneParamsHist[iteration]}"
         )
@@ -504,14 +562,20 @@ class MaterialOptimizerController:
         sc = MplCanvas()
         self.plotOptimizationResults(
             sc,
-            self.model.refImage,
+            self.model.sensorToReferenceImageDict[
+                self.model.scene.sensors()[sensorIdx]
+            ],
             popUpWindow.initImg,
             MaterialOptimizerModel.convertToBitmap(
-                MaterialOptimizerModel.render(self.model.scene, 512)
+                MaterialOptimizerModel.render(
+                    self.model.scene,
+                    self.model.scene.sensors()[sensorIdx],
+                    512,
+                )
             ),
             {self.model.lossFunction: popUpWindow.lossHist},
             iteration,
-            popUpWindow.lossHist[iteration][0],
+            popUpWindow.lossHist[iteration],
         )
 
     def plotOptimizationResults(

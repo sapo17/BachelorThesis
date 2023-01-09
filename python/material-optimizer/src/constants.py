@@ -1,5 +1,6 @@
 from pathlib import Path
 import re
+import numpy as np
 
 
 """ Configuration Constants """
@@ -11,7 +12,7 @@ MY_APP_ID: str = "sapo.material-optimizer.0.1"  # arbitrary string
 LOG_FILE: Path = Path("material-optimizer.log")
 DEFAULT_MIN_ERR: float = 0.001
 DEFAULT_ITERATION_COUNT: int = 100
-SUPPORTED_SPP_VALUES: list = ["4", "8", "16", "32", "64"]
+SUPPORTED_SPP_VALUES: list = np.array(2 ** np.arange(7)).astype(str)
 CUDA_AD_RGB: str = "cuda_ad_rgb"
 DEFAULT_MITSUBA_SCENE: str = "cbox.xml"
 MITSUBA_PRB_INTEGRATOR: str = "prb"
@@ -62,10 +63,11 @@ LOSS_FUNCTION_STRING: str = "Loss function"
 SPP_DURING_OPT_STRING: str = "Samples per pixel during optimization"
 DEFAULT_MIN_CLAMP_VALUE: float = 0.001
 DEFAULT_MAX_CLAMP_VALUE: float = 0.999
-LOAD_REF_IMG_LABEL: str = "Load a reference image"
+LOAD_REF_IMG_LABEL: str = "Load reference image/s"
 DEFAULT_LEARNING_RATE: float = 0.03
 MAX_LEARNING_RATE: float = 0.9
 MIN_LEARNING_RATE: float = 0.0001
+SENSOR_IDX_LABEL: str = "Sensor Index"
 
 """ 
 BSDF Parameter Patterns Constants
