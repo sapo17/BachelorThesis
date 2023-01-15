@@ -1,0 +1,1310 @@
+<scene version="2.1.0">
+
+<!-- Defaults, these can be set via the command line: -Darg=value -->
+
+	<default name="spp" value="512"/>
+	<default name="resx" value="256"/>
+	<default name="resy" value="256"/>
+	<default name="integrator" value="path" />
+	<default name="sample_border" value="true"/>
+	
+	<!-- Camera and Rendering Parameters -->
+
+	<integrator type="$integrator">
+		<integer name="max_depth" value="12"/>
+	</integrator>
+	<sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="14.987889"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="-148.7433244989288"/>
+			<rotate y="1" angle="69.91285328757755"/>
+			<rotate z="1" angle="-159.14316177448697"/>
+			<translate value="-9.494224 2.004364 12.973854"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/><boolean name="sample_border" value="$sample_border"/>
+		</film>
+	</sensor>
+	<!-- <sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="14.987889"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="-134.9459189037745"/>
+			<rotate y="1" angle="76.71484743669649"/>
+			<rotate z="1" angle="-144.79196444142804"/>
+			<translate value="-9.845461 1.833241 11.649063"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/><boolean name="sample_border" value="$sample_border"/>
+		</film>
+	</sensor>
+	<sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="14.987889"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="-120.63093523369498"/>
+			<rotate y="1" angle="79.7374178802914"/>
+			<rotate z="1" angle="-129.98934624574463"/>
+			<translate value="-9.952674 1.700988 10.926926"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/><boolean name="sample_border" value="$sample_border"/>
+		</film>
+	</sensor>
+	<sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="14.987889"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="-75.55008844734505"/>
+			<rotate y="1" angle="81.91878222570755"/>
+			<rotate z="1" angle="-84.58505585124874"/>
+			<translate value="-10.002868 1.556516 9.656627"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/><boolean name="sample_border" value="$sample_border"/>
+		</film>
+	</sensor>
+	<sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="14.987889"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="-36.339345290325014"/>
+			<rotate y="1" angle="78.29096822919028"/>
+			<rotate z="1" angle="-44.802369728604766"/>
+			<translate value="-9.891767 1.363339 8.362008"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/><boolean name="sample_border" value="$sample_border"/>
+		</film>
+	</sensor> -->
+	<sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="14.987889"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="-25.2391472474629"/>
+			<rotate y="1" angle="75.3046319391423"/>
+			<rotate z="1" angle="-33.773851105987355"/>
+			<translate value="-9.757905 1.328280 7.697661"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/><boolean name="sample_border" value="$sample_border"/>
+		</film>
+	</sensor>
+	<!-- <sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="14.987889"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="-14.387018260161064"/>
+			<rotate y="1" angle="68.63008911993579"/>
+			<rotate z="1" angle="-22.556479460366376"/>
+			<translate value="-9.381949 1.171636 6.454833"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/><boolean name="sample_border" value="$sample_border"/>
+		</film>
+	</sensor>
+	<sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="14.987889"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="-11.147049725473815"/>
+			<rotate y="1" angle="65.39238137786381"/>
+			<rotate z="1" angle="-19.126713629022813"/>
+			<translate value="-9.152105 1.100882 5.895553"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/><boolean name="sample_border" value="$sample_border"/>
+		</film>
+	</sensor>
+	<sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="14.987889"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="-7.088242681479119"/>
+			<rotate y="1" angle="58.50867084551485"/>
+			<rotate z="1" angle="-14.426259404490079"/>
+			<translate value="-8.578268 0.917431 4.793204"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/><boolean name="sample_border" value="$sample_border"/>
+		</film>
+	</sensor>
+	<sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="14.987889"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="-5.103003802985307"/>
+			<rotate y="1" angle="53.85676219050798"/>
+			<rotate z="1" angle="-12.250906479317194"/>
+			<translate value="-8.115016 0.840808 4.100718"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/><boolean name="sample_border" value="$sample_border"/>
+		</film>
+	</sensor> -->
+	<sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="14.987889"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="-3.137248679429192"/>
+			<rotate y="1" angle="46.81423609957787"/>
+			<rotate z="1" angle="-9.707260362587114"/>
+			<translate value="-7.319790 0.690137 3.141010"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/><boolean name="sample_border" value="$sample_border"/>
+		</film>
+	</sensor>
+	<!-- <sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="14.987889"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="-2.4338809213431567"/>
+			<rotate y="1" angle="43.17125225291402"/>
+			<rotate z="1" angle="-8.617887878652391"/>
+			<translate value="-6.864341 0.605874 2.689704"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/><boolean name="sample_border" value="$sample_border"/>
+		</film>
+	</sensor>
+	<sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="14.987889"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="-1.5862767501810824"/>
+			<rotate y="1" angle="35.6215299745971"/>
+			<rotate z="1" angle="-6.838796489027437"/>
+			<translate value="-5.843343 0.420065 1.853415"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/><boolean name="sample_border" value="$sample_border"/>
+		</film>
+	</sensor>
+	<sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="14.987889"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="-1.1313521072340889"/>
+			<rotate y="1" angle="32.05795049212924"/>
+			<rotate z="1" angle="-6.116775911204919"/>
+			<translate value="-5.321468 0.370211 1.507999"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/><boolean name="sample_border" value="$sample_border"/>
+		</film>
+	</sensor>
+	<sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="14.987889"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="-0.4933921082699466"/>
+			<rotate y="1" angle="25.290996920999756"/>
+			<rotate z="1" angle="-4.827340783178178"/>
+			<translate value="-4.273224 0.273920 0.946581"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/><boolean name="sample_border" value="$sample_border"/>
+		</film>
+	</sensor> -->
+	<sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="14.987889"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="0.025974388990445296"/>
+			<rotate y="1" angle="18.64542605670516"/>
+			<rotate z="1" angle="-3.6947421664205615"/>
+			<translate value="-3.185736 0.209708 0.522404"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/><boolean name="sample_border" value="$sample_border"/>
+		</film>
+	</sensor>
+	<!-- <sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="14.987889"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="0.04433424430434369"/>
+			<rotate y="1" angle="16.06025922001057"/>
+			<rotate z="1" angle="-3.289802235201896"/>
+			<translate value="-2.753942 0.166597 0.390447"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/><boolean name="sample_border" value="$sample_border"/>
+		</film>
+	</sensor>
+	<sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="14.987889"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="0.3676030489663341"/>
+			<rotate y="1" angle="9.131596651412806"/>
+			<rotate z="1" angle="-2.2074676208766384"/>
+			<translate value="-1.564893 0.125239 0.142327"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/><boolean name="sample_border" value="$sample_border"/>
+		</film>
+	</sensor>
+	<sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="14.987889"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="0.44941812309378804"/>
+			<rotate y="1" angle="2.0529388597733313"/>
+			<rotate z="1" angle="-1.1468581307538988"/>
+			<translate value="-0.332653 0.087001 0.031299"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/><boolean name="sample_border" value="$sample_border"/>
+		</film>
+	</sensor>
+	<sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="14.987889"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="0.4525156672432417"/>
+			<rotate y="1" angle="-0.49781796413040913"/>
+			<rotate z="1" angle="-0.7975915517076838"/>
+			<translate value="0.113607 0.079526 0.028849"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/><boolean name="sample_border" value="$sample_border"/>
+		</film>
+	</sensor> -->
+	<sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="14.987889"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="0.19612481325188322"/>
+			<rotate y="1" angle="-8.099961464079495"/>
+			<rotate z="1" angle="0.212089540003355"/>
+			<translate value="1.438234 0.043750 0.135523"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/><boolean name="sample_border" value="$sample_border"/>
+		</film>
+	</sensor>
+	<!-- <sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="14.987889"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="-0.15113859937681404"/>
+			<rotate y="1" angle="-12.729327933504385"/>
+			<rotate z="1" angle="0.8825189242604157"/>
+			<translate value="2.237592 0.014055 0.284062"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/><boolean name="sample_border" value="$sample_border"/>
+		</film>
+	</sensor>
+	<sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="14.987889"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="-0.4401926986396429"/>
+			<rotate y="1" angle="-20.31341289353563"/>
+			<rotate z="1" angle="2.0594552871283467"/>
+			<translate value="3.505352 0.056019 0.672310"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/><boolean name="sample_border" value="$sample_border"/>
+		</film>
+	</sensor>
+	<sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="14.987889"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="-0.7516034611391648"/>
+			<rotate y="1" angle="-23.89528703769538"/>
+			<rotate z="1" angle="2.6832299970425773"/>
+			<translate value="4.083961 0.068164 0.911142"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/><boolean name="sample_border" value="$sample_border"/>
+		</film>
+	</sensor>
+	<sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="14.987889"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="-1.5340046721327403"/>
+			<rotate y="1" angle="-31.552762380358416"/>
+			<rotate z="1" angle="4.1260476950525335"/>
+			<translate value="5.262751 0.120998 1.538522"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/><boolean name="sample_border" value="$sample_border"/>
+		</film>
+	</sensor> -->
+	<sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="14.987889"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="-2.0272891515624063"/>
+			<rotate y="1" angle="-35.3050668197829"/>
+			<rotate z="1" angle="4.976190668873443"/>
+			<translate value="5.807777 0.161423 1.904838"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/><boolean name="sample_border" value="$sample_border"/>
+		</film>
+	</sensor>
+	<!-- <sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="14.987889"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="-3.1469580067777767"/>
+			<rotate y="1" angle="-42.826723850800235"/>
+			<rotate z="1" angle="6.775350008053541"/>
+			<translate value="6.822056 0.268859 2.746600"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/><boolean name="sample_border" value="$sample_border"/>
+		</film>
+	</sensor>
+	<sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="14.987889"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="-4.849179459275647"/>
+			<rotate y="1" angle="-50.40462065944345"/>
+			<rotate z="1" angle="9.147314624240298"/>
+			<translate value="7.723061 0.399321 3.724412"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/><boolean name="sample_border" value="$sample_border"/>
+		</film>
+	</sensor>
+	<sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="14.987889"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="-5.8565017344846515"/>
+			<rotate y="1" angle="-53.39847698776763"/>
+			<rotate z="1" angle="10.298793164524298"/>
+			<translate value="8.044638 0.438135 4.140696"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/><boolean name="sample_border" value="$sample_border"/>
+		</film>
+	</sensor>
+	<sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="14.987889"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="-9.435399196826742"/>
+			<rotate y="1" angle="-61.91247512782319"/>
+			<rotate z="1" angle="14.59474480338866"/>
+			<translate value="8.818464 0.618568 5.428413"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/><boolean name="sample_border" value="$sample_border"/>
+		</film>
+	</sensor> -->
+	<sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="14.987889"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="-2.658067793583662"/>
+			<rotate y="1" angle="-52.039402531623914"/>
+			<rotate z="1" angle="9.692003427528597"/>
+			<translate value="7.821831 0.891741 4.025462"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/><boolean name="sample_border" value="$sample_border"/>
+		</film>
+	</sensor>
+	<!-- <sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="14.987889"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="-4.925559330329784"/>
+			<rotate y="1" angle="-59.28188241050614"/>
+			<rotate z="1" angle="12.38810705049618"/>
+			<translate value="8.522531 1.022973 5.082002"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/><boolean name="sample_border" value="$sample_border"/>
+		</film>
+	</sensor>
+	<sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="14.987889"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="-6.557414466450891"/>
+			<rotate y="1" angle="-63.153602462284546"/>
+			<rotate z="1" angle="14.359108399665098"/>
+			<translate value="8.835558 1.115345 5.685867"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/><boolean name="sample_border" value="$sample_border"/>
+		</film>
+	</sensor>
+	<sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="14.987889"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="-11.932889456466816"/>
+			<rotate y="1" angle="-70.38476471771207"/>
+			<rotate z="1" angle="20.142511315218158"/>
+			<translate value="9.321822 1.256634 6.889382"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/><boolean name="sample_border" value="$sample_border"/>
+		</film>
+	</sensor>
+	<sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="14.987889"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="-18.187333806808866"/>
+			<rotate y="1" angle="-74.78393246776638"/>
+			<rotate z="1" angle="26.554677540100496"/>
+			<translate value="9.550719 1.331933 7.680172"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/><boolean name="sample_border" value="$sample_border"/>
+		</film>
+	</sensor> -->
+	<sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="14.987889"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="-36.815266041502326"/>
+			<rotate y="1" angle="-80.39875094667788"/>
+			<rotate z="1" angle="45.709511057936254"/>
+			<translate value="9.744862 1.490854 8.839876"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/><boolean name="sample_border" value="$sample_border"/>
+		</film>
+	</sensor>
+	<!-- <sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="14.987889"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="-56.55654472411726"/>
+			<rotate y="1" angle="-82.39532452409934"/>
+			<rotate z="1" angle="65.49424681914539"/>
+			<translate value="9.802689 1.536418 9.445478"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/><boolean name="sample_border" value="$sample_border"/>
+		</film>
+	</sensor>
+	<sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="14.987889"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="-108.75397392747317"/>
+			<rotate y="1" angle="-82.19647722679275"/>
+			<rotate z="1" angle="118.29853491516235"/>
+			<translate value="9.775648 1.708633 10.611110"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/><boolean name="sample_border" value="$sample_border"/>
+		</film>
+	</sensor>
+	<sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="14.987889"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="-137.3973830799188"/>
+			<rotate y="1" angle="-77.44685247042509"/>
+			<rotate z="1" angle="147.2588785054749"/>
+			<translate value="9.630572 1.833949 11.775310"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/><boolean name="sample_border" value="$sample_border"/>
+		</film>
+	</sensor>
+	<sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="14.987889"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="-142.83822981048093"/>
+			<rotate y="1" angle="-75.27429906903826"/>
+			<rotate z="1" angle="152.8456863786002"/>
+			<translate value="9.536744 1.883028 12.199730"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/><boolean name="sample_border" value="$sample_border"/>
+		</film>
+	</sensor> -->
+	<sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="14.987889"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="-151.85095128825787"/>
+			<rotate y="1" angle="-68.39918091466517"/>
+			<rotate z="1" angle="162.30559400171623"/>
+			<translate value="9.156372 2.027666 13.417057"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/><boolean name="sample_border" value="$sample_border"/>
+		</film>
+	</sensor>
+	<!-- <sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="14.987889"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="-155.51941857071506"/>
+			<rotate y="1" angle="-63.519461545176284"/>
+			<rotate z="1" angle="166.07742936707237"/>
+			<translate value="8.817329 2.089437 14.226818"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/><boolean name="sample_border" value="$sample_border"/>
+		</film>
+	</sensor>
+	<sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="14.987889"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="-158.37726534209676"/>
+			<rotate y="1" angle="-56.69452137554069"/>
+			<rotate z="1" angle="169.47292130916082"/>
+			<translate value="8.212875 2.228534 15.267946"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/><boolean name="sample_border" value="$sample_border"/>
+		</film>
+	</sensor>
+	<sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="14.987889"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="-159.4007145477098"/>
+			<rotate y="1" angle="-52.92864535023538"/>
+			<rotate z="1" angle="170.863411220392"/>
+			<translate value="7.828848 2.311168 15.801153"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/><boolean name="sample_border" value="$sample_border"/>
+		</film>
+	</sensor>
+	<sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="14.987889"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="-161.183107053138"/>
+			<rotate y="1" angle="-45.54292615917423"/>
+			<rotate z="1" angle="173.03005650814677"/>
+			<translate value="6.991630 2.407171 16.789156"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/><boolean name="sample_border" value="$sample_border"/>
+		</film>
+	</sensor> -->
+	<sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="14.987889"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="-161.8330951753131"/>
+			<rotate y="1" angle="-41.884038217028"/>
+			<rotate z="1" angle="173.91713415679135"/>
+			<translate value="6.529147 2.453710 17.232393"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/><boolean name="sample_border" value="$sample_border"/>
+		</film>
+	</sensor>
+	<!-- <sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="14.987889"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="-162.76213750621824"/>
+			<rotate y="1" angle="-34.823992690876814"/>
+			<rotate z="1" angle="175.35278527881468"/>
+			<translate value="5.560560 2.538016 17.998446"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/><boolean name="sample_border" value="$sample_border"/>
+		</film>
+	</sensor>
+	<sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="14.987889"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="-163.58349507466895"/>
+			<rotate y="1" angle="-27.788368506103"/>
+			<rotate z="1" angle="176.59762823618453"/>
+			<translate value="4.509601 2.582878 18.640959"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/><boolean name="sample_border" value="$sample_border"/>
+		</film>
+	</sensor>
+	<sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="14.987889"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="-163.69452662981666"/>
+			<rotate y="1" angle="-25.28936792088271"/>
+			<rotate z="1" angle="176.9573742997691"/>
+			<translate value="4.117973 2.612637 18.829988"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/><boolean name="sample_border" value="$sample_border"/>
+		</film>
+	</sensor>
+	<sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="14.987889"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="-164.22931678145034"/>
+			<rotate y="1" angle="-18.083666903133704"/>
+			<rotate z="1" angle="178.093507966309"/>
+			<translate value="2.940745 2.642502 19.292587"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/><boolean name="sample_border" value="$sample_border"/>
+		</film>
+	</sensor> -->
+	<sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="14.987889"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="-164.47897385599265"/>
+			<rotate y="1" angle="-13.595750236325195"/>
+			<rotate z="1" angle="178.5908003793993"/>
+			<translate value="2.189940 2.644296 19.502947"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/><boolean name="sample_border" value="$sample_border"/>
+		</film>
+	</sensor>
+	<!-- <sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="14.987889"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="-164.52424434981148"/>
+			<rotate y="1" angle="-6.842591085998202"/>
+			<rotate z="1" angle="179.42023123144898"/>
+			<translate value="1.027701 2.678896 19.692743"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/><boolean name="sample_border" value="$sample_border"/>
+		</film>
+	</sensor>
+	<sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="14.987889"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="-164.64030292418835"/>
+			<rotate y="1" angle="-3.0884657608296684"/>
+			<rotate z="1" angle="179.89609051092376"/>
+			<translate value="0.375911 2.670845 19.749748"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/><boolean name="sample_border" value="$sample_border"/>
+		</film>
+	</sensor>
+	<sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="14.987889"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="-164.63350005577502"/>
+			<rotate y="1" angle="3.4902554807370767"/>
+			<rotate z="1" angle="-179.40250006036362"/>
+			<translate value="-0.766839 2.665947 19.736279"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/><boolean name="sample_border" value="$sample_border"/>
+		</film>
+	</sensor>
+	<sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="14.987889"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="-164.47625544070297"/>
+			<rotate y="1" angle="8.298381020789304"/>
+			<rotate z="1" angle="-178.8040388852871"/>
+			<translate value="-1.600166 2.668276 19.640316"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/><boolean name="sample_border" value="$sample_border"/>
+		</film>
+	</sensor> -->
+	<sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="14.987889"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="-164.16586432406092"/>
+			<rotate y="1" angle="15.75511368865108"/>
+			<rotate z="1" angle="-177.80011036032195"/>
+			<translate value="-2.867978 2.645669 19.354015"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/><boolean name="sample_border" value="$sample_border"/>
+		</film>
+	</sensor>
+	<!-- <sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="14.987889"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="-164.06406718467105"/>
+			<rotate y="1" angle="19.357316183328077"/>
+			<rotate z="1" angle="-177.42481878618642"/>
+			<translate value="-3.460211 2.619058 19.162758"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/><boolean name="sample_border" value="$sample_border"/>
+		</film>
+	</sensor>
+	<sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="14.987889"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="-163.74265214270858"/>
+			<rotate y="1" angle="26.04965164532246"/>
+			<rotate z="1" angle="-176.64750227750395"/>
+			<translate value="-4.527212 2.568817 18.711695"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/><boolean name="sample_border" value="$sample_border"/>
+		</film>
+	</sensor>
+	<sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="14.987889"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="-163.3799964185376"/>
+			<rotate y="1" angle="33.0235206747156"/>
+			<rotate z="1" angle="-175.65451571558916"/>
+			<translate value="-5.577450 2.476510 18.111776"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/><boolean name="sample_border" value="$sample_border"/>
+		</film>
+	</sensor> -->
+	<sensor type="perspective">
+		<string name="fov_axis" value="x"/>
+		<float name="fov" value="14.987889"/>
+		<float name="principal_point_offset_x" value="0.000000"/>
+		<float name="principal_point_offset_y" value="-0.000000"/>
+		<float name="near_clip" value="0.100000"/>
+		<float name="far_clip" value="1000.000000"/>
+		<transform name="to_world">
+			<rotate x="1" angle="-163.15373957209175"/>
+			<rotate y="1" angle="35.706876603371"/>
+			<rotate z="1" angle="-175.21478813682373"/>
+			<translate value="-5.960028 2.441444 17.844963"/>
+		</transform>
+		<sampler type="independent">
+			<integer name="sample_count" value="$spp"/>
+		</sampler>
+		<film type="hdrfilm">
+			<integer name="width" value="$resx"/>
+			<integer name="height" value="$resy"/><boolean name="sample_border" value="$sample_border"/>
+		</film>
+	</sensor>
+
+<!-- Materials -->
+
+	<bsdf type="twosided" id="mat-Shape">
+		<bsdf type="principled">
+			<!-- <texture type="bitmap" name="base_color">
+				<string name="filename" value="scenes\metashape\textures\init-texture-768.png"/>
+			</texture> -->
+			<texture type="mesh_attribute" name="base_color">
+                <string name="name" value="vertex_color"/>
+            </texture>
+			<float name="spec_tint" value="0.000000"/>
+			<float name="spec_trans" value="0.000000"/>
+			<float name="metallic" value="0.000000"/>
+			<float name="anisotropic" value="0.000000"/>
+			<float name="roughness" value="0.500000"/>
+			<float name="sheen" value="0.000000"/>
+			<float name="sheen_tint" value="0.500000"/>
+			<float name="clearcoat" value="0.000000"/>
+			<float name="clearcoat_gloss" value="0.173205"/>
+			<float name="specular" value="0.500000"/>
+		</bsdf>
+	</bsdf>
+
+<!-- Emitters -->
+<emitter type="constant"></emitter>
+
+<!-- Shapes -->
+
+	<shape type="ply">
+		<string name="filename" value="meshes/MiniBirdyInit.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-Shape" name="bsdf"/>
+	</shape>
+</scene>
