@@ -38,6 +38,10 @@ Saip Can Hasbay, 01428723, University of Vienna, [saipcanhasbay@gmail.com](saipc
 - To retrieve additional [mitsuba-data](https://github.com/mitsuba-renderer/mitsuba-data) (e.g. test scenes provided from the mitsuba team), then run the following:
   - `git submodule update --init --recursive`
 
+### Tips
+- To change the current mitsuba version, modify the mitsuba line in `requirements.txt` and reinstall dependencies with:
+  - `pip install -r requirements.txt`
+
 ### Known Issues
 
 - After closing _material-optimizer_ sometimes Dr.Jit warns about leaked variables. For example:
@@ -53,4 +57,4 @@ Saip Can Hasbay, 01428723, University of Vienna, [saipcanhasbay@gmail.com](saipc
   ```
   Critical Dr.Jit compiler failure: jit_optix_compile(): optixModuleGetCompilationState() indicates that the compilation did not complete succesfully. The module's compilation state is: 0x2363
   ```
-  - The problem seems to be known and will be fixed in the upcoming versions. [See Also](https://github.com/mitsuba-renderer/mitsuba3/issues/408)
+  - The problem seems to be known and will be fixed in the upcoming mitsuba versions. [See Also](https://github.com/mitsuba-renderer/mitsuba3/issues/408)
