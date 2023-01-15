@@ -116,6 +116,7 @@ class MaterialOptimizerView(QMainWindow):
         samplesPerPixelLabel = QLabel(text=SPP_DURING_OPT_STRING)
         self.samplesPerPixelBox = QComboBox()
         self.samplesPerPixelBox.addItems(SUPPORTED_SPP_VALUES)
+        self.samplesPerPixelBox.setCurrentText(SUPPORTED_SPP_VALUES[2])
         self.sppContainerLayout.addWidget(samplesPerPixelLabel)
         self.sppContainerLayout.addWidget(self.samplesPerPixelBox)
 

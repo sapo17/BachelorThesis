@@ -22,7 +22,7 @@ class MaterialOptimizerModel:
         self.setSceneParams(self.scene)
         self.setInitialSceneParams(self.sceneParams)
         self.setDefaultOptimizationParams(self.initialSceneParams)
-        self.setSamplesPerPixel(SUPPORTED_SPP_VALUES[0])
+        self.setSamplesPerPixel(SUPPORTED_SPP_VALUES[2])
         self.setLossFunction(LOSS_FUNCTION_STRINGS[0])
 
     def setScene(self, fileName: str, sceneRes: tuple, integratorType: str):
@@ -190,8 +190,8 @@ class MaterialOptimizerModel:
         mostLikelyPattern = self.getClosestPattern(key)
         opt[key] = dr.clamp(
             opt[key],
-            DEFAULT_CLAMP_VALUES[mostLikelyPattern][0],
-            DEFAULT_CLAMP_VALUES[mostLikelyPattern][1],
+            self.optimizationParams[key][COLUMN_LABEL_MIN_CLAMP_LABEL],
+            self.optimizationParams[key][COLUMN_LABEL_MAX_CLAMP_LABEL]
         )
 
     def getClosestPattern(self, key: str) -> re.Pattern:
