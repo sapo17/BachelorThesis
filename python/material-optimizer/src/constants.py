@@ -267,7 +267,7 @@ def getDefaultLegalValues(pattern: re.Pattern) -> tuple([int, int]):
     return result
 
 
-DEFAULT_CLAMP_VALUES: dict[re.Pattern, tuple([int, int])] = {
+DEFAULT_CLAMP_VALUES: dict = {
     pattern: getDefaultLegalValues(pattern)
     for pattern in SUPPORTED_MITSUBA_PARAMETER_PATTERNS
 }

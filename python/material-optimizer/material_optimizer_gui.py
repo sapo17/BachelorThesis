@@ -22,7 +22,7 @@ def main():
     # Prepare log file
     LOG_FILE.unlink(missing_ok=True)
     logging.basicConfig(
-        filename=LOG_FILE, encoding="utf-8", level=logging.INFO
+        filename=LOG_FILE, level=logging.INFO
     )
 
     # initialize the PyQt application
