@@ -21,8 +21,12 @@ Saip Can Hasbay, 01428723, University of Vienna, [saipcanhasbay@gmail.com](saipc
    1. Create:
       - ` python -m venv c:\path\to\myenv (e.g. python -m venv cloned_repository_root\myenv)`
    2. Activate your virtual environment:
-      - `path_to_your_venv\Scripts\activate (e.g. myenv\Scripts\activate)`
+      - Windows: `path_to_your_venv\Scripts\activate (e.g. myenv\Scripts\activate)`
+      - Linux: `source path_to_your_venv\bin\activate (e.g. source myenv\bin\activate)`
 3. Install dependencies
+   
+   0. (optional): Make sure pip is updated
+      - `pip install --upgrade pip`
    - `pip install -r requirements.txt`
 
 ### Run
@@ -37,6 +41,39 @@ Saip Can Hasbay, 01428723, University of Vienna, [saipcanhasbay@gmail.com](saipc
 
 - To retrieve additional [mitsuba-data](https://github.com/mitsuba-renderer/mitsuba-data) (e.g. test scenes provided from the mitsuba team), then run the following:
   - `git submodule update --init --recursive`
+
+### Tips
+- Change mitsuba version by modifiying the mitsuba row in the `requirements.txt` file and following the [installation](#installation) steps.
+- On Visual Studio Code we suggests using the Python extension by Microsoft.
+- You can check the availability of CUDA with the following command:
+  - `nvcc --version`
+  - Which should respond with something like this:
+    ```
+    nvcc: NVIDIA (R) Cuda compiler driver
+    Copyright (c) 2005-2022 NVIDIA Corporation
+    Built on Wed_Jun__8_16:49:14_PDT_2022
+    Cuda compilation tools, release 11.7, V11.7.99
+    Build cuda_11.7.r11.7/compiler.31442593_0
+    ```
+- If CUDA is not available in your system, or you receive an error similar to this:
+  
+  ```
+    AttributeError: jit_init_thread_state(): the CUDA backend is inactive because it has not been initialized via jit_init(), or because the CUDA driver library ("libcuda.so") could not be found! Set the DRJIT_LIBCUDA_PATH environment variable to specify its path.
+  ```
+  - **Linux**: You might fix the problem with adding the following lines (_if CUDA is indeed installed in your system_) to your _.bashrc_ file:
+    ```
+    # cuda path
+    export PATH="/usr/local/cuda-12.0/bin:$PATH" # set according to cuda version
+    export LD_LIBRARY_PATH=/usr/lib/wsl/lib:$LD_LIBRARY_PATH
+    ```
+  - Otherwise you might navigate to the `./src/material_optimizer_model.py` file and replace the mitsuba variant as demonstrated below. Although at the moment we don't support LLVM (CPU) variant of mitsuba, it still might help to run the application.
+    ```
+      # set mitsuba variant: NVIDIA CUDA
+      # mi.set_variant(CUDA_AD_RGB) # replace this line with
+      mi.set_variant('llvm_ad_rgb') # with this
+    ```
+  
+
 
 ### Known Issues
 
@@ -54,3 +91,4 @@ Saip Can Hasbay, 01428723, University of Vienna, [saipcanhasbay@gmail.com](saipc
   Critical Dr.Jit compiler failure: jit_optix_compile(): optixModuleGetCompilationState() indicates that the compilation did not complete succesfully. The module's compilation state is: 0x2363
   ```
   - The problem seems to be known and will be fixed in the upcoming versions. [See Also](https://github.com/mitsuba-renderer/mitsuba3/issues/408)
+
