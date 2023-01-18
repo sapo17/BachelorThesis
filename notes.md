@@ -587,4 +587,48 @@ Contributions
 So far, we have accumulated background information from the field of computer graphics. Now that we can roughly understand how a computer can generate beautiful images and simultaneously reacquire scene descriptions from an image, we can explore what this thesis covers. Respectively, our contributions include the following:
 An optimization procedure to acquire scene parameters (i.e., material properties) from an image using the mitsuba renderer. Specifically, the goal is to be able to reconstruct translucent material properties from real and synthetic images. However, the procedure can additionally reconstruct opaque material properties. 
 A mini GUI tool that incorporates the full power of the mitsuba renderer and various features to accomplish the task of inverse rendering.
-A flexible code base in python that makes use of the parallel computing power of NVIDIA GPUs to accomplish the task of inverse rendering. 
+A flexible code base in python that makes use of the parallel computing power of NVIDIA GPUs to accomplish the task of inverse rendering.
+
+### 17.01.23
+physics based or physically based rendering - e.g. phy
+semicolonb
+camera ray tracing 
+italics on quotes
+LTE in first
+comma for both first and second equation
+extension to sphere of the rendering eq.
+replace slide, separe parts into own figures maybe
+replace images in the inverse rendering figure and simplify
+pro estimating 
+related work: group by topic
+MIS: open it up
+More about ADAM, SGD
+material dictionioneries: 2-3 more sentences
+on evaluation: try out 
+  - on multiple camera poses show the difference in results between:
+    - accumulate loss and then optimize
+    - current impl. (opt step at each camera pose)
+  - show differences between using different g(x)
+  - on green algae: show w/o texture
+  - use different optimization and hyperparameters, then show their effect
+    - e.g. crazy learning rate with short iteration counts
+    - default vs. specific clamp values
+
+optimization function bad -- good image
+
+ask: as pplying
+
+
+Feedback from David [Doc](docs\BachelorThesis_draft_v1_cmtDH.pdf). Summary and consequently TODOs:
+1. More detail in description of raytracing. Clarify camera raytracing vs. light raytracing.
+2. The BSDF: Longer quotes should be separated by text style or italics/indent
+3. Rendering Eq:
+   1. surface prop + direct incident light
+   2. Punctuations + indent at the beginnen of a paragraph
+   3. H^2 rather than Large omega
+   4. Replace cosTheta w/ surface normal _dot_ omega
+   5. Replace the figure of the rendering eq.
+4. Physically based Inverse Rendering: differentiating f(x)
+
+- Changes on thesis:
+  - Removed wikipedia references
