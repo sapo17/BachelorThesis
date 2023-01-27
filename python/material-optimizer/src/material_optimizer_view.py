@@ -51,7 +51,7 @@ class MaterialOptimizerView(QMainWindow):
             return QFileDialog.getOpenFileNames(
                 self, IMPORT_FILE_STRING, homeDir, filterStr
             )[0]
-        
+
         # Single selection
         return QFileDialog.getOpenFileName(
             self, IMPORT_FILE_STRING, homeDir, filterStr
@@ -239,6 +239,9 @@ class PopUpWindow(QMainWindow):
 
 
 class MplCanvas(FigureCanvasQTAgg):
-    def __init__(self, parent=None):
-        fig, self.axes = plt.subplots(2, 2, figsize=(10, 10))
+    def __init__(self, isVertical=True, parent=None):
+        if isVertical:
+            fig, self.axes = plt.subplots(2, 2, figsize=(10, 10))
+        else:
+            fig, self.axes = plt.subplots(1, 4, figsize=(25, 5))
         super(MplCanvas, self).__init__(fig)
