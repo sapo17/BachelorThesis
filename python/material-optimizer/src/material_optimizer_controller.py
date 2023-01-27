@@ -525,6 +525,33 @@ class MaterialOptimizerController:
             # output: filled dictionary
             json.dump(outputDict, outfile, indent=4)
 
+            # output: resulting figure
+            outputFileName = outputFileDir + "/figure.png"
+            isVertical = False
+            canvas = MplCanvas(isVertical)
+            currentSensorIdx = int(popUpWindow.sensorDropdown.currentText())
+            self.preparePlot(
+                canvas,
+                self.model.sensorToReferenceImageDict[
+                    self.model.scene.sensors()[currentSensorIdx]
+                ],
+                popUpWindow.initImg,
+                MaterialOptimizerModel.convertToBitmap(
+                    MaterialOptimizerModel.render(
+                        self.model.scene,
+                        self.model.scene.sensors()[currentSensorIdx],
+                        512,
+                    )
+                ),
+                {self.model.lossFunction: popUpWindow.lossHist},
+                selectedIteration,
+                popUpWindow.lossHist[selectedIteration],
+                isVertical,
+            )
+            import matplotlib.pyplot
+
+            matplotlib.pyplot.savefig(outputFileName)
+
             # inform user
             absPath = str(Path(outputFileDir).resolve())
             self.view.showInfoMessageBox(
@@ -560,7 +587,7 @@ class MaterialOptimizerController:
             values=popUpWindow.sceneParamsHist[iteration]
         )
         sc = MplCanvas()
-        self.plotOptimizationResults(
+        self.preparePlot(
             sc,
             self.model.sensorToReferenceImageDict[
                 self.model.scene.sensors()[sensorIdx]
@@ -577,48 +604,72 @@ class MaterialOptimizerController:
             iteration,
             popUpWindow.lossHist[iteration],
         )
+        sc.show()
 
-    def plotOptimizationResults(
+    def preparePlot(
         self,
-        canvas: MplCanvas,
+        canvas,
         refImage,
         initImg,
         finalImg,
         paramErrors,
-        iterationNumber: int,
-        loss: float,
+        iterationNumber,
+        loss,
+        isVertical=True,
     ):
+        if isVertical:
+            for k, v in paramErrors.items():
+                canvas.axes[0][0].plot(v, label=k)
 
-        for k, v in paramErrors.items():
-            canvas.axes[0][0].plot(v, label=k)
+            canvas.axes[0][0].set_xlabel(ITERATION_STRING)
+            canvas.axes[0][0].set_ylabel(LOSS_STRING)
+            canvas.axes[0][0].legend()
+            canvas.axes[0][0].set_title(PARAMETER_ERROR_PLOT_STRING)
 
-        canvas.axes[0][0].set_xlabel(ITERATION_STRING)
-        canvas.axes[0][0].set_ylabel(LOSS_STRING)
-        canvas.axes[0][0].legend()
-        canvas.axes[0][0].set_title(PARAMETER_ERROR_PLOT_STRING)
+            canvas.axes[0][1].imshow(
+                MaterialOptimizerModel.convertToBitmap(initImg)
+            )
+            canvas.axes[0][1].axis(OFF_STRING)
+            canvas.axes[0][1].set_title(INITIAL_IMAGE_STRING)
 
-        canvas.axes[0][1].imshow(
-            MaterialOptimizerModel.convertToBitmap(initImg)
-        )
-        canvas.axes[0][1].axis(OFF_STRING)
-        canvas.axes[0][1].set_title(INITIAL_IMAGE_STRING)
+            canvas.axes[1][0].imshow(
+                MaterialOptimizerModel.convertToBitmap(finalImg)
+            )
+            canvas.axes[1][0].axis(OFF_STRING)
+            canvas.axes[1][0].set_title(
+                f"Optimized image: Iteration #{iterationNumber}, Loss: {loss:6f}"
+            )
 
-        canvas.axes[1][0].imshow(
-            MaterialOptimizerModel.convertToBitmap(finalImg)
-        )
-        canvas.axes[1][0].axis(OFF_STRING)
-        canvas.axes[1][0].set_title(
-            f"Optimized image: Iteration #{iterationNumber}, Loss: {loss:6f}"
-        )
+            canvas.axes[1][1].imshow(
+                MaterialOptimizerModel.convertToBitmap(refImage)
+            )
+            canvas.axes[1][1].axis(OFF_STRING)
+            canvas.axes[1][1].set_title(REFERENCE_IMAGE_STRING)
+        else:
+            for k, v in paramErrors.items():
+                canvas.axes[0].plot(v, label=k)
 
-        canvas.axes[1][1].imshow(
-            MaterialOptimizerModel.convertToBitmap(refImage)
-        )
-        canvas.axes[1][1].axis(OFF_STRING)
-        canvas.axes[1][1].set_title(REFERENCE_IMAGE_STRING)
+            canvas.axes[0].set_xlabel(ITERATION_STRING)
+            canvas.axes[0].set_ylabel(LOSS_STRING)
+            canvas.axes[0].legend()
+            canvas.axes[0].set_title(PARAMETER_ERROR_PLOT_STRING)
 
-        import matplotlib.pyplot
+            canvas.axes[1].imshow(
+                MaterialOptimizerModel.convertToBitmap(initImg)
+            )
+            canvas.axes[1].axis(OFF_STRING)
+            canvas.axes[1].set_title(INITIAL_IMAGE_STRING)
 
-        matplotlib.pyplot.savefig(IMAGES_DIR_PATH + FIGURE_FILE_NAME)
+            canvas.axes[2].imshow(
+                MaterialOptimizerModel.convertToBitmap(finalImg)
+            )
+            canvas.axes[2].axis(OFF_STRING)
+            canvas.axes[2].set_title(
+                f"Optimized image: Iteration #{iterationNumber}, Loss: {loss:6f}"
+            )
 
-        canvas.show()
+            canvas.axes[3].imshow(
+                MaterialOptimizerModel.convertToBitmap(refImage)
+            )
+            canvas.axes[3].axis(OFF_STRING)
+            canvas.axes[3].set_title(REFERENCE_IMAGE_STRING)
