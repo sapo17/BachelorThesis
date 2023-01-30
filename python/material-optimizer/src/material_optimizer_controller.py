@@ -5,7 +5,7 @@ import mitsuba as mi
 import drjit as dr
 import logging
 from PyQt6.QtWidgets import *
-
+import matplotlib.pyplot
 import numpy as np
 from src.constants import *
 from src.material_optimizer_model import MaterialOptimizerModel
@@ -149,7 +149,7 @@ class MaterialOptimizerController:
         self.view.optimizeButton.setDisabled(True)
         self.view.progressBar.setValue(50)
 
-        opts, initImg = self.model.prepareOptimization(checkedRows)
+        opts, sensorToInitImg = self.model.prepareOptimization(checkedRows)
 
         self.view.progressBar.setValue(100)
         self.view.progressBar.reset()
@@ -167,7 +167,7 @@ class MaterialOptimizerController:
         else:
             popUp = PopUpWindow(self.view)
             self.initOptimizedSceneSelector(
-                popUp, initImg, lossHist, sceneParamsHist
+                popUp, sensorToInitImg, lossHist, sceneParamsHist
             )
 
         self.view.optimizeButton.setDisabled(False)
@@ -414,9 +414,13 @@ class MaterialOptimizerController:
         ).text()
 
     def initOptimizedSceneSelector(
-        self, popUpWindow: PopUpWindow, initImg, lossHist, sceneParamsHist
+        self,
+        popUpWindow: PopUpWindow,
+        sensorToInitImg,
+        lossHist,
+        sceneParamsHist,
     ):
-        popUpWindow.initImg = initImg
+        popUpWindow.sensorToInitImg = sensorToInitImg
         popUpWindow.lossHist = lossHist
         popUpWindow.sceneParamsHist = sceneParamsHist
 
@@ -526,37 +530,41 @@ class MaterialOptimizerController:
             json.dump(outputDict, outfile, indent=4)
 
             # output: resulting figure
-            outputFileName = outputFileDir + "/figure.png"
-            isVertical = False
-            canvas = MplCanvas(isVertical)
-            currentSensorIdx = int(popUpWindow.sensorDropdown.currentText())
-            self.preparePlot(
-                canvas,
-                self.model.sensorToReferenceImageDict[
-                    self.model.scene.sensors()[currentSensorIdx]
-                ],
-                popUpWindow.initImg,
-                MaterialOptimizerModel.convertToBitmap(
-                    MaterialOptimizerModel.render(
-                        self.model.scene,
-                        self.model.scene.sensors()[currentSensorIdx],
-                        512,
-                    )
-                ),
-                {self.model.lossFunction: popUpWindow.lossHist},
-                selectedIteration,
-                popUpWindow.lossHist[selectedIteration],
-                isVertical,
-            )
-            import matplotlib.pyplot
-
-            matplotlib.pyplot.savefig(outputFileName)
+            for sensorIdx in range(len(self.model.scene.sensors())):
+                self.outputFigure(
+                    popUpWindow, selectedIteration, outputFileDir, sensorIdx
+                )
 
             # inform user
             absPath = str(Path(outputFileDir).resolve())
             self.view.showInfoMessageBox(
                 f"The output can be found at: '{absPath}'"
             )
+
+    def outputFigure(
+        self, popUpWindow, selectedIteration, outputFileDir, sensorIdx
+    ):
+        outputFileName = outputFileDir + f"/figure-sensor{sensorIdx}.png"
+        isVertical = False
+        canvas = MplCanvas(isVertical)
+        currentSensor = self.model.scene.sensors()[sensorIdx]
+        self.preparePlot(
+            canvas,
+            self.model.sensorToReferenceImageDict[currentSensor],
+            popUpWindow.sensorToInitImg[currentSensor],
+            MaterialOptimizerModel.convertToBitmap(
+                MaterialOptimizerModel.render(
+                    self.model.scene,
+                    currentSensor,
+                    512,
+                )
+            ),
+            {self.model.lossFunction: popUpWindow.lossHist},
+            selectedIteration,
+            popUpWindow.lossHist[selectedIteration],
+            isVertical,
+        )
+        matplotlib.pyplot.savefig(outputFileName)
 
     def onOptimizedSceneSelectorTextChanged(self, popUpWindow: PopUpWindow):
         if (
@@ -568,7 +576,9 @@ class MaterialOptimizerController:
                 MaterialOptimizerModel.minIdxInDrList(popUpWindow.lossHist),
             )
         else:
-            popUpWindow.showOptimizedPlot(len(popUpWindow.sceneParamsHist) - 1)
+            self.showOptimizedPlot(
+                popUpWindow, len(popUpWindow.sceneParamsHist) - 1
+            )
 
     def onSensorIdxChanged(self, popUpWindow: PopUpWindow):
         self.showOptimizedPlot(
@@ -587,16 +597,15 @@ class MaterialOptimizerController:
             values=popUpWindow.sceneParamsHist[iteration]
         )
         sc = MplCanvas()
+        currentSensor = self.model.scene.sensors()[sensorIdx]
         self.preparePlot(
             sc,
-            self.model.sensorToReferenceImageDict[
-                self.model.scene.sensors()[sensorIdx]
-            ],
-            popUpWindow.initImg,
+            self.model.sensorToReferenceImageDict[currentSensor],
+            popUpWindow.sensorToInitImg[currentSensor],
             MaterialOptimizerModel.convertToBitmap(
                 MaterialOptimizerModel.render(
                     self.model.scene,
-                    self.model.scene.sensors()[sensorIdx],
+                    currentSensor,
                     512,
                 )
             ),

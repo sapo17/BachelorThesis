@@ -191,7 +191,7 @@ class MaterialOptimizerModel:
         opt[key] = dr.clamp(
             opt[key],
             self.optimizationParams[key][COLUMN_LABEL_MIN_CLAMP_LABEL],
-            self.optimizationParams[key][COLUMN_LABEL_MAX_CLAMP_LABEL]
+            self.optimizationParams[key][COLUMN_LABEL_MAX_CLAMP_LABEL],
         )
 
     def getClosestPattern(self, key: str) -> re.Pattern:
@@ -404,8 +404,11 @@ class MaterialOptimizerModel:
     def prepareOptimization(self, checkedRows: list):
         opts = self.initOptimizers(checkedRows)
         self.updateSceneParamsWithOptimizers(opts)
-        initImg = self.render(self.scene, self.scene.sensors()[0], spp=256)
-        return opts, initImg
+        sensorToInitImg = {
+            sensor: self.render(self.scene, sensor, spp=256)
+            for sensor in self.scene.sensors()
+        }
+        return opts, sensorToInitImg
 
     def optimizationLoop(self, opts: list, setProgressValue: callable = None):
         lossHist = []

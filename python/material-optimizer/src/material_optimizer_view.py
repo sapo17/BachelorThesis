@@ -233,7 +233,7 @@ class PopUpWindow(QMainWindow):
         # the amount of warned leaked parameters.
         self.lossHist = None
         self.sceneParamsHist = None
-        self.initImg = None
+        self.sensorToInitImg = None
 
         return super().closeEvent(a0)
 
