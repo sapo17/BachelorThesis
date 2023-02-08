@@ -48,22 +48,14 @@
 			<rgb value="0.800000 0.800000 0.800000" name="reflectance"/>
 		</bsdf>
 	</bsdf>
-	<bsdf type="twosided" id="mat-material-bsdf">
-		<bsdf type="principled">
-			<texture name="base_color" type="bitmap">
-				<string name="filename" value="scenes\texture-scanner\textures\init-texture-512.png"/>
-			</texture>
-			<float name="spec_tint" value="0.000000"/>
-			<float name="spec_trans" value="0.000000"/>
-			<float name="metallic" value="0.000000"/>
-			<float name="anisotropic" value="0.000000"/>
-			<float name="roughness" value="0.500000"/>
-			<float name="sheen" value="0.000000"/>
-			<float name="sheen_tint" value="0.500000"/>
-			<float name="clearcoat" value="0.000000"/>
-			<float name="clearcoat_gloss" value="0.173205"/>
-			<float name="specular" value="0.500000"/>
-		</bsdf>
+	<bsdf type="principled" id="mat-material-bsdf">
+		<!-- <rgb value="0.1 0.1 0.1" name="base_color"/> -->
+		<texture name="base_color" type="bitmap">
+			<string name="filename" value="scenes\texture-scanner\textures\init-texture-512.png"/>
+		</texture>
+		<float name="roughness" value="0.7"/>
+		<float name="spec_trans" value="0.1"/>
+		<float name="eta" value="1.54"/>
 	</bsdf>
 	<bsdf type="diffuse" id="empty-emitter-bsdf">
 		<rgb value="0.000000" name="reflectance"/>
