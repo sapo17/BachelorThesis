@@ -5,7 +5,7 @@ import mitsuba as mi
 import drjit as dr
 import logging
 from PyQt6.QtWidgets import *
-import matplotlib.pyplot
+import matplotlib.pyplot as plt
 import numpy as np
 from src.constants import *
 from src.material_optimizer_model import MaterialOptimizerModel
@@ -14,6 +14,8 @@ from src.material_optimizer_view import (
     MplCanvas,
     PopUpWindow,
 )
+from PIL import Image, ImageChops, ImageOps
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 
 class MaterialOptimizerController:
@@ -155,7 +157,7 @@ class MaterialOptimizerController:
         self.view.progressBar.reset()
 
         # initiate the optimization loop
-        lossHist, sceneParamsHist = self.model.optimizationLoop(
+        lossHist, sceneParamsHist, optLog = self.model.optimizationLoop(
             opts, lambda x: self.view.progressBar.setValue(x)
         )
 
@@ -167,7 +169,7 @@ class MaterialOptimizerController:
         else:
             popUp = PopUpWindow(self.view)
             self.initOptimizedSceneSelector(
-                popUp, sensorToInitImg, lossHist, sceneParamsHist
+                popUp, sensorToInitImg, lossHist, sceneParamsHist, optLog
             )
 
         self.view.optimizeButton.setDisabled(False)
@@ -419,10 +421,12 @@ class MaterialOptimizerController:
         sensorToInitImg,
         lossHist,
         sceneParamsHist,
+        optLog,
     ):
         popUpWindow.sensorToInitImg = sensorToInitImg
         popUpWindow.lossHist = lossHist
         popUpWindow.sceneParamsHist = sceneParamsHist
+        popUpWindow.optLog = optLog
 
         # central widget
         centralWidgetContainer = QWidget()
@@ -535,6 +539,11 @@ class MaterialOptimizerController:
                     popUpWindow, selectedIteration, outputFileDir, sensorIdx
                 )
 
+            # output: optimization log file
+            optLogFileName = outputFileDir + "/optimization.log"
+            with open(optLogFileName, "w") as f:
+                f.write(popUpWindow.optLog)
+
             # inform user
             absPath = str(Path(outputFileDir).resolve())
             self.view.showInfoMessageBox(
@@ -545,8 +554,7 @@ class MaterialOptimizerController:
         self, popUpWindow, selectedIteration, outputFileDir, sensorIdx
     ):
         outputFileName = outputFileDir + f"/figure-sensor{sensorIdx}.png"
-        isVertical = False
-        canvas = MplCanvas(isVertical)
+        canvas = MplCanvas()
         currentSensor = self.model.scene.sensors()[sensorIdx]
         self.preparePlot(
             canvas,
@@ -562,9 +570,8 @@ class MaterialOptimizerController:
             {self.model.lossFunction: popUpWindow.lossHist},
             selectedIteration,
             popUpWindow.lossHist[selectedIteration],
-            isVertical,
         )
-        matplotlib.pyplot.savefig(outputFileName)
+        plt.savefig(outputFileName)
 
     def onOptimizedSceneSelectorTextChanged(self, popUpWindow: PopUpWindow):
         if (
@@ -624,61 +631,46 @@ class MaterialOptimizerController:
         paramErrors,
         iterationNumber,
         loss,
-        isVertical=True,
     ):
-        if isVertical:
-            for k, v in paramErrors.items():
-                canvas.axes[0][0].plot(v, label=k)
+        for k, v in paramErrors.items():
+            canvas.axes[0].plot(v, label=k)
 
-            canvas.axes[0][0].set_xlabel(ITERATION_STRING)
-            canvas.axes[0][0].set_ylabel(LOSS_STRING)
-            canvas.axes[0][0].legend()
-            canvas.axes[0][0].set_title(PARAMETER_ERROR_PLOT_STRING)
+        canvas.axes[0].set_xlabel(ITERATION_STRING)
+        canvas.axes[0].set_ylabel(LOSS_STRING)
+        canvas.axes[0].legend()
+        canvas.axes[0].set_title(PARAMETER_ERROR_PLOT_STRING)
 
-            canvas.axes[0][1].imshow(
-                MaterialOptimizerModel.convertToBitmap(initImg)
-            )
-            canvas.axes[0][1].axis(OFF_STRING)
-            canvas.axes[0][1].set_title(INITIAL_IMAGE_STRING)
+        canvas.axes[1].imshow(MaterialOptimizerModel.convertToBitmap(initImg))
+        canvas.axes[1].axis(OFF_STRING)
+        canvas.axes[1].set_title(INITIAL_IMAGE_STRING)
 
-            canvas.axes[1][0].imshow(
-                MaterialOptimizerModel.convertToBitmap(finalImg)
-            )
-            canvas.axes[1][0].axis(OFF_STRING)
-            canvas.axes[1][0].set_title(
-                f"Optimized image: Iteration #{iterationNumber}, Loss: {loss:6f}"
-            )
+        canvas.axes[2].imshow(finalImg)
+        canvas.axes[2].axis(OFF_STRING)
+        canvas.axes[2].set_title(
+            f"Optimized image: Iteration #{iterationNumber}, Loss: {loss:6f}"
+        )
 
-            canvas.axes[1][1].imshow(
-                MaterialOptimizerModel.convertToBitmap(refImage)
-            )
-            canvas.axes[1][1].axis(OFF_STRING)
-            canvas.axes[1][1].set_title(REFERENCE_IMAGE_STRING)
-        else:
-            for k, v in paramErrors.items():
-                canvas.axes[0].plot(v, label=k)
+        refBmp = MaterialOptimizerModel.convertToBitmap(refImage)
+        canvas.axes[3].imshow(refBmp)
+        canvas.axes[3].axis(OFF_STRING)
+        canvas.axes[3].set_title(REFERENCE_IMAGE_STRING)
 
-            canvas.axes[0].set_xlabel(ITERATION_STRING)
-            canvas.axes[0].set_ylabel(LOSS_STRING)
-            canvas.axes[0].legend()
-            canvas.axes[0].set_title(PARAMETER_ERROR_PLOT_STRING)
+        refPilImg = Image.fromarray(np.uint8(refBmp))
+        finalPilImg = Image.fromarray(np.uint8(finalImg))
+        diff_np = self.normalized_absolute_error(refPilImg, finalPilImg)
+        im4 = canvas.axes[4].imshow(diff_np, cmap="inferno")
+        divider = make_axes_locatable(canvas.axes[4])
+        cax4 = divider.append_axes("right", size="5%", pad=0.05)
+        plt.colorbar(im4, cax=cax4)
+        canvas.axes[4].axis(OFF_STRING)
+        canvas.axes[4].set_title(r"Absolute Error: |$y_{ref} - y_{opt}$|")
 
-            canvas.axes[1].imshow(
-                MaterialOptimizerModel.convertToBitmap(initImg)
-            )
-            canvas.axes[1].axis(OFF_STRING)
-            canvas.axes[1].set_title(INITIAL_IMAGE_STRING)
+        plt.tight_layout()
 
-            canvas.axes[2].imshow(
-                MaterialOptimizerModel.convertToBitmap(finalImg)
-            )
-            canvas.axes[2].axis(OFF_STRING)
-            canvas.axes[2].set_title(
-                f"Optimized image: Iteration #{iterationNumber}, Loss: {loss:6f}"
-            )
-
-            canvas.axes[3].imshow(
-                MaterialOptimizerModel.convertToBitmap(refImage)
-            )
-            canvas.axes[3].axis(OFF_STRING)
-            canvas.axes[3].set_title(REFERENCE_IMAGE_STRING)
+    @staticmethod
+    def normalized_absolute_error(ref: Image, opt: Image):
+        diff = ImageChops.difference(ref, opt)
+        diff = ImageOps.grayscale(diff)
+        diff_np = np.array(diff, dtype="float64")
+        diff_np *= 1.0 / diff_np.max()
+        return diff_np

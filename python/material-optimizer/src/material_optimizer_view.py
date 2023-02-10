@@ -239,9 +239,6 @@ class PopUpWindow(QMainWindow):
 
 
 class MplCanvas(FigureCanvasQTAgg):
-    def __init__(self, isVertical=True, parent=None):
-        if isVertical:
-            fig, self.axes = plt.subplots(2, 2, figsize=(10, 10))
-        else:
-            fig, self.axes = plt.subplots(1, 4, figsize=(25, 5))
+    def __init__(self, parent=None):
+        fig, self.axes = plt.subplots(1, 5, figsize=(20, 4))
         super(MplCanvas, self).__init__(fig)

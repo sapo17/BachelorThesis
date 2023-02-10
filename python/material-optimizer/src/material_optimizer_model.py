@@ -7,6 +7,7 @@ import mitsuba as mi
 import drjit as dr
 import logging
 from src.constants import *
+import time
 
 # set mitsuba variant: NVIDIA CUDA
 mi.set_variant(CUDA_AD_RGB)
@@ -413,6 +414,9 @@ class MaterialOptimizerModel:
     def optimizationLoop(self, opts: list, setProgressValue: callable = None):
         lossHist = []
         sceneParamsHist = []
+
+        startTime = time.time()
+        optLog = "Optimization loop begin\n"
         for it in range(self.iterationCount):
 
             if setProgressValue is not None:
@@ -422,8 +426,12 @@ class MaterialOptimizerModel:
             for sensorIdx, sensor in enumerate(self.scene.sensors()):
 
                 loss = self.computeLoss(sensor=sensor, seed=it)
-                logging.info(f"Sensor {sensorIdx:02d}")
-                logging.info(f"\tcurrent loss= {loss[0]:6f}")
+                currentSensorStr = f"Sensor {sensorIdx:02d}"
+                logging.info(currentSensorStr)
+                optLog += currentSensorStr + "\n"
+                currentLossStr = f"\tcurrent loss= {loss[0]:6f}"
+                logging.info(currentLossStr)
+                optLog += currentLossStr + "\n"
 
                 # Backpropagate through the rendering process
                 dr.backward(loss)
@@ -444,10 +452,21 @@ class MaterialOptimizerModel:
             if total_loss < self.minError:
                 break
 
-            logging.info(f"Iteration {it:02d}")
-            logging.info(f"\ttotal loss= {total_loss:6f}")
+            currentItStr = f"Iteration {it:02d}"
+            logging.info(currentItStr)
+            optLog += currentItStr + "\n"
+            currentTotalLossStr = f"\ttotal loss= {total_loss:6f}"
+            logging.info(currentTotalLossStr)
+            optLog += currentTotalLossStr + "\n"
+            optLog += f"Current scene parameters:\n \t{sceneParamsHist[it]}\n"
 
-        return lossHist, sceneParamsHist
+        endTime = time.time()
+        elapsedTime = endTime - startTime
+        optLog += f"Optimization loop end. Elapsed time: {elapsedTime:.3f}s\n"
+        optLog += f"Initial scene parameters:\n {sceneParamsHist[0]}\n"
+        optLog += f"End scene parameters:\n {sceneParamsHist[-1]}\n"
+
+        return lossHist, sceneParamsHist, optLog
 
     @staticmethod
     def convertToBitmap(image: mi.TensorXf):
