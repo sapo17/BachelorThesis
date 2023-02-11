@@ -465,6 +465,12 @@ class MaterialOptimizerModel:
         optLog += f"Optimization loop end. Elapsed time: {elapsedTime:.3f}s\n"
         optLog += f"Initial scene parameters:\n {sceneParamsHist[0]}\n"
         optLog += f"End scene parameters:\n {sceneParamsHist[-1]}\n"
+        optLog += "Hyperparameters:\n"
+        optLog += f"\tminimum error:{self.minError},\n"
+        optLog += f"\tspp:{self.samplesPerPixel},\n"
+        optLog += f"\toptimization func.:{self.lossFunction},\n"
+        optLog += f"\titeraration count:{self.iterationCount}\n"
+        optLog += f"Optimization parameters:\n \t{self.optimizationParams}"
 
         return lossHist, sceneParamsHist, optLog
 
