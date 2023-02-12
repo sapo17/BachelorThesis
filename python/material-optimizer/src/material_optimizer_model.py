@@ -9,9 +9,6 @@ import logging
 from src.constants import *
 import time
 
-# set mitsuba variant: NVIDIA CUDA
-mi.set_variant(CUDA_AD_RGB)
-
 
 class MaterialOptimizerModel:
     """This class contains the business logic of material-optimizer."""
@@ -188,12 +185,21 @@ class MaterialOptimizerModel:
 
     def ensureLegalParamValues(self, opt, key):
         # Post-process the optimized parameters to ensure legal values
-        mostLikelyPattern = self.getClosestPattern(key)
-        opt[key] = dr.clamp(
-            opt[key],
-            self.optimizationParams[key][COLUMN_LABEL_MIN_CLAMP_LABEL],
-            self.optimizationParams[key][COLUMN_LABEL_MAX_CLAMP_LABEL],
-        )
+        if VERTEX_POSITIONS_PATTERN.search(key):
+            self.ensureLegalVertexPositions(opt, key)
+        else:
+            opt[key] = dr.clamp(
+                opt[key],
+                self.optimizationParams[key][COLUMN_LABEL_MIN_CLAMP_LABEL],
+                self.optimizationParams[key][COLUMN_LABEL_MAX_CLAMP_LABEL],
+            )
+
+    def ensureLegalVertexPositions(self, opt, key):
+        point = dr.unravel(mi.Point3f, opt[key])
+        minVal = self.optimizationParams[key][COLUMN_LABEL_MIN_CLAMP_LABEL]
+        maxVal = self.optimizationParams[key][COLUMN_LABEL_MAX_CLAMP_LABEL]
+        clampedPoint = dr.clamp(point, minVal, maxVal)
+        opt[key] = dr.ravel(clampedPoint)
 
     def getClosestPattern(self, key: str) -> re.Pattern:
         for pattern in SUPPORTED_MITSUBA_PARAMETER_PATTERNS:
@@ -243,6 +249,21 @@ class MaterialOptimizerModel:
             green = float(result[1])
             blue = float(result[2])
             return mi.Color3f(red, green, blue)
+        except:
+            raise ValueError(errMsg)
+
+    def stringToPoint3f(self, newValue) -> mi.Point3f:
+        result = newValue.split(",")
+        errMsg = (
+            "Invalid XYZ input. Please use the following format: 1.0, 1.0, 1.0"
+        )
+        if len(result) != 3:
+            raise ValueError(errMsg)
+        try:
+            x = float(result[0])
+            y = float(result[1])
+            z = float(result[2])
+            return mi.Point3f(x, y, z)
         except:
             raise ValueError(errMsg)
 
@@ -422,23 +443,26 @@ class MaterialOptimizerModel:
             if setProgressValue is not None:
                 setProgressValue(int(it / self.iterationCount * 100))
 
+            loss = 0.0
+            for sensor in self.scene.sensors():
+                loss += self.computeLoss(sensor=sensor, seed=it)
+
             total_loss = 0.0
-            for sensorIdx, sensor in enumerate(self.scene.sensors()):
-
-                loss = self.computeLoss(sensor=sensor, seed=it)
-                currentSensorStr = f"Sensor {sensorIdx:02d}"
-                logging.info(currentSensorStr)
-                optLog += currentSensorStr + "\n"
-                currentLossStr = f"\tcurrent loss= {loss[0]:6f}"
-                logging.info(currentLossStr)
-                optLog += currentLossStr + "\n"
-
+            if it > 0:
+                margin = lossHist[-1] * 0.15
+                if loss[0] < lossHist[-1] + margin:
+                    # Backpropagate through the rendering process
+                    dr.backward(loss)
+                    self.updateAfterStep(opts, self.sceneParams)
+                    total_loss = loss[0]
+                else:
+                    total_loss = lossHist[-1]  # no changes
+                    logging.info(f"Skipping backprop. and update at it: {it}")
+            else:
                 # Backpropagate through the rendering process
                 dr.backward(loss)
-
                 self.updateAfterStep(opts, self.sceneParams)
-
-                total_loss += loss[0]
+                total_loss = loss[0]
 
             # update loss and scene parameter histograms
             sceneParamsHist.append(

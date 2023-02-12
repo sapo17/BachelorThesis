@@ -194,7 +194,18 @@ class MaterialOptimizerView(QMainWindow):
                     self.setCheckboxAsQTableItem(result, row, col, value)
                     continue
                 else:
-                    item = QTableWidgetItem(str(value))
+                    # special case: mi.Point3f for max/min clamp value of vertex pos.
+                    if VERTEX_POSITIONS_PATTERN.search(param):
+                        if (
+                            label == COLUMN_LABEL_MIN_CLAMP_LABEL
+                            or label == COLUMN_LABEL_MAX_CLAMP_LABEL
+                        ):
+                            itemContent = self.Point3fToCellString(value)
+                            item = QTableWidgetItem(itemContent)
+                        else:
+                            item = QTableWidgetItem(str(value))
+                    else:
+                        item = QTableWidgetItem(str(value))
                 result.setItem(row, col, item)
 
         return result
@@ -210,6 +221,10 @@ class MaterialOptimizerView(QMainWindow):
     @staticmethod
     def Color3fToCellString(color3f: mi.Color3f):
         return str(color3f).translate(str.maketrans({"[": None, "]": None}))
+
+    @staticmethod
+    def Point3fToCellString(point3f: mi.Point3f):
+        return str(point3f).translate(str.maketrans({"[": None, "]": None}))
 
     def replaceTable(self, newTable: QTableWidget):
         self.tableContainerLayout.replaceWidget(self.table, newTable)

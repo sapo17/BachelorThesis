@@ -353,12 +353,48 @@ class MaterialOptimizerController:
 
         return True
 
+    def onMinOrMaxClampValueOfVertexPositionChanged(
+        self, row, col, paramRow, paramCol
+    ):
+        # assumption: we are sure that it is vertex pos' and min or max clamp
+        try:
+            newValue = self.model.stringToPoint3f(
+                self.view.table.item(row, col).text()
+            )
+            return True, paramRow, paramCol, newValue
+        except ValueError as err:
+            if paramCol == COLUMN_LABEL_MIN_CLAMP_LABEL:
+                self.view.table.item(row, col).setText(
+                    MaterialOptimizerView.Point3fToCellString(
+                        (-MAX_VERTEX_POSITION_VALUE)
+                    )
+                )
+            else:
+                self.view.table.item(row, col).setText(
+                    MaterialOptimizerView.Point3fToCellString(
+                        (MAX_VERTEX_POSITION_VALUE)
+                    )
+                )
+            errMsg = "Optimization parameter is not changed. " + str(err)
+            self.view.showInfoMessageBox(errMsg)
+            return False, None, None, None
+
     def onOptimizationParamChanged(self, row, col):
         paramRow = self.getRowLabelText()
         paramCol = self.getColumnLabelText()
         try:
-            newValue = float(self.view.table.item(row, col).text())
+            # special case: vertex positions
+            if VERTEX_POSITIONS_PATTERN.search(paramRow):
+                if (
+                    paramCol == COLUMN_LABEL_MIN_CLAMP_LABEL
+                    or paramCol == COLUMN_LABEL_MAX_CLAMP_LABEL
+                ):
+                    # we are sure that it is vertex pos. and min or max clamp val.
+                    return self.onMinOrMaxClampValueOfVertexPositionChanged(
+                        row, col, paramRow, paramCol
+                    )
 
+            newValue = float(self.view.table.item(row, col).text())
             if not self.isLegalLearningRate(row, col, paramCol, newValue):
                 return False, None, None, None
             if not self.isLegalClampValue(

@@ -6,6 +6,12 @@ from PyQt6.QtWidgets import QApplication
 import sys
 import logging
 import ctypes
+import mitsuba as mi
+
+# set mitsuba variant: NVIDIA CUDA
+CUDA_AD_RGB: str = "cuda_ad_rgb"
+mi.set_variant(CUDA_AD_RGB)
+
 from src.constants import LOG_FILE, MY_APP_ID
 from src.material_optimizer_model import MaterialOptimizerModel
 from src.material_optimizer_view import MaterialOptimizerView
