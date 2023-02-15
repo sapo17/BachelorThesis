@@ -120,7 +120,9 @@ class MaterialOptimizerController:
 
     def onOptimizeBtnClicked(self):
         try:
+            self.view.setDisabled(True)
             self.optimizeMaterials()
+            self.view.setDisabled(False)
         except Exception as err:
             msg = f"Exiting program. Runtime error during optimiztion: {err}"
             logging.error(msg)
@@ -158,7 +160,9 @@ class MaterialOptimizerController:
 
         # initiate the optimization loop
         lossHist, sceneParamsHist, optLog = self.model.optimizationLoop(
-            opts, lambda x: self.view.progressBar.setValue(x)
+            opts,
+            lambda x: self.view.progressBar.setValue(x),
+            self.view.showDiffRender,
         )
 
         self.view.progressBar.setValue(self.view.progressBar.maximum())
@@ -211,6 +215,18 @@ class MaterialOptimizerController:
         self.view.lossFunctionBox.currentTextChanged.connect(
             self.onLossFunctionChanged
         )
+        self.view.marginPercentageLine.editingFinished.connect(
+            self.onMarginPercentageChanged
+        )
+
+    def onMarginPercentageChanged(self):
+        try:
+            self.model.setMarginPercentage(
+                self.view.marginPercentageLine.text()
+            )
+        except Exception as err:
+            self.view.marginPercentageLine.setText("inf")
+            self.view.showInfoMessageBox(str(err))
 
     def onMinErrLineChanged(self):
         try:

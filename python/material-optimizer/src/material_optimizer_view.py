@@ -10,6 +10,15 @@ from matplotlib import pyplot as plt
 import mitsuba as mi
 from PyQt6 import QtGui, QtWidgets, QtCore
 from src.constants import *
+from enum import Enum
+import logging
+from matplotlib.figure import Figure
+
+
+class PlotStatusEnum(Enum):
+    INITIAL = 1
+    RENDER = 2
+    CLOSE = 3
 
 
 class MaterialOptimizerView(QMainWindow):
@@ -21,6 +30,7 @@ class MaterialOptimizerView(QMainWindow):
         self.setWindowIcon(
             QtGui.QIcon(IMAGES_DIR_PATH + WINDOW_ICON_FILE_NAME)
         )
+        self.diffRenderPlot = None
         self.show()
 
     def initUI(self):
@@ -140,10 +150,24 @@ class MaterialOptimizerView(QMainWindow):
         self.iterationContainerLayout.addWidget(iterationCountLabel)
         self.iterationContainerLayout.addWidget(self.iterationCountLine)
 
+        # iteration count input
+        self.marginPercentageContainer = QWidget(self.configContainer)
+        self.marginPercentageContainerLayout = QHBoxLayout(
+            self.marginPercentageContainer
+        )
+        marginPercentageLabel = QLabel(text=MARGIN_PERCENTAGE_LABEL)
+        self.marginPercentageLine = QLineEdit()
+        self.marginPercentageLine.setText(INF_STR)
+        self.marginPercentageContainerLayout.addWidget(marginPercentageLabel)
+        self.marginPercentageContainerLayout.addWidget(
+            self.marginPercentageLine
+        )
+
         self.configContainerLayout.addWidget(self.minErrContainer)
         self.configContainerLayout.addWidget(self.sppContainer)
         self.configContainerLayout.addWidget(self.lossFunctionContainer)
         self.configContainerLayout.addWidget(self.iterationContainer)
+        self.configContainerLayout.addWidget(self.marginPercentageContainer)
 
     def initProgessContainer(self, centralWidget):
         self.progressContainer = QWidget(self.bottomContainer)
@@ -230,6 +254,36 @@ class MaterialOptimizerView(QMainWindow):
         self.tableContainerLayout.replaceWidget(self.table, newTable)
         self.table = newTable
 
+    def showDiffRender(
+        self,
+        diffRender: mi.Bitmap = None,
+        it: int = 0,
+        loss: float = 0.0,
+        plotStatus: str = CLOSE_STATUS_STR,
+    ):
+        try:
+            match PlotStatusEnum[plotStatus]:
+                case PlotStatusEnum.CLOSE:
+                    self.diffRenderPlot.close()
+                    self.diffRenderPlot = None
+                case PlotStatusEnum.INITIAL:
+                    if diffRender is not None:
+                        self.diffRenderPlot = DifferentiableRenderCanvas(
+                            diffRender
+                        )
+                        self.diffRenderPlot.axes.set_axis_off()
+                        self.diffRenderPlot.show()
+                case PlotStatusEnum.RENDER:
+                    if diffRender is not None:
+                        self.diffRenderPlot.axesImage.set_data(diffRender)
+                        self.diffRenderPlot.axes.set_title(
+                            f"Iteration: {it}, Loss: {loss:6f}"
+                        )
+                        self.diffRenderPlot.draw()
+                        QtCore.QCoreApplication.processEvents()
+        except ValueError as err:
+            logging.exception(f"Unexpected value in showDiffRender(): {err}")
+
 
 class PopUpWindow(QMainWindow):
     def __init__(self, parent: MaterialOptimizerView):
@@ -257,3 +311,11 @@ class MplCanvas(FigureCanvasQTAgg):
     def __init__(self, parent=None):
         fig, self.axes = plt.subplots(1, 5, figsize=(20, 4))
         super(MplCanvas, self).__init__(fig)
+
+
+class DifferentiableRenderCanvas(FigureCanvasQTAgg):
+    def __init__(self, diffRender):
+        fig = Figure()
+        self.axes = fig.add_subplot()
+        super(DifferentiableRenderCanvas, self).__init__(fig)
+        self.axesImage = self.axes.imshow(diffRender)
