@@ -9,9 +9,6 @@ import logging
 from src.constants import *
 import time
 
-# set mitsuba variant: NVIDIA CUDA
-mi.set_variant(CUDA_AD_RGB)
-
 
 class MaterialOptimizerModel:
     """This class contains the business logic of material-optimizer."""
@@ -25,6 +22,7 @@ class MaterialOptimizerModel:
         self.setDefaultOptimizationParams(self.initialSceneParams)
         self.setSamplesPerPixel(SUPPORTED_SPP_VALUES[2])
         self.setLossFunction(LOSS_FUNCTION_STRINGS[0])
+        self.setMarginPercentage(INF_STR)
 
     def setScene(self, fileName: str, sceneRes: tuple, integratorType: str):
         self.scene = mi.load_file(
@@ -188,12 +186,21 @@ class MaterialOptimizerModel:
 
     def ensureLegalParamValues(self, opt, key):
         # Post-process the optimized parameters to ensure legal values
-        mostLikelyPattern = self.getClosestPattern(key)
-        opt[key] = dr.clamp(
-            opt[key],
-            self.optimizationParams[key][COLUMN_LABEL_MIN_CLAMP_LABEL],
-            self.optimizationParams[key][COLUMN_LABEL_MAX_CLAMP_LABEL],
-        )
+        if VERTEX_POSITIONS_PATTERN.search(key):
+            self.ensureLegalVertexPositions(opt, key)
+        else:
+            opt[key] = dr.clamp(
+                opt[key],
+                self.optimizationParams[key][COLUMN_LABEL_MIN_CLAMP_LABEL],
+                self.optimizationParams[key][COLUMN_LABEL_MAX_CLAMP_LABEL],
+            )
+
+    def ensureLegalVertexPositions(self, opt, key):
+        point = dr.unravel(mi.Point3f, opt[key])
+        minVal = self.optimizationParams[key][COLUMN_LABEL_MIN_CLAMP_LABEL]
+        maxVal = self.optimizationParams[key][COLUMN_LABEL_MAX_CLAMP_LABEL]
+        clampedPoint = dr.clamp(point, minVal, maxVal)
+        opt[key] = dr.ravel(clampedPoint)
 
     def getClosestPattern(self, key: str) -> re.Pattern:
         for pattern in SUPPORTED_MITSUBA_PARAMETER_PATTERNS:
@@ -203,7 +210,9 @@ class MaterialOptimizerModel:
 
     def initOptimizers(self, params: list) -> list:
         opt = mi.ad.Adam(
-            lr=0.2, params={k: self.sceneParams[k] for k in params}
+            lr=0.2,
+            params={k: self.sceneParams[k] for k in params},
+            mask_updates=True,
         )
         opt.set_learning_rate(
             {
@@ -243,6 +252,21 @@ class MaterialOptimizerModel:
             green = float(result[1])
             blue = float(result[2])
             return mi.Color3f(red, green, blue)
+        except:
+            raise ValueError(errMsg)
+
+    def stringToPoint3f(self, newValue) -> mi.Point3f:
+        result = newValue.split(",")
+        errMsg = (
+            "Invalid XYZ input. Please use the following format: 1.0, 1.0, 1.0"
+        )
+        if len(result) != 3:
+            raise ValueError(errMsg)
+        try:
+            x = float(result[0])
+            y = float(result[1])
+            z = float(result[2])
+            return mi.Point3f(x, y, z)
         except:
             raise ValueError(errMsg)
 
@@ -314,6 +338,18 @@ class MaterialOptimizerModel:
     def setLossFunction(self, value: str):
         self.lossFunction = value
 
+    def setMarginPercentage(self, value: str):
+        if not MaterialOptimizerModel.is_float(value):
+            raise ValueError("Please provide a valid float value (e.g. 0.001)")
+
+        floatValue = float(value)
+        if value == INF_STR or floatValue >= 0.0:
+            self.marginPercentage = floatValue
+        else:
+            raise ValueError(
+                f"Valid values are: {INF_STR} or a positive floating points."
+            )
+
     @staticmethod
     def minIdxInDrList(lis: list):
         minValue = dr.min(lis)
@@ -356,7 +392,7 @@ class MaterialOptimizerModel:
         else:
             result = self.mse(image, self.sensorToReferenceImageDict[sensor])
 
-        return result
+        return result, image
 
     def mse(self, image, refImage):
         """L2 Loss: Mean Squared Error"""
@@ -411,55 +447,76 @@ class MaterialOptimizerModel:
         }
         return opts, sensorToInitImg
 
-    def optimizationLoop(self, opts: list, setProgressValue: callable = None):
+    def optimizationLoop(
+        self,
+        opts: list,
+        setProgressValue: callable = None,
+        showDiffRender: callable = None,
+    ):
         lossHist = []
         sceneParamsHist = []
+        sensors = self.scene.sensors()
+        tmpLossTracker = {sensorIdx: [] for sensorIdx in range(len(sensors))}
 
-        startTime = time.time()
-        optLog = "Optimization loop begin\n"
+        startTime, optLog = self.startOptimizationLog()
+        self.initPlotProgress(showDiffRender)
         for it in range(self.iterationCount):
 
-            if setProgressValue is not None:
-                setProgressValue(int(it / self.iterationCount * 100))
+            itPercent = int(it / self.iterationCount * 100)
+            self.updateProgressBar(setProgressValue, itPercent)
 
-            total_loss = 0.0
-            for sensorIdx, sensor in enumerate(self.scene.sensors()):
-
-                loss = self.computeLoss(sensor=sensor, seed=it)
-                currentSensorStr = f"Sensor {sensorIdx:02d}"
-                logging.info(currentSensorStr)
-                optLog += currentSensorStr + "\n"
-                currentLossStr = f"\tcurrent loss= {loss[0]:6f}"
-                logging.info(currentLossStr)
-                optLog += currentLossStr + "\n"
-
-                # Backpropagate through the rendering process
-                dr.backward(loss)
-
-                self.updateAfterStep(opts, self.sceneParams)
-
-                total_loss += loss[0]
-
-            # update loss and scene parameter histograms
-            sceneParamsHist.append(
-                self.createSubsetSceneParams(
-                    self.sceneParams,
-                    SUPPORTED_MITSUBA_PARAMETER_PATTERNS,
+            totalLoss = 0.0
+            for sensorIdx, sensor in enumerate(sensors):
+                currentLoss, diffRender = self.computeLoss(
+                    sensor=sensor, seed=it
                 )
-            )
-            lossHist.append(total_loss)
+                totalLoss += currentLoss[0]
 
-            if total_loss < self.minError:
+                if it == 0:
+                    dr.backward(currentLoss)
+                    tmpLossTracker[sensorIdx].append(currentLoss[0])
+                    self.updateAfterStep(opts, self.sceneParams)
+                else:
+                    sensorLossOnPriorIt = tmpLossTracker[sensorIdx][-1]
+                    margin = sensorLossOnPriorIt * self.marginPercentage
+                    if currentLoss[0] < sensorLossOnPriorIt + margin:
+                        dr.backward(currentLoss)
+                        self.updateAfterStep(opts, self.sceneParams)
+                        tmpLossTracker[sensorIdx].append(currentLoss[0])
+                    else:
+                        # no changes if total loss exceeds the prior loss + margin
+                        totalLoss = lossHist[-1]
+                        msg = "Skipped backpropopagation and scene update for"
+                        msg += f" sensor index {sensorIdx} at iteration {it}."
+                        logging.info(msg)
+
+            self.updatePlotProgress(
+                showDiffRender, it, itPercent, diffRender, totalLoss
+            )
+            self.updateLossAndSceneParamsHist(
+                lossHist, sceneParamsHist, totalLoss
+            )
+            self.updateOptimizationLog(sceneParamsHist, optLog, it, totalLoss)
+            if totalLoss < self.minError:
                 break
 
-            currentItStr = f"Iteration {it:02d}"
-            logging.info(currentItStr)
-            optLog += currentItStr + "\n"
-            currentTotalLossStr = f"\ttotal loss= {total_loss:6f}"
-            logging.info(currentTotalLossStr)
-            optLog += currentTotalLossStr + "\n"
-            optLog += f"Current scene parameters:\n \t{sceneParamsHist[it]}\n"
+        showDiffRender(diffRender=None, plotStatus=CLOSE_STATUS_STR)
+        self.endOptimizationLog(sceneParamsHist, startTime, optLog)
 
+        return lossHist, sceneParamsHist, optLog
+
+    def updateLossAndSceneParamsHist(
+        self, lossHist, sceneParamsHist, totalLoss
+    ):
+        sceneParamsHist.append(
+            self.createSubsetSceneParams(
+                self.sceneParams,
+                SUPPORTED_MITSUBA_PARAMETER_PATTERNS,
+            )
+        )
+        lossHist.append(totalLoss)
+
+    def endOptimizationLog(self, sceneParamsHist, startTime, optLog):
         endTime = time.time()
         elapsedTime = endTime - startTime
         optLog += f"Optimization loop end. Elapsed time: {elapsedTime:.3f}s\n"
@@ -472,7 +529,38 @@ class MaterialOptimizerModel:
         optLog += f"\titeraration count:{self.iterationCount}\n"
         optLog += f"Optimization parameters:\n \t{self.optimizationParams}"
 
-        return lossHist, sceneParamsHist, optLog
+    def startOptimizationLog(self):
+        startTime = time.time()
+        optLog = "Optimization loop begin\n"
+        return startTime, optLog
+
+    def updateOptimizationLog(self, sceneParamsHist, optLog, it, totalLoss):
+        currentItStr = f"Iteration {it:02d}"
+        logging.info(currentItStr)
+        optLog += currentItStr + "\n"
+        currentTotalLossStr = f"\ttotal loss= {totalLoss:6f}"
+        logging.info(currentTotalLossStr)
+        optLog += currentTotalLossStr + "\n"
+        optLog += f"Current scene parameters:\n \t{sceneParamsHist[it]}\n"
+
+    def updateProgressBar(self, setProgressValue, itPercent):
+        if setProgressValue is not None:
+            setProgressValue(itPercent)
+
+    def initPlotProgress(self, showDiffRender):
+        if showDiffRender is not None:
+            showDiffRender(
+                diffRender=list(self.sensorToReferenceImageDict.values())[0],
+                plotStatus=INITIAL_STATUS_STR,
+            )
+
+    def updatePlotProgress(
+        self, showDiffRender, it, itPercent, diffRender, loss: float
+    ):
+        if showDiffRender is not None and (it == 1 or itPercent % 5 == 0):
+            showDiffRender(
+                self.convertToBitmap(diffRender), it, loss, RENDER_STATUS_STR
+            )
 
     @staticmethod
     def convertToBitmap(image: mi.TensorXf):

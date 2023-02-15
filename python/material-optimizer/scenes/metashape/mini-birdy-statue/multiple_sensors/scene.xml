@@ -1278,12 +1278,12 @@
 
 	<bsdf type="twosided" id="mat-Shape">
 		<bsdf type="principled">
-			<!-- <texture type="bitmap" name="base_color">
-				<string name="filename" value="scenes\metashape\textures\init-texture-768.png"/>
-			</texture> -->
-			<texture type="mesh_attribute" name="base_color">
+			<texture type="bitmap" name="base_color">
+				<string name="filename" value="scenes\metashape\textures\init-texture-512.png"/>
+			</texture>
+			<!-- <texture type="mesh_attribute" name="base_color">
                 <string name="name" value="vertex_color"/>
-            </texture>
+            </texture> -->
 			<float name="spec_tint" value="0.000000"/>
 			<float name="spec_trans" value="0.000000"/>
 			<float name="metallic" value="0.000000"/>
@@ -1299,6 +1299,9 @@
 
 <!-- Emitters -->
 <emitter type="constant"></emitter>
+<!-- <emitter type="envmap">
+    <string name="filename" value="scenes\metashape\mini-birdy-statue\HomeEnvironment.png"/>
+</emitter> -->
 
 <!-- Shapes -->
 

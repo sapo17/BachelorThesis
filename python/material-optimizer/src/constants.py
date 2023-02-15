@@ -1,6 +1,7 @@
 from pathlib import Path
 import re
 import numpy as np
+import mitsuba as mi
 
 
 """ Configuration Constants """
@@ -13,7 +14,6 @@ LOG_FILE: Path = Path("material-optimizer.log")
 DEFAULT_MIN_ERR: float = 0.001
 DEFAULT_ITERATION_COUNT: int = 100
 SUPPORTED_SPP_VALUES: list = np.array(2 ** np.arange(7)).astype(str)
-CUDA_AD_RGB: str = "cuda_ad_rgb"
 DEFAULT_MITSUBA_SCENE: str = "cbox.xml"
 MITSUBA_PRB_INTEGRATOR: str = "prb"
 MITSUBA_PRB_REPARAM_INTEGRATOR: str = "prb_reparam"
@@ -67,6 +67,11 @@ DEFAULT_LEARNING_RATE: float = 0.03
 MAX_LEARNING_RATE: float = 0.9
 MIN_LEARNING_RATE: float = 0.0001
 SENSOR_IDX_LABEL: str = "Sensor Index"
+INF_STR = "inf"
+CLOSE_STATUS_STR = "CLOSE"
+INITIAL_STATUS_STR = "INITIAL"
+RENDER_STATUS_STR = "RENDER"
+MARGIN_PERCENTAGE_LABEL = "Margin per update"
 
 """ 
 BSDF Parameter Patterns Constants
@@ -181,7 +186,7 @@ See also: https://mitsuba.readthedocs.io/en/stable/src/generated/plugins_shapes.
 """
 VERTEX_POSITIONS_PATTERN: re.Pattern = re.compile(r".*\.vertex_positions")
 # TODO: what can be the min/max vertex position value?
-MAX_VERTEX_POSITION_VALUE: float = 10.0
+MAX_VERTEX_POSITION_VALUE: mi.Point3f = mi.Point3f(100.0, 100.0, 100.0)
 
 """ Combine Patterns """
 SUPPORTED_MITSUBA_PARAMETER_PATTERNS: list = [
