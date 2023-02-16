@@ -92,6 +92,7 @@ class MaterialOptimizerView(QMainWindow):
         self.tableContainerLayout = QVBoxLayout(self.tableContainer)
         self.table = self.initTable(sceneParams)
         self.tableContainerLayout.addWidget(self.table)
+        self.tableContainer.setDisabled(True)
 
     def initTopWidget(self, centralWidget):
         self.loadRefImgBtn = QPushButton(LOAD_REF_IMG_LABEL)
@@ -106,6 +107,7 @@ class MaterialOptimizerView(QMainWindow):
         self.initConfigurationContainer()
         self.bottomContainerLayout.addWidget(self.configContainer)
         self.bottomContainerLayout.addWidget(self.progressContainer)
+        self.bottomContainer.setDisabled(True)
 
     def initConfigurationContainer(self):
         self.configContainer = QWidget(self.bottomContainer)
