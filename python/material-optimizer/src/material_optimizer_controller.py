@@ -45,6 +45,8 @@ class MaterialOptimizerController:
             self.updateTable(
                 self.model.initialSceneParams, self.model.optimizationParams
             )
+            self.view.tableContainer.setDisabled(True)
+            self.view.bottomContainer.setDisabled(True)
         except Exception as err:
             self.model.loadMitsubaScene()
             msg = "Invalid Mitsuba 3 scene file. Setting default scene."
@@ -88,6 +90,8 @@ class MaterialOptimizerController:
             msg += "defined in the loaded scene file (i.e. first image "
             msg += "corresponds to the first sensor in the loaded scene)."
             self.view.showInfoMessageBox(msg)
+            self.view.tableContainer.setDisabled(False)
+            self.view.bottomContainer.setDisabled(False)
         except Exception as err:
             logging.error(str(err))
             self.view.showInfoMessageBox(
