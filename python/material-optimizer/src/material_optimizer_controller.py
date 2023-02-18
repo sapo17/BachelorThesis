@@ -222,6 +222,9 @@ class MaterialOptimizerController:
         self.view.marginPercentageLine.editingFinished.connect(
             self.onMarginPercentageChanged
         )
+        self.view.marginPenalty.currentTextChanged.connect(
+            self.onMarginPenaltyChanged
+        )
 
     def onMarginPercentageChanged(self):
         try:
@@ -229,8 +232,11 @@ class MaterialOptimizerController:
                 self.view.marginPercentageLine.text()
             )
         except Exception as err:
-            self.view.marginPercentageLine.setText("inf")
+            self.view.marginPercentageLine.setText(INF_STR)
             self.view.showInfoMessageBox(str(err))
+
+    def onMarginPenaltyChanged(self, text: str):
+        self.model.setMarginPenalty(text)
 
     def onMinErrLineChanged(self):
         try:

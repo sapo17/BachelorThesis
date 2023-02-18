@@ -59,7 +59,7 @@ LOSS_FUNCTION_STRINGS: list = [
     MBE_STRING,
 ]
 LOSS_FUNCTION_STRING: str = "Loss function"
-SPP_DURING_OPT_STRING: str = "Samples per pixel during optimization"
+SPP_DURING_OPT_STRING: str = "Samples per pixel"
 DEFAULT_MIN_CLAMP_VALUE: float = 0.001
 DEFAULT_MAX_CLAMP_VALUE: float = 0.999
 LOAD_REF_IMG_LABEL: str = "Load reference image/s"
@@ -72,6 +72,9 @@ CLOSE_STATUS_STR = "CLOSE"
 INITIAL_STATUS_STR = "INITIAL"
 RENDER_STATUS_STR = "RENDER"
 MARGIN_PERCENTAGE_LABEL = "Margin per update"
+MARGIN_PENALTY_LABEL = "Margin Penalty"
+NONE_STR = "None"
+EXPONENTIAL_DECAY_STR = "Exponential Decay"
 
 """ 
 BSDF Parameter Patterns Constants
