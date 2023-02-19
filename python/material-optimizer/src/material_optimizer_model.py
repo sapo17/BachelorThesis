@@ -23,6 +23,7 @@ class MaterialOptimizerModel:
         self.setSamplesPerPixel(SUPPORTED_SPP_VALUES[2])
         self.setLossFunction(LOSS_FUNCTION_STRINGS[0])
         self.setMarginPercentage(INF_STR)
+        self.setMarginPenalty(NONE_STR)
 
     def setScene(self, fileName: str, sceneRes: tuple, integratorType: str):
         self.scene = mi.load_file(
@@ -350,6 +351,9 @@ class MaterialOptimizerModel:
                 f"Valid values are: {INF_STR} or a positive floating points."
             )
 
+    def setMarginPenalty(self, value: str):
+        self.marginPenalty = value
+
     @staticmethod
     def minIdxInDrList(lis: list):
         minValue = dr.min(lis)
@@ -457,6 +461,7 @@ class MaterialOptimizerModel:
         sceneParamsHist = []
         sensors = self.scene.sensors()
         tmpLossTracker = {sensorIdx: [] for sensorIdx in range(len(sensors))}
+        tmpFailTracker = 0
 
         startTime, optLog = self.startOptimizationLog()
         self.initPlotProgress(showDiffRender)
@@ -485,6 +490,10 @@ class MaterialOptimizerModel:
                         tmpLossTracker[sensorIdx].append(currentLoss[0])
                     else:
                         # no changes if total loss exceeds the prior loss + margin
+                        self.increaseFailAndResetOptIfNecessary(
+                            opts, tmpFailTracker
+                        )
+                        self.penalizeLearningRates(opts, it)
                         totalLoss = lossHist[-1]
                         msg = "Skipped backpropopagation and scene update for"
                         msg += f" sensor index {sensorIdx} at iteration {it}."
@@ -504,6 +513,38 @@ class MaterialOptimizerModel:
         self.endOptimizationLog(sceneParamsHist, startTime, optLog)
 
         return lossHist, sceneParamsHist, optLog
+
+    def increaseFailAndResetOptIfNecessary(self, opts, tmpFailTracker):
+        tmpFailTracker += 1
+        if tmpFailTracker % 5 == 0:
+            for opt in opts:
+                for param in opt.variables.keys():
+                    logging.info(f"Reset optimization for {param}")
+                    opt.reset(param)
+
+    def penalizeLearningRates(self, opts, it):
+        if self.marginPenalty == EXPONENTIAL_DECAY_STR:
+            for opt in opts:
+                newLearningRateDict = {
+                    param: max(
+                        0.00001,
+                        self.exponentialDecay(
+                            self.optimizationParams[param][
+                                COLUMN_LABEL_LEARNING_RATE
+                            ],
+                            0.05,
+                            it,
+                        ),
+                    )
+                    for param in opt.variables.keys()
+                }
+                logging.info(f"New learning rates: {newLearningRateDict}")
+                opt.set_learning_rate(newLearningRateDict)
+
+    @staticmethod
+    def exponentialDecay(original: float, decayFactor: float, time: int):
+        """time = iteration in our case"""
+        return original * (1 - decayFactor) ** time
 
     def updateLossAndSceneParamsHist(
         self, lossHist, sceneParamsHist, totalLoss

@@ -152,11 +152,12 @@ class MaterialOptimizerView(QMainWindow):
         self.iterationContainerLayout.addWidget(iterationCountLabel)
         self.iterationContainerLayout.addWidget(self.iterationCountLine)
 
-        # iteration count input
+        # margin container
         self.marginPercentageContainer = QWidget(self.configContainer)
         self.marginPercentageContainerLayout = QHBoxLayout(
             self.marginPercentageContainer
         )
+        # margin percentage input
         marginPercentageLabel = QLabel(text=MARGIN_PERCENTAGE_LABEL)
         self.marginPercentageLine = QLineEdit()
         self.marginPercentageLine.setText(INF_STR)
@@ -164,6 +165,13 @@ class MaterialOptimizerView(QMainWindow):
         self.marginPercentageContainerLayout.addWidget(
             self.marginPercentageLine
         )
+        # margin percentage penalty
+        penaltyLabel = QLabel(text=MARGIN_PENALTY_LABEL)
+        self.marginPenalty = QComboBox()
+        self.marginPenalty.addItems([NONE_STR, EXPONENTIAL_DECAY_STR])
+        self.marginPenalty.setCurrentText(NONE_STR)
+        self.marginPercentageContainerLayout.addWidget(penaltyLabel)
+        self.marginPercentageContainerLayout.addWidget(self.marginPenalty)
 
         self.configContainerLayout.addWidget(self.minErrContainer)
         self.configContainerLayout.addWidget(self.sppContainer)
