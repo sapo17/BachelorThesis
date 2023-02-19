@@ -298,14 +298,7 @@ class PopUpWindow(QMainWindow):
 
     def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
         self.parent().setDisabled(False)
-
-        # part of it causes dr.jit to warn about leaked variables (specifically
-        # sceneParamsHist, lossHist). Setting them to None at least lessens
-        # the amount of warned leaked parameters.
-        self.lossHist = None
-        self.sceneParamsHist = None
-        self.sensorToInitImg = None
-
+        self.destroy()
         return super().closeEvent(a0)
 
 

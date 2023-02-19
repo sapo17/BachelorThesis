@@ -479,10 +479,6 @@ class MaterialOptimizerController:
         sceneParamsHist,
         optLog,
     ):
-        popUpWindow.sensorToInitImg = sensorToInitImg
-        popUpWindow.lossHist = lossHist
-        popUpWindow.sceneParamsHist = sceneParamsHist
-        popUpWindow.optLog = optLog
 
         # central widget
         centralWidgetContainer = QWidget()
@@ -496,11 +492,13 @@ class MaterialOptimizerController:
         popUpWindow.sensorDropdown.addItems(
             [
                 str(sensorIdx)
-                for sensorIdx, sensor in enumerate(self.model.scene.sensors())
+                for sensorIdx in range(len(self.model.scene.sensors()))
             ]
         )
         popUpWindow.sensorDropdown.currentTextChanged.connect(
-            lambda: self.onSensorIdxChanged(popUpWindow)
+            lambda: self.onSensorIdxChanged(
+                popUpWindow, lossHist, sceneParamsHist, sensorToInitImg
+            )
         )
         sensorSelectionContainerLayout.addWidget(sensorSelectionLabel)
         sensorSelectionContainerLayout.addWidget(popUpWindow.sensorDropdown)
@@ -511,12 +509,18 @@ class MaterialOptimizerController:
             [LAST_ITERATION_STRING, COLUMN_LABEL_MINIMUM_ERROR]
         )
         popUpWindow.optimizationDropdown.currentTextChanged.connect(
-            lambda: self.onOptimizedSceneSelectorTextChanged(popUpWindow)
+            lambda: self.onOptimizedSceneSelectorTextChanged(
+                popUpWindow, lossHist, sceneParamsHist, sensorToInitImg
+            )
         )
 
         # output button
         outputBtn = QPushButton(text=OUTPUT_TO_JSON_STRING)
-        outputBtn.clicked.connect(lambda: self.onOutputBtnPressed(popUpWindow))
+        outputBtn.clicked.connect(
+            lambda: self.onOutputBtnPressed(
+                popUpWindow, lossHist, sceneParamsHist, sensorToInitImg, optLog
+            )
+        )
 
         centralWidgetContainerLayout.addWidget(
             popUpWindow.optimizationDropdown
@@ -527,18 +531,25 @@ class MaterialOptimizerController:
 
         popUpWindow.show()
 
-        lastIteration = len(popUpWindow.sceneParamsHist) - 1
-        self.showOptimizedPlot(popUpWindow, lastIteration)
+        lastIteration = len(sceneParamsHist) - 1
+        self.showOptimizedPlot(
+            sceneParamsHist, sensorToInitImg, lossHist, lastIteration
+        )
 
-    def onOutputBtnPressed(self, popUpWindow: PopUpWindow):
-        selectedIteration = len(popUpWindow.sceneParamsHist) - 1
+    def onOutputBtnPressed(
+        self,
+        popUpWindow: PopUpWindow,
+        lossHist,
+        sceneParamsHist,
+        sensorToInitImg,
+        optLog,
+    ):
+        selectedIteration = len(sceneParamsHist) - 1
         if (
             popUpWindow.optimizationDropdown.currentText()
             == COLUMN_LABEL_MINIMUM_ERROR
         ):
-            selectedIteration = MaterialOptimizerModel.minIdxInDrList(
-                popUpWindow.lossHist
-            )
+            selectedIteration = MaterialOptimizerModel.minIdxInDrList(lossHist)
 
         outputFileDir = (
             OUTPUT_DIR_PATH
@@ -556,7 +567,7 @@ class MaterialOptimizerController:
         # the dictionary and finally output as a .json file
         with open(outputFileName, "w") as outfile:
             outputDict = {}
-            for k, v in popUpWindow.sceneParamsHist[selectedIteration].items():
+            for k, v in sceneParamsHist[selectedIteration].items():
                 if type(v) is mi.TensorXf:
                     # special output: volume
                     if ALBEDO_DATA_PATTERN.search(k):
@@ -592,13 +603,17 @@ class MaterialOptimizerController:
             # output: resulting figure
             for sensorIdx in range(len(self.model.scene.sensors())):
                 self.outputFigure(
-                    popUpWindow, selectedIteration, outputFileDir, sensorIdx
+                    selectedIteration,
+                    outputFileDir,
+                    sensorIdx,
+                    lossHist,
+                    sensorToInitImg,
                 )
 
             # output: optimization log file
             optLogFileName = outputFileDir + "/optimization.log"
             with open(optLogFileName, "w") as f:
-                f.write(popUpWindow.optLog)
+                f.write(optLog)
 
             # inform user
             absPath = str(Path(outputFileDir).resolve())
@@ -607,7 +622,12 @@ class MaterialOptimizerController:
             )
 
     def outputFigure(
-        self, popUpWindow, selectedIteration, outputFileDir, sensorIdx
+        self,
+        selectedIteration,
+        outputFileDir,
+        sensorIdx,
+        lossHist,
+        sensorToInitImg,
     ):
         outputFileName = outputFileDir + f"/figure-sensor{sensorIdx}.png"
         canvas = MplCanvas()
@@ -615,7 +635,7 @@ class MaterialOptimizerController:
         self.preparePlot(
             canvas,
             self.model.sensorToReferenceImageDict[currentSensor],
-            popUpWindow.sensorToInitImg[currentSensor],
+            sensorToInitImg[currentSensor],
             MaterialOptimizerModel.convertToBitmap(
                 MaterialOptimizerModel.render(
                     self.model.scene,
@@ -623,48 +643,66 @@ class MaterialOptimizerController:
                     512,
                 )
             ),
-            {self.model.lossFunction: popUpWindow.lossHist},
+            {self.model.lossFunction: lossHist},
             selectedIteration,
-            popUpWindow.lossHist[selectedIteration],
+            lossHist[selectedIteration],
         )
         plt.savefig(outputFileName)
 
-    def onOptimizedSceneSelectorTextChanged(self, popUpWindow: PopUpWindow):
+    def onOptimizedSceneSelectorTextChanged(
+        self,
+        popUpWindow: PopUpWindow,
+        lossHist,
+        sceneParamsHist,
+        sensorToInitImg,
+    ):
         if (
             popUpWindow.optimizationDropdown.currentText()
             == COLUMN_LABEL_MINIMUM_ERROR
         ):
             self.showOptimizedPlot(
-                popUpWindow,
-                MaterialOptimizerModel.minIdxInDrList(popUpWindow.lossHist),
+                sceneParamsHist,
+                sensorToInitImg,
+                lossHist,
+                MaterialOptimizerModel.minIdxInDrList(lossHist),
             )
         else:
             self.showOptimizedPlot(
-                popUpWindow, len(popUpWindow.sceneParamsHist) - 1
+                sceneParamsHist,
+                sensorToInitImg,
+                lossHist,
+                len(sceneParamsHist) - 1,
             )
 
-    def onSensorIdxChanged(self, popUpWindow: PopUpWindow):
+    def onSensorIdxChanged(
+        self, popUpWindow, lossHist, sceneParamsHist, sensorToInitImg
+    ):
         self.showOptimizedPlot(
-            popUpWindow,
-            MaterialOptimizerModel.minIdxInDrList(popUpWindow.lossHist),
+            sceneParamsHist,
+            sensorToInitImg,
+            lossHist,
+            MaterialOptimizerModel.minIdxInDrList(lossHist),
             int(popUpWindow.sensorDropdown.currentText()),
         )
 
     def showOptimizedPlot(
-        self, popUpWindow: PopUpWindow, iteration: int, sensorIdx: int = 0
+        self,
+        sceneParamsHist,
+        sensorToInitImg,
+        lossHist,
+        iteration: int,
+        sensorIdx: int = 0,
     ):
         logging.info(
-            f"Scene parameters in {iteration}:\n {popUpWindow.sceneParamsHist[iteration]}"
+            f"Scene parameters in {iteration}:\n {sceneParamsHist[iteration]}"
         )
-        self.model.sceneParams.update(
-            values=popUpWindow.sceneParamsHist[iteration]
-        )
+        self.model.sceneParams.update(values=sceneParamsHist[iteration])
         sc = MplCanvas()
         currentSensor = self.model.scene.sensors()[sensorIdx]
         self.preparePlot(
             sc,
             self.model.sensorToReferenceImageDict[currentSensor],
-            popUpWindow.sensorToInitImg[currentSensor],
+            sensorToInitImg[currentSensor],
             MaterialOptimizerModel.convertToBitmap(
                 MaterialOptimizerModel.render(
                     self.model.scene,
@@ -672,9 +710,9 @@ class MaterialOptimizerController:
                     512,
                 )
             ),
-            {self.model.lossFunction: popUpWindow.lossHist},
+            {self.model.lossFunction: lossHist},
             iteration,
-            popUpWindow.lossHist[iteration],
+            lossHist[iteration],
         )
         sc.show()
 
