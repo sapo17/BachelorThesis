@@ -3,3 +3,19 @@ mat-opt-venv
 output
 __pycache__
 material-optimizer.log
+
+# additional projects do not commit
+project-independent/**
+python
+nerfstudio
+InverseTranslucent
+nvdiffrec
+tamashii
+instant-ngp
+MaterialOptimizerOverleaf
+mitsuba-data
+test.ipynb
+*.zip
+metashape
+todo.md
+mat-opt-mi-v302
