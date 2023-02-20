@@ -1,3 +1,21 @@
-python/reference-image-creator/output/*
-*.log
-**/PyQT-Tutorial/venv/
+# what to not commit: e.g. venv, output directory, pycache. Modify as you like.
+mat-opt-venv 
+output
+__pycache__
+material-optimizer.log
+
+# additional projects do not commit
+project-independent/**
+python
+nerfstudio
+InverseTranslucent
+nvdiffrec
+tamashii
+instant-ngp
+MaterialOptimizerOverleaf
+mitsuba-data
+test.ipynb
+*.zip
+metashape
+todo.md
+mat-opt-mi-v302

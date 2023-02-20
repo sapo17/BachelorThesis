@@ -1,0 +1,43 @@
+{
+    "mat-floor.brdf_0.reflectance.value": "[[1.0, 1.0, 1.0]]",
+    "mat-material-holder-bsdf.brdf_0.reflectance.value": "[[0.800000011920929, 0.800000011920929, 0.800000011920929]]",
+    "mat-material-bsdf.clearcoat.value": [
+        0.0
+    ],
+    "mat-material-bsdf.clearcoat_gloss.value": [
+        0.0
+    ],
+    "mat-material-bsdf.metallic.value": [
+        0.0
+    ],
+    "mat-material-bsdf.eta": [
+        1.4969111680984497
+    ],
+    "mat-material-bsdf.roughness.value": [
+        0.6999333500862122
+    ],
+    "mat-material-bsdf.base_color.value": "[[0.003817357588559389, 0.1574091762304306, 0.052569951862096786]]",
+    "mat-material-bsdf.anisotropic.value": [
+        0.6493859887123108
+    ],
+    "mat-material-bsdf.spec_tint.value": [
+        0.0
+    ],
+    "mat-material-bsdf.sheen.value": [
+        0.0
+    ],
+    "mat-material-bsdf.sheen_tint.value": [
+        0.0
+    ],
+    "mat-material-bsdf.spec_trans.value": [
+        0.4000000059604645
+    ],
+    "mat-material-bsdf.flatness.value": [
+        0.0
+    ],
+    "empty-emitter-bsdf.reflectance.value": "[[0.0, 0.0, 0.0]]",
+    "PLYMesh.emitter.radiance.value": "[[50.0, 50.0, 50.0]]",
+    "PLYMesh_1.emitter.radiance.value": "[[50.0, 50.0, 50.0]]",
+    "PLYMesh_2.emitter.radiance.value": "[[50.0, 50.0, 50.0]]",
+    "PLYMesh_3.emitter.radiance.value": "[[50.0, 50.0, 50.0]]"
+}

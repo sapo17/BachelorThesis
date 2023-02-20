@@ -1,4 +1,0 @@
-# what to not commit: e.g. venv, output directory, pycache. Modify as you like.
-mat-opt-venv 
-output
-__pycache__

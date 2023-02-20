@@ -1,0 +1,16 @@
+{
+    "mat-PlaneBsdf.brdf_0.reflectance.color0.value": "[[0.4000000059604645, 0.4000000059604645, 0.4000000059604645]]",
+    "mat-PlaneBsdf.brdf_0.reflectance.color1.value": "[[0.20000000298023224, 0.20000000298023224, 0.20000000298023224]]",
+    "mat-ObjectBsdf.eta": [
+        1.5499999523162842
+    ],
+    "mat-ObjectBsdf.alpha.value": [
+        0.3063618540763855
+    ],
+    "medium1.sigma_t.value.value": [
+        0.269522100687027
+    ],
+    "emitter-envmap.scale": [
+        1.0
+    ]
+}

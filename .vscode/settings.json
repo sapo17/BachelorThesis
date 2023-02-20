@@ -1,4 +1,6 @@
 {
-  "cmake.configureOnOpen": false,
-  "python.linting.enabled": true
+    "python.defaultInterpreterPath": "mat_opt_venv/Scripts/python.exe",
+    "python.analysis.typeCheckingMode": "off",
+    "python.formatting.provider": "black",
+    "python.formatting.blackArgs": ["--line-length", "79"]
 }
