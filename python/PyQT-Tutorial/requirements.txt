@@ -1,3 +1,0 @@
-pyqt6
-matplotlib
-mitsuba==3.0.1

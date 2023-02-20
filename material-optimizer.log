@@ -1,0 +1,205 @@
+INFO:root:Integrator type: prb_reparam
+INFO:root:Iteration 00
+INFO:root:	total loss= 0.007368
+INFO:root:Iteration 01
+INFO:root:	total loss= 0.007144
+INFO:root:Iteration 02
+INFO:root:	total loss= 0.007140
+INFO:root:Iteration 03
+INFO:root:	total loss= 0.006541
+INFO:root:Iteration 04
+INFO:root:	total loss= 0.006300
+INFO:root:Iteration 05
+INFO:root:	total loss= 0.005936
+INFO:root:Iteration 06
+INFO:root:	total loss= 0.005620
+INFO:root:Iteration 07
+INFO:root:	total loss= 0.005731
+INFO:root:Iteration 08
+INFO:root:	total loss= 0.005672
+INFO:root:Iteration 09
+INFO:root:	total loss= 0.005055
+INFO:root:Iteration 10
+INFO:root:	total loss= 0.004886
+INFO:root:Iteration 11
+INFO:root:	total loss= 0.004877
+INFO:root:Iteration 12
+INFO:root:	total loss= 0.004749
+INFO:root:Iteration 13
+INFO:root:	total loss= 0.004681
+INFO:root:Iteration 14
+INFO:root:	total loss= 0.004858
+INFO:root:Iteration 15
+INFO:root:	total loss= 0.004838
+INFO:root:Iteration 16
+INFO:root:	total loss= 0.004935
+INFO:root:Iteration 17
+INFO:root:	total loss= 0.004666
+INFO:root:Iteration 18
+INFO:root:	total loss= 0.004574
+INFO:root:Iteration 19
+INFO:root:	total loss= 0.004721
+INFO:root:Iteration 20
+INFO:root:	total loss= 0.004630
+INFO:root:Iteration 21
+INFO:root:	total loss= 0.004435
+INFO:root:Iteration 22
+INFO:root:	total loss= 0.004264
+INFO:root:Iteration 23
+INFO:root:	total loss= 0.004591
+INFO:root:Iteration 24
+INFO:root:	total loss= 0.004617
+INFO:root:Iteration 25
+INFO:root:	total loss= 0.004671
+INFO:root:Iteration 26
+INFO:root:	total loss= 0.004984
+INFO:root:Iteration 27
+INFO:root:	total loss= 0.004613
+INFO:root:Iteration 28
+INFO:root:	total loss= 0.004542
+INFO:root:Iteration 29
+INFO:root:	total loss= 0.004858
+INFO:root:Iteration 30
+INFO:root:	total loss= 0.004917
+INFO:root:Iteration 31
+INFO:root:	total loss= 0.004499
+INFO:root:Iteration 32
+INFO:root:	total loss= 0.004860
+INFO:root:Iteration 33
+INFO:root:	total loss= 0.005048
+INFO:root:Iteration 34
+INFO:root:	total loss= 0.005140
+INFO:root:Iteration 35
+INFO:root:	total loss= 0.004839
+INFO:root:Iteration 36
+INFO:root:	total loss= 0.004994
+INFO:root:Iteration 37
+INFO:root:	total loss= 0.004607
+INFO:root:Iteration 38
+INFO:root:	total loss= 0.004745
+INFO:root:Iteration 39
+INFO:root:	total loss= 0.004626
+INFO:root:Iteration 40
+INFO:root:	total loss= 0.004890
+INFO:root:Iteration 41
+INFO:root:	total loss= 0.004715
+INFO:root:Iteration 42
+INFO:root:	total loss= 0.005031
+INFO:root:Iteration 43
+INFO:root:	total loss= 0.004699
+INFO:root:Iteration 44
+INFO:root:	total loss= 0.005244
+INFO:root:Iteration 45
+INFO:root:	total loss= 0.004536
+INFO:root:Iteration 46
+INFO:root:	total loss= 0.004880
+INFO:root:Iteration 47
+INFO:root:	total loss= 0.004948
+INFO:root:Iteration 48
+INFO:root:	total loss= 0.004522
+INFO:root:Iteration 49
+INFO:root:	total loss= 0.004971
+INFO:root:Iteration 50
+INFO:root:	total loss= 0.004488
+INFO:root:Iteration 51
+INFO:root:	total loss= 0.004588
+INFO:root:Iteration 52
+INFO:root:	total loss= 0.004758
+INFO:root:Iteration 53
+INFO:root:	total loss= 0.004543
+INFO:root:Iteration 54
+INFO:root:	total loss= 0.004666
+INFO:root:Iteration 55
+INFO:root:	total loss= 0.004660
+INFO:root:Iteration 56
+INFO:root:	total loss= 0.004844
+INFO:root:Iteration 57
+INFO:root:	total loss= 0.004799
+INFO:root:Iteration 58
+INFO:root:	total loss= 0.005246
+INFO:root:Iteration 59
+INFO:root:	total loss= 0.004533
+INFO:root:Iteration 60
+INFO:root:	total loss= 0.004632
+INFO:root:Iteration 61
+INFO:root:	total loss= 0.004952
+INFO:root:Iteration 62
+INFO:root:	total loss= 0.004849
+INFO:root:Iteration 63
+INFO:root:	total loss= 0.004616
+INFO:root:Iteration 64
+INFO:root:	total loss= 0.004871
+INFO:root:Iteration 65
+INFO:root:	total loss= 0.004338
+INFO:root:Iteration 66
+INFO:root:	total loss= 0.004700
+INFO:root:Iteration 67
+INFO:root:	total loss= 0.004678
+INFO:root:Iteration 68
+INFO:root:	total loss= 0.004937
+INFO:root:Iteration 69
+INFO:root:	total loss= 0.004638
+INFO:root:Iteration 70
+INFO:root:	total loss= 0.004613
+INFO:root:Iteration 71
+INFO:root:	total loss= 0.004694
+INFO:root:Iteration 72
+INFO:root:	total loss= 0.004809
+INFO:root:Iteration 73
+INFO:root:	total loss= 0.004785
+INFO:root:Iteration 74
+INFO:root:	total loss= 0.004644
+INFO:root:Iteration 75
+INFO:root:	total loss= 0.004613
+INFO:root:Iteration 76
+INFO:root:	total loss= 0.004538
+INFO:root:Iteration 77
+INFO:root:	total loss= 0.004847
+INFO:root:Iteration 78
+INFO:root:	total loss= 0.004428
+INFO:root:Iteration 79
+INFO:root:	total loss= 0.004289
+INFO:root:Iteration 80
+INFO:root:	total loss= 0.005097
+INFO:root:Iteration 81
+INFO:root:	total loss= 0.004317
+INFO:root:Iteration 82
+INFO:root:	total loss= 0.004503
+INFO:root:Iteration 83
+INFO:root:	total loss= 0.004805
+INFO:root:Iteration 84
+INFO:root:	total loss= 0.004805
+INFO:root:Iteration 85
+INFO:root:	total loss= 0.004915
+INFO:root:Iteration 86
+INFO:root:	total loss= 0.004861
+INFO:root:Iteration 87
+INFO:root:	total loss= 0.004822
+INFO:root:Iteration 88
+INFO:root:	total loss= 0.004649
+INFO:root:Iteration 89
+INFO:root:	total loss= 0.004374
+INFO:root:Iteration 90
+INFO:root:	total loss= 0.004407
+INFO:root:Iteration 91
+INFO:root:	total loss= 0.004581
+INFO:root:Iteration 92
+INFO:root:	total loss= 0.004559
+INFO:root:Iteration 93
+INFO:root:	total loss= 0.004690
+INFO:root:Iteration 94
+INFO:root:	total loss= 0.004986
+INFO:root:Iteration 95
+INFO:root:	total loss= 0.004233
+INFO:root:Iteration 96
+INFO:root:	total loss= 0.004580
+INFO:root:Iteration 97
+INFO:root:	total loss= 0.004774
+INFO:root:Iteration 98
+INFO:root:	total loss= 0.004801
+INFO:root:Iteration 99
+INFO:root:	total loss= 0.004702
+INFO:root:Initial scene parameters:
+ {'gray.reflectance.value': [[0.8500000238418579, 0.8500000238418579, 0.8500000238418579]], 'white.reflectance.value': [[0.8858090043067932, 0.6988589763641357, 0.6664220094680786]], 'green.reflectance.value': [[0.10542099922895432, 0.37797999382019043, 0.07642500102519989]], 'red.reflectance.value': [[0.0299949012696743, 0.02992268279194832, 0.029020167887210846]], 'mirror.eta.value': [0.0], 'mirror.k.value': [1.0], 'mirror.specular_reflectance.value': [1.0], 'light.emitter.radiance.value': [[18.386999130249023, 13.987299919128418, 6.753570079803467]], 'light.vertex_positions': [0.25, 0.9900000095367432, -0.25, 0.25, 0.9900000095367432, 0.25, -0.25, 0.9900000095367432, 0.25, -0.25, 0.9900000095367432, -0.25], 'floor.vertex_positions': [-1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0, -1.0, -1.0, -1.0, -1.0, -1.0], 'ceiling.vertex_positions': [1.0, 1.0, -1.0, 1.0, 1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0, -1.0], 'back.vertex_positions': [1.0, -1.0, -1.0, 1.0, 1.0, -1.0, -1.0, 1.0, -1.0, -1.0, -1.0, -1.0], 'greenwall.vertex_positions': [-1.0, 1.0, -1.0, -1.0, 1.0, 1.0, -1.0, -1.0, 1.0, -1.0, -1.0, -1.0], 'redwall.vertex_positions': [1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.0, 1.0, -1.0, -1.0]}
+INFO:root:Scene parameters in 99:
+ {'gray.reflectance.value': [[0.8500000238418579, 0.8500000238418579, 0.8500000238418579]], 'white.reflectance.value': [[0.8858090043067932, 0.6988589763641357, 0.6664220094680786]], 'green.reflectance.value': [[0.10542099922895432, 0.37797999382019043, 0.07642500102519989]], 'red.reflectance.value': [[0.634380042552948, 0.05439818277955055, 0.04922393709421158]], 'mirror.eta.value': [0.0], 'mirror.k.value': [1.0], 'mirror.specular_reflectance.value': [1.0], 'light.emitter.radiance.value': [[18.386999130249023, 13.987299919128418, 6.753570079803467]], 'light.vertex_positions': [0.25, 0.9900000095367432, -0.25, 0.25, 0.9900000095367432, 0.25, -0.25, 0.9900000095367432, 0.25, -0.25, 0.9900000095367432, -0.25], 'floor.vertex_positions': [-1.0, -1.0, 1.0, 1.0, -1.0, 1.0, 1.0, -1.0, -1.0, -1.0, -1.0, -1.0], 'ceiling.vertex_positions': [1.0, 1.0, -1.0, 1.0, 1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0, -1.0], 'back.vertex_positions': [1.0, -1.0, -1.0, 1.0, 1.0, -1.0, -1.0, 1.0, -1.0, -1.0, -1.0, -1.0], 'greenwall.vertex_positions': [-1.0, 1.0, -1.0, -1.0, 1.0, 1.0, -1.0, -1.0, 1.0, -1.0, -1.0, -1.0], 'redwall.vertex_positions': [1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.0, 1.0, -1.0, -1.0]}
