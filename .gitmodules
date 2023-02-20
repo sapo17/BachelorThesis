@@ -1,3 +1,3 @@
-[submodule "python/material-optimizer/mitsuba-data"]
-	path = python/material-optimizer/mitsuba-data
+[submodule "mitsuba-data"]
+	path = mitsuba-data
 	url = https://github.com/mitsuba-renderer/mitsuba-data
