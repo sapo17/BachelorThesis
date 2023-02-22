@@ -73,6 +73,8 @@ Saip Can Hasbay, 01428723, University of Vienna, [saipcanhasbay@gmail.com](saipc
       mi.set_variant('llvm_ad_rgb') # with this
     ```
 - Dr.Jit Cache location: `C:\Users\user\AppData\Local\Temp\drjit\`
+- Automatic UML Model generation. See [also](https://www.bhavaniravi.com/python/generate-uml-diagrams-from-python-code).
+  - ```pyreverse -o svg --colorized -p MaterialOptimizer .``` (make sure "." refers to this repository location)
   
 
 
