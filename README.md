@@ -75,7 +75,24 @@ Saip Can Hasbay, 01428723, University of Vienna, [saipcanhasbay@gmail.com](saipc
 - Dr.Jit Cache location: `C:\Users\user\AppData\Local\Temp\drjit\`
 - Automatic UML Model generation. See [also](https://www.bhavaniravi.com/python/generate-uml-diagrams-from-python-code).
   - ```pyreverse -o svg --colorized -p MaterialOptimizer .``` (make sure "." refers to this repository location)
-  
+- Beware that under linux you may need to change some path/s in provided Mitsuba XML files. For example, the file under `scenes/material-preview/translucent-principled-bsdf/scene-init-bunny.xml`, beginning for line 80:
+  ```
+    <shape type="ply">
+        <string name="filename" value="scenes\material-preview\meshes\bunny.ply"/> # change this
+        <string name="filename" value="scenes/material-preview/meshes/bunny.ply"/> # with this
+		<transform name="to_world">
+			<scale value="13"/>
+			<rotate z="1" angle="130"/>
+			<rotate y="1" angle="70"/>
+			<rotate x="1" angle="-50"/>
+			<rotate z="1" angle="-50"/>
+			<rotate y="1" angle="-2"/>
+			<rotate x="1" angle="12"/>
+			<translate x="0.3" y="0.0" z="-0.5"/>
+		</transform>
+        <ref id="object_bsdf"/>
+    </shape>
+  ```
 
 
 ### Known Issues
