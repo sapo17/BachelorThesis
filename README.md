@@ -93,6 +93,7 @@ Saip Can Hasbay, 01428723, University of Vienna, [saipcanhasbay@gmail.com](saipc
         <ref id="object_bsdf"/>
     </shape>
   ```
+- Under videos directory you may find simple optimization examples.
 
 
 ### Known Issues
