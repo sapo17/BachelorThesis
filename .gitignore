@@ -4,24 +4,3 @@ output/*
 !output/README.md
 __pycache__
 material-optimizer.log
-
-
-# additional projects do not commit
-mitsuba-data
-project-independent/**
-python
-nerfstudio
-InverseTranslucent
-nvdiffrec
-tamashii
-instant-ngp
-MaterialOptimizerOverleaf
-mitsuba-data
-test.ipynb
-*.zip
-metashape
-todo.md
-mat-opt-mi-v302
-kaolin-venv
-__init__.py
-*.psd
