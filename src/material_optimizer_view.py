@@ -272,25 +272,24 @@ class MaterialOptimizerView(QMainWindow):
         plotStatus: str = CLOSE_STATUS_STR,
     ):
         try:
-            match PlotStatusEnum[plotStatus]:
-                case PlotStatusEnum.CLOSE:
-                    self.diffRenderPlot.close()
-                    self.diffRenderPlot = None
-                case PlotStatusEnum.INITIAL:
-                    if diffRender is not None:
-                        self.diffRenderPlot = DifferentiableRenderCanvas(
-                            diffRender
-                        )
-                        self.diffRenderPlot.axes.set_axis_off()
-                        self.diffRenderPlot.show()
-                case PlotStatusEnum.RENDER:
-                    if diffRender is not None:
-                        self.diffRenderPlot.axesImage.set_data(diffRender)
-                        self.diffRenderPlot.axes.set_title(
-                            f"Iteration: {it}, Loss: {loss:6f}"
-                        )
-                        self.diffRenderPlot.draw()
-                        QtCore.QCoreApplication.processEvents()
+            if PlotStatusEnum[plotStatus] is PlotStatusEnum.CLOSE:
+                self.diffRenderPlot.close()
+                self.diffRenderPlot = None
+            elif PlotStatusEnum[plotStatus] is PlotStatusEnum.INITIAL:
+                if diffRender is not None:
+                    self.diffRenderPlot = DifferentiableRenderCanvas(
+                        diffRender
+                    )
+                    self.diffRenderPlot.axes.set_axis_off()
+                    self.diffRenderPlot.show()
+            elif PlotStatusEnum[plotStatus] is PlotStatusEnum.RENDER:
+                if diffRender is not None:
+                    self.diffRenderPlot.axesImage.set_data(diffRender)
+                    self.diffRenderPlot.axes.set_title(
+                        f"Iteration: {it}, Loss: {loss:6f}"
+                    )
+                    self.diffRenderPlot.draw()
+                    QtCore.QCoreApplication.processEvents()
         except ValueError as err:
             logging.exception(f"Unexpected value in showDiffRender(): {err}")
 
