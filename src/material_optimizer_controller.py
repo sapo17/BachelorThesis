@@ -100,6 +100,12 @@ class MaterialOptimizerController:
 
     def updateSignals(self):
         self.view.table.cellChanged.connect(self.onCellChanged)
+        self.view.table.verticalHeader().sectionDoubleClicked.connect(
+            self.onVerticalHeaderSectionDoubleClicked
+        )
+        self.view.table.verticalHeader().sectionPressed.connect(
+            self.onVerticalHeaderSectionPressed
+        )
 
     def combineTableValues(self, params, optimizationParams):
         result = {}
@@ -225,6 +231,51 @@ class MaterialOptimizerController:
         self.view.marginPenalty.currentTextChanged.connect(
             self.onMarginPenaltyChanged
         )
+        self.view.table.verticalHeader().sectionDoubleClicked.connect(
+            self.onVerticalHeaderSectionDoubleClicked
+        )
+        self.view.table.verticalHeader().sectionPressed.connect(
+            self.onVerticalHeaderSectionPressed
+        )
+
+    def onVerticalHeaderSectionDoubleClicked(self, rowIndex):
+        rowLabel = self.getRowLabelText()
+        from PyQt6.QtGui import QColor
+
+        if self.model.optimizationParams[rowLabel][COLUMN_LABEL_OPTIMIZE]:
+            self.model.optimizationParams[rowLabel][
+                COLUMN_LABEL_OPTIMIZE
+            ] = False
+            self.view.table.setStyleSheet(
+                self.view.getQTableItemSelectedStyle(TOL_BLUE_COLOR)
+            )
+            for colIdx in range(self.view.table.columnCount()):
+                self.view.table.item(rowIndex, colIdx).setBackground(
+                    QColor(WHITE_COLOR)
+                )
+        else:
+            self.model.optimizationParams[rowLabel][
+                COLUMN_LABEL_OPTIMIZE
+            ] = True
+            self.view.table.setStyleSheet(
+                self.view.getQTableItemSelectedStyle(TOL_GOLD_COLOR)
+            )
+            for colIdx in range(self.view.table.columnCount()):
+                self.view.table.item(rowIndex, colIdx).setBackground(
+                    QColor(TOL_GOLD_COLOR)
+                )
+
+    def onVerticalHeaderSectionPressed(self):
+        rowLabel = self.getRowLabelText()
+
+        if self.model.optimizationParams[rowLabel][COLUMN_LABEL_OPTIMIZE]:
+            self.view.table.setStyleSheet(
+                self.view.getQTableItemSelectedStyle(TOL_GOLD_COLOR)
+            )
+        else:
+            self.view.table.setStyleSheet(
+                self.view.getQTableItemSelectedStyle(TOL_BLUE_COLOR)
+            )
 
     def onMarginPercentageChanged(self):
         try:
@@ -285,23 +336,9 @@ class MaterialOptimizerController:
 
     def getCheckedRows(self) -> list:
         result = []
-        colIdx = self.getColumnIndex(COLUMN_LABEL_OPTIMIZE)
-        for rowIdx in range(self.view.table.rowCount()):
-            assert (
-                self.view.table.cellWidget(rowIdx, colIdx).layout().itemAt(0)
-                != None
-            )
-            isChecked = (
-                self.view.table.cellWidget(rowIdx, colIdx)
-                .layout()
-                .itemAt(0)
-                .widget()
-                .isChecked()
-            )
-            if isChecked:
-                result.append(
-                    self.view.table.verticalHeaderItem(rowIdx).text()
-                )
+        for param in list(self.model.optimizationParams.keys()):
+            if self.model.optimizationParams[param][COLUMN_LABEL_OPTIMIZE]:
+                result.append(param)
         return result
 
     def onCellChanged(self, row, col):
@@ -408,6 +445,11 @@ class MaterialOptimizerController:
     def onOptimizationParamChanged(self, row, col):
         paramRow = self.getRowLabelText()
         paramCol = self.getColumnLabelText()
+
+        # make sure the column refers to optimization parameter
+        if paramCol not in self.model.optimizationParams[paramRow]:
+            return False, None, None, None
+
         try:
             # special case: vertex positions
             if VERTEX_POSITIONS_PATTERN.search(paramRow):
