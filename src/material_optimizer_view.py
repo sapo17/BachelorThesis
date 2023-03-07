@@ -192,17 +192,20 @@ class MaterialOptimizerView(QMainWindow):
     def initTable(self, sceneParams: dict):
         firstKey = list(sceneParams)[0]
         columns = sceneParams[firstKey].keys()
+        filteredColumns = list(
+            filter(lambda col: col != COLUMN_LABEL_OPTIMIZE, columns)
+        )
         rowsLength = len(sceneParams)
-        columnsLength = len(columns)
+        columnsLength = len(filteredColumns)
         result = QTableWidget(rowsLength, columnsLength)
-        result.setHorizontalHeaderLabels(columns)
+        result.setHorizontalHeaderLabels(filteredColumns)
         result.setVerticalHeaderLabels(sceneParams.keys())
         result.horizontalHeader().setSectionResizeMode(
             QtWidgets.QHeaderView.ResizeMode.ResizeToContents
         )
 
         for row, param in enumerate(sceneParams):
-            for col, label in enumerate(columns):
+            for col, label in enumerate(filteredColumns):
                 value = sceneParams[param][label]
                 if label == COLUMN_LABEL_VALUE:
                     valueType = type(value)
@@ -224,9 +227,6 @@ class MaterialOptimizerView(QMainWindow):
                         item.setBackground(QtGui.QColorConstants.LightGray)
                     else:
                         item = QTableWidgetItem(NOT_IMPLEMENTED_STRING)
-                elif label == COLUMN_LABEL_OPTIMIZE:
-                    self.setCheckboxAsQTableItem(result, row, col, value)
-                    continue
                 else:
                     # special case: mi.Point3f for max/min clamp value of vertex pos.
                     if VERTEX_POSITIONS_PATTERN.search(param):
@@ -240,17 +240,22 @@ class MaterialOptimizerView(QMainWindow):
                             item = QTableWidgetItem(str(value))
                     else:
                         item = QTableWidgetItem(str(value))
+                result.setStyleSheet(
+                    self.getQTableItemSelectedStyle(TOL_BLUE_COLOR)
+                )
                 result.setItem(row, col, item)
 
         return result
 
-    def setCheckboxAsQTableItem(self, result, row, col, value):
-        checkboxContainer = QWidget()
-        layout = QHBoxLayout(checkboxContainer)
-        item = QCheckBox()
-        item.setChecked(value)
-        layout.addWidget(item, alignment=QtCore.Qt.AlignmentFlag.AlignCenter)
-        result.setCellWidget(row, col, checkboxContainer)
+    @staticmethod
+    def getQTableItemSelectedStyle(backgroundColor: str) -> str:
+        return (
+            "QTableView::item:selected"
+            "{"
+            f"background-color : {backgroundColor};"
+            "selection-color : #000000;"
+            "}"
+        )
 
     @staticmethod
     def Color3fToCellString(color3f: mi.Color3f):
