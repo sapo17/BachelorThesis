@@ -100,6 +100,12 @@ class MaterialOptimizerController:
 
     def updateSignals(self):
         self.view.table.cellChanged.connect(self.onCellChanged)
+        self.view.table.verticalHeader().sectionDoubleClicked.connect(
+            self.onVerticalHeaderSectionDoubleClicked
+        )
+        self.view.table.verticalHeader().sectionPressed.connect(
+            self.onVerticalHeaderSectionPressed
+        )
 
     def combineTableValues(self, params, optimizationParams):
         result = {}
@@ -439,6 +445,11 @@ class MaterialOptimizerController:
     def onOptimizationParamChanged(self, row, col):
         paramRow = self.getRowLabelText()
         paramCol = self.getColumnLabelText()
+
+        # make sure the column refers to optimization parameter
+        if paramCol not in self.model.optimizationParams[paramRow]:
+            return False, None, None, None
+
         try:
             # special case: vertex positions
             if VERTEX_POSITIONS_PATTERN.search(paramRow):
