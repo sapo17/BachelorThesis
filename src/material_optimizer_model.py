@@ -272,10 +272,7 @@ class MaterialOptimizerModel:
             raise ValueError(errMsg)
 
     def updateOptimizationParam(self, paramCol, paramRow, newValue):
-        if (
-            paramCol not in self.optimizationParams[paramRow]
-            or self.optimizationParams[paramRow][paramCol] == newValue
-        ):
+        if self.optimizationParams[paramRow][paramCol] == newValue:
             return
         self.optimizationParams[paramRow][paramCol] = newValue
 
