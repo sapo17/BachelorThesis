@@ -224,8 +224,8 @@
 		<boolean name="face_normals" value="true"/>
 		<ref id="mat-PlaneBsdf" name="bsdf"/>
 	</shape>
-	<shape type="ply" id="sphere">
-		<string name="filename" value="meshes/Sphere.ply"/>
+	<shape type="obj" id="cube">
+		<string name="filename" value="meshes/cube.obj"/>
 		<boolean name="face_normals" value="true"/>
 		<ref id="mat-ObjectBsdf" name="bsdf"/>
 	</shape>

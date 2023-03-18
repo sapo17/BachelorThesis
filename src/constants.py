@@ -118,6 +118,9 @@ FLATNESS_PATTERN: re.Pattern = re.compile(r".*\.flatness")
 CLEARCOAT_PATTERN: re.Pattern = re.compile(r".*\.clearcoat")
 CLEARCOAT_GLOSS_PATTERN: re.Pattern = re.compile(r".*\.clearcoat_gloss")
 
+# special pattern: activates custom optimizer
+GRID_VOLUME_TO_OPTIMIZER_PATTERN: re.Pattern = re.compile(r"grid_volume_data.sigma_t.data")
+
 # max Index of refraction value is taken from
 # https://en.wikipedia.org/wiki/List_of_refractive_indices
 # Germanium: ~4.1
@@ -251,6 +254,8 @@ PATTERNS_INTRODUCE_DISCONTINUITIES: list = [
     VERTEX_POSITIONS_PATTERN,
 ]
 PATTERNS_REQUIRE_VOLUMETRIC_INTEGRATOR = [ALBEDO_PATTERN, SIGMA_T_PATTERN]
+
+OPTIMIZER_PATTERNS: list =  [GRID_VOLUME_TO_OPTIMIZER_PATTERN]
 
 ### Constant dictionary: key: Pattern, value: default min and max clamp value
 def getDefaultLegalValues(pattern: re.Pattern) -> tuple([int, int]):

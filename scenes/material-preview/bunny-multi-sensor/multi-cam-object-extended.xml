@@ -213,18 +213,20 @@
 	</texture>
 
 <!-- Emitters -->
-<emitter type="envmap" id="emitter-envmap">
-	<string name="filename" value="scenes\material-preview\textures\envmap.exr" />
+<emitter type="constant">
 </emitter>
+<!-- <emitter type="envmap" id="emitter-envmap">
+	<string name="filename" value="scenes\material-preview\textures\envmap.exr" />
+</emitter> -->
 
 
 <!-- Shapes -->
 
-	<shape type="ply">
+	<!-- <shape type="ply">
 		<string name="filename" value="meshes/Plane.ply"/>
 		<boolean name="face_normals" value="true"/>
 		<ref id="mat-PlaneBsdf" name="bsdf"/>
-	</shape>
+	</shape> -->
 	<shape type="ply" id="bunny">
 		<string name="filename" value="meshes/bunny.ply"/>
 		<boolean name="face_normals" value="true"/>
