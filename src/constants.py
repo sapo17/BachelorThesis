@@ -76,6 +76,11 @@ MARGIN_PENALTY_LABEL = "Margin Penalty"
 NONE_STR = "None"
 EXPONENTIAL_DECAY_STR = "Exponential Decay"
 
+# Color Blind friendly colors: https://davidmathlogic.com/colorblind/#%23332288-%23117733-%2344AA99-%2388CCEE-%23DDCC77-%23CC6677-%23AA4499-%23882255
+TOL_GOLD_COLOR = "#DDCC77"
+TOL_BLUE_COLOR = "#88CCEE"
+WHITE_COLOR = "#fff"
+
 """ 
 BSDF Parameter Patterns Constants
 See also: https://mitsuba.readthedocs.io/en/stable/src/generated/plugins_bsdfs.html#
@@ -150,7 +155,7 @@ IRRADIANCE_PATTERN: re.Pattern = re.compile(
 )  # supports only float/Color3f entry
 
 # TODO: what can be the max radiance value
-MAX_RADIANCE_VALUE: float = 10000.0 
+MAX_RADIANCE_VALUE: float = 10000.0
 MAX_SCALE_VALUE: int = 100
 
 
