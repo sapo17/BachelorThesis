@@ -648,14 +648,27 @@ class MaterialOptimizerController:
             # output: filled dictionary
             json.dump(outputDict, outfile, indent=4)
 
+            # prepare figure content and output each element
+            sensorToOptimizedImage = {}
+            self.prepareFigureAndOutputEachElem(
+                lossHist,
+                sensorToInitImg,
+                outputFileDir,
+                sensorToOptimizedImage,
+                selectedIteration,
+            )
+
             # output: resulting figure
+            figuresDir = outputFileDir + f"/figures_it_{selectedIteration}"
+            Path(figuresDir).mkdir(parents=True, exist_ok=True)
             for sensorIdx in range(len(self.model.scene.sensors())):
                 self.outputFigure(
                     selectedIteration,
-                    outputFileDir,
+                    figuresDir,
                     sensorIdx,
                     lossHist,
                     sensorToInitImg,
+                    sensorToOptimizedImage,
                 )
 
             # output: optimization log file
@@ -669,6 +682,66 @@ class MaterialOptimizerController:
                 f"The output can be found at: '{absPath}'"
             )
 
+    def prepareFigureAndOutputEachElem(
+        self,
+        lossHist,
+        sensorToInitImg,
+        outputFileDir,
+        sensorToOptimizedImage,
+        selectedIteration,
+    ):
+        refImgsDir = outputFileDir + "/ref_imgs"
+        Path(refImgsDir).mkdir(parents=True, exist_ok=True)
+        initImgsDir = outputFileDir + "/init_imgs"
+        Path(initImgsDir).mkdir(parents=True, exist_ok=True)
+        optImgsDir = outputFileDir + f"/opt_imgs_it_{selectedIteration}"
+        Path(optImgsDir).mkdir(parents=True, exist_ok=True)
+        absErrImgs = outputFileDir + f"/abs_err_imgs_it_{selectedIteration}"
+        Path(absErrImgs).mkdir(parents=True, exist_ok=True)
+
+        for sensorIdx in range(len(self.model.scene.sensors())):
+            currentSensor = self.model.scene.sensors()[sensorIdx]
+
+            # output: reference image
+            refImgName = refImgsDir + f"/ref_img_s{sensorIdx}.png"
+            mi.util.write_bitmap(
+                refImgName,
+                self.model.sensorToReferenceImageDict[currentSensor],
+            )
+
+            # output: init image
+            initImgName = initImgsDir + f"/init_img_s{sensorIdx}.png"
+            mi.util.write_bitmap(initImgName, sensorToInitImg[currentSensor])
+
+            sensorToOptimizedImage[
+                sensorIdx
+            ] = MaterialOptimizerModel.convertToBitmap(
+                MaterialOptimizerModel.render(
+                    self.model.scene,
+                    currentSensor,
+                    512,
+                )
+            )
+            # output: opt image
+            optImageName = optImgsDir + f"/opt_img_s{sensorIdx}.png"
+            mi.util.write_bitmap(
+                optImageName,
+                sensorToOptimizedImage[sensorIdx],
+            )
+
+            # output: abs error image
+            refBmp = MaterialOptimizerModel.convertToBitmap(
+                self.model.sensorToReferenceImageDict[currentSensor]
+            )
+            absErrImg = self.getAbsoluteErrImage(
+                sensorToOptimizedImage[sensorIdx], refBmp
+            )
+            absErrImageName = absErrImgs + f"/abs_err_img_s{sensorIdx}.png"
+            plt.imsave(absErrImageName, absErrImg, cmap="inferno")
+
+        # output: loss history
+        np.save((outputFileDir + "/loss_histroy.npy"), np.array(lossHist))
+
     def outputFigure(
         self,
         selectedIteration,
@@ -676,6 +749,7 @@ class MaterialOptimizerController:
         sensorIdx,
         lossHist,
         sensorToInitImg,
+        sensorToOptimizedImage,
     ):
         outputFileName = outputFileDir + f"/figure-sensor{sensorIdx}.png"
         canvas = MplCanvas()
@@ -684,13 +758,7 @@ class MaterialOptimizerController:
             canvas,
             self.model.sensorToReferenceImageDict[currentSensor],
             sensorToInitImg[currentSensor],
-            MaterialOptimizerModel.convertToBitmap(
-                MaterialOptimizerModel.render(
-                    self.model.scene,
-                    currentSensor,
-                    512,
-                )
-            ),
+            sensorToOptimizedImage[sensorIdx],
             {self.model.lossFunction: lossHist},
             selectedIteration,
             lossHist[selectedIteration],
@@ -797,9 +865,7 @@ class MaterialOptimizerController:
         canvas.axes[3].axis(OFF_STRING)
         canvas.axes[3].set_title(REFERENCE_IMAGE_STRING)
 
-        refPilImg = Image.fromarray(np.uint8(refBmp))
-        finalPilImg = Image.fromarray(np.uint8(finalImg))
-        diff_np = self.normalized_absolute_error(refPilImg, finalPilImg)
+        diff_np = self.getAbsoluteErrImage(finalImg, refBmp)
         im4 = canvas.axes[4].imshow(diff_np, cmap="inferno")
         divider = make_axes_locatable(canvas.axes[4])
         cax4 = divider.append_axes("right", size="5%", pad=0.05)
@@ -808,6 +874,15 @@ class MaterialOptimizerController:
         canvas.axes[4].set_title(r"Absolute Error: |$y_{ref} - y_{opt}$|")
 
         plt.tight_layout()
+
+    @staticmethod
+    def getAbsoluteErrImage(finalImg, refBmp):
+        refPilImg = Image.fromarray(np.uint8(refBmp))
+        finalPilImg = Image.fromarray(np.uint8(finalImg))
+        diff_np = MaterialOptimizerController.normalized_absolute_error(
+            refPilImg, finalPilImg
+        )
+        return diff_np
 
     @staticmethod
     def normalized_absolute_error(ref: Image, opt: Image):
