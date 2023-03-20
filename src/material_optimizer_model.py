@@ -483,7 +483,7 @@ class MaterialOptimizerModel:
                     self.updateAfterStep(opts, self.sceneParams)
                 else:
                     sensorLossOnPriorIt = tmpLossTracker[sensorIdx][-1]
-                    margin = sensorLossOnPriorIt * self.marginPercentage
+                    margin = self.computeMargin(sensorLossOnPriorIt)
                     if currentLoss[0] < sensorLossOnPriorIt + margin:
                         dr.backward(currentLoss)
                         self.updateAfterStep(opts, self.sceneParams)
@@ -509,10 +509,16 @@ class MaterialOptimizerModel:
             if totalLoss < self.minError:
                 break
 
-        showDiffRender(diffRender=None, plotStatus=CLOSE_STATUS_STR)
+        if showDiffRender:
+            showDiffRender(diffRender=None, plotStatus=CLOSE_STATUS_STR)
         optLog = self.endOptimizationLog(sceneParamsHist, startTime, optLog)
 
         return lossHist, sceneParamsHist, optLog
+
+    def computeMargin(self, sensorLossOnPriorIt):
+        if self.marginPercentage == float("inf"):
+            return self.marginPercentage
+        return sensorLossOnPriorIt * self.marginPercentage
 
     def increaseFailAndResetOptIfNecessary(self, opts, tmpFailTracker):
         tmpFailTracker += 1
@@ -565,6 +571,7 @@ class MaterialOptimizerModel:
         )
         optLog.append(f"Initial scene parameters:\n {sceneParamsHist[0]}\n")
         optLog.append(f"End scene parameters:\n {sceneParamsHist[-1]}\n")
+        optLog.append(f"Mitsuba version:\n {mi.__version__}\n")
         optLog.append("Hyperparameters:\n")
         optLog.append(f"\tminimum error:{self.minError},\n")
         optLog.append(f"\tspp:{self.samplesPerPixel},\n")

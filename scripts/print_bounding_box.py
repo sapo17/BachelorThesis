@@ -4,17 +4,19 @@ import matplotlib.pyplot as plt
 
 mi.set_variant("cuda_ad_rgb")
 
-def printMinMax(vertices: mi.Float):
-    x = dr.unravel(mi.Point3f, vertices)[0]
-    y = dr.unravel(mi.Point3f, vertices)[1]
-    z = dr.unravel(mi.Point3f, vertices)[2]
-    print(f"Min: {dr.min(x)[0]:.6f}, {dr.min(y)[0]:.6f}, {dr.min(z)[0]:.6f}")
-    print(f"Max: {dr.max(x)[0]:.6f}, {dr.max(y)[0]:.6f}, {dr.max(z)[0]:.6f}")
+def getShape(scene: mi.Scene, id: str):
+    for shape in scene.shapes():
+        if shape.id() == id:
+            return shape
+    return None
 
-scene = mi.load_file('scenes\\texture-scanner\samples-231122\greenish-circular-obj\scene-first-rgb.xml', spp=1)
-# scene = mi.load_file('scenes\metashape\mini-birdy-statue\multiple_sensors\scene.xml', spp=1)
-params = mi.traverse(scene)
-printMinMax(params['material-ply.vertex_positions'])
+scene = mi.load_file('scenes\material-preview\\bunny-multi-sensor\multi-cam-object-extended.xml', spp=1)
+shape = getShape(scene, "bunny")
+
+bbox = shape.bbox()
+bsphere = bbox.bounding_sphere()
+print(bbox)
+print(bsphere)
 
 # birdy
 # Min: -0.875, -0.933, 9.320
@@ -23,3 +25,13 @@ printMinMax(params['material-ply.vertex_positions'])
 # green alginate
 # Min: -0.235536, 0.032117, -0.283350 min x can go lower -0.236?, min z can go lower -0.285? e.g. -0.236, 0.032117, -0.28350
 # Max: -0.204037, 0.032658, -0.254136 max x can go higher -0.2039?, max z can go more higher -0.251? e.g. -0.20395, 0.032658, -0.253
+
+# multi sensor bunny
+# BoundingBox3f[
+#   min = [-2.22219, 0.0573322, -1.81878],
+#   max = [2.35461, 4.59399, 1.72843]
+# ]
+# BoundingSphere3f[
+#   center = [0.0662107, 2.32566, -0.0451787],
+#   radius = 3.67801
+# ]

@@ -9,7 +9,7 @@
 
 
     <integrator type="$integrator">
-        <integer name="max_depth" value="$max_depth"/>
+        <!-- <integer name="max_depth" value="$max_depth"/> -->
     </integrator>
 
     <sensor type="perspective" id="camera">
