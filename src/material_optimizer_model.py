@@ -491,6 +491,11 @@ class MaterialOptimizerModel:
             opts, setProgressValue, showDiffRender
         )
 
+    def computeMargin(self, sensorLossOnPriorIt):
+        if self.marginPercentage == float("inf"):
+            return self.marginPercentage
+        return sensorLossOnPriorIt * self.marginPercentage
+
     def increaseFailAndResetOptIfNecessary(self, opts, tmpFailTracker):
         tmpFailTracker += 1
         if tmpFailTracker % 5 == 0:
@@ -542,6 +547,7 @@ class MaterialOptimizerModel:
         )
         optLog.append(f"Initial scene parameters:\n {sceneParamsHist[0]}\n")
         optLog.append(f"End scene parameters:\n {sceneParamsHist[-1]}\n")
+        optLog.append(f"Mitsuba version:\n {mi.__version__}\n")
         optLog.append("Hyperparameters:\n")
         optLog.append(f"\tminimum error:{self.minError},\n")
         optLog.append(f"\tspp:{self.samplesPerPixel},\n")
@@ -651,7 +657,7 @@ class DefaultOptimizerStrategy(OptimizerStrategy):
                     self.model.updateAfterStep(opts, self.model.sceneParams)
                 else:
                     sensorLossOnPriorIt = tmpLossTracker[sensorIdx][-1]
-                    margin = sensorLossOnPriorIt * self.model.marginPercentage
+                    margin = self.model.computeMargin(sensorLossOnPriorIt)
                     if currentLoss[0] < sensorLossOnPriorIt + margin:
                         dr.backward(currentLoss)
                         self.model.updateAfterStep(
@@ -681,7 +687,10 @@ class DefaultOptimizerStrategy(OptimizerStrategy):
             if totalLoss < self.model.minError:
                 break
 
-        showDiffRender(diffRender=None, plotStatus=CLOSE_STATUS_STR)
+        if showDiffRender:
+            showDiffRender(
+                diffRender=None, plotStatus=CLOSE_STATUS_STR
+            )
         optLog = self.model.endOptimizationLog(
             sceneParamsHist, startTime, optLog
         )
@@ -731,9 +740,7 @@ class CustomOptimizerStrategy(OptimizerStrategy):
                         )
                     else:
                         sensorLossOnPriorIt = tmpLossTracker[sensorIdx][-1]
-                        margin = (
-                            sensorLossOnPriorIt * self.model.marginPercentage
-                        )
+                        margin = self.model.computeMargin(sensorLossOnPriorIt)
                         if currentLoss[0] < sensorLossOnPriorIt + margin:
                             dr.backward(currentLoss)
                             self.model.updateAfterStep(
@@ -765,9 +772,10 @@ class CustomOptimizerStrategy(OptimizerStrategy):
                     it > self.model.iterationCount
                     or totalLoss < self.model.minError
                 ):
-                    showDiffRender(
-                        diffRender=None, plotStatus=CLOSE_STATUS_STR
-                    )
+                    if showDiffRender:
+                        showDiffRender(
+                            diffRender=None, plotStatus=CLOSE_STATUS_STR
+                        )
                     optLog = self.model.endOptimizationLog(
                         sceneParamsHist, startTime, optLog
                     )
@@ -783,7 +791,10 @@ class CustomOptimizerStrategy(OptimizerStrategy):
                 )
                 self.model.sceneParams.update(opt)
 
-        showDiffRender(diffRender=None, plotStatus=CLOSE_STATUS_STR)
+        if showDiffRender:
+            showDiffRender(
+                diffRender=None, plotStatus=CLOSE_STATUS_STR
+            )
         optLog = self.model.endOptimizationLog(
             sceneParamsHist, startTime, optLog
         )

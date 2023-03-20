@@ -55,7 +55,7 @@
 		</texture> -->
 		<float name="roughness" value="0.6999"/>
 		<float name="spec_trans" value="0.4000"/>
-		<float name="eta" value="1.4969"/>
+		<float name="eta" value="1.54"/>
 	</bsdf>
 	<bsdf type="diffuse" id="empty-emitter-bsdf">
 		<rgb value="0.000000" name="reflectance"/>
