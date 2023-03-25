@@ -18,7 +18,8 @@
     "object_bsdf.roughness.value": [
         0.0010000000474974513
     ],
-    "object_bsdf.base_color.value": "[[0.4156782627105713, 0.8532409071922302, 0.9990000128746033]]",
+    "object_bsdf.base_color.value": 
+    "[[0.4156782627105713, 0.8532409071922302, 0.9990000128746033]]",
     "object_bsdf.anisotropic.value": [
         0.0
     ],
