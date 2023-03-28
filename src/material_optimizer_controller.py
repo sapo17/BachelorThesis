@@ -100,6 +100,12 @@ class MaterialOptimizerController:
 
     def updateSignals(self):
         self.view.table.cellChanged.connect(self.onCellChanged)
+        self.view.table.verticalHeader().sectionDoubleClicked.connect(
+            self.onVerticalHeaderSectionDoubleClicked
+        )
+        self.view.table.verticalHeader().sectionPressed.connect(
+            self.onVerticalHeaderSectionPressed
+        )
 
     def combineTableValues(self, params, optimizationParams):
         result = {}
@@ -225,6 +231,51 @@ class MaterialOptimizerController:
         self.view.marginPenalty.currentTextChanged.connect(
             self.onMarginPenaltyChanged
         )
+        self.view.table.verticalHeader().sectionDoubleClicked.connect(
+            self.onVerticalHeaderSectionDoubleClicked
+        )
+        self.view.table.verticalHeader().sectionPressed.connect(
+            self.onVerticalHeaderSectionPressed
+        )
+
+    def onVerticalHeaderSectionDoubleClicked(self, rowIndex):
+        rowLabel = self.getRowLabelText()
+        from PyQt6.QtGui import QColor
+
+        if self.model.optimizationParams[rowLabel][COLUMN_LABEL_OPTIMIZE]:
+            self.model.optimizationParams[rowLabel][
+                COLUMN_LABEL_OPTIMIZE
+            ] = False
+            self.view.table.setStyleSheet(
+                self.view.getQTableItemSelectedStyle(TOL_BLUE_COLOR)
+            )
+            for colIdx in range(self.view.table.columnCount()):
+                self.view.table.item(rowIndex, colIdx).setBackground(
+                    QColor(WHITE_COLOR)
+                )
+        else:
+            self.model.optimizationParams[rowLabel][
+                COLUMN_LABEL_OPTIMIZE
+            ] = True
+            self.view.table.setStyleSheet(
+                self.view.getQTableItemSelectedStyle(TOL_GOLD_COLOR)
+            )
+            for colIdx in range(self.view.table.columnCount()):
+                self.view.table.item(rowIndex, colIdx).setBackground(
+                    QColor(TOL_GOLD_COLOR)
+                )
+
+    def onVerticalHeaderSectionPressed(self):
+        rowLabel = self.getRowLabelText()
+
+        if self.model.optimizationParams[rowLabel][COLUMN_LABEL_OPTIMIZE]:
+            self.view.table.setStyleSheet(
+                self.view.getQTableItemSelectedStyle(TOL_GOLD_COLOR)
+            )
+        else:
+            self.view.table.setStyleSheet(
+                self.view.getQTableItemSelectedStyle(TOL_BLUE_COLOR)
+            )
 
     def onMarginPercentageChanged(self):
         try:
@@ -285,23 +336,9 @@ class MaterialOptimizerController:
 
     def getCheckedRows(self) -> list:
         result = []
-        colIdx = self.getColumnIndex(COLUMN_LABEL_OPTIMIZE)
-        for rowIdx in range(self.view.table.rowCount()):
-            assert (
-                self.view.table.cellWidget(rowIdx, colIdx).layout().itemAt(0)
-                != None
-            )
-            isChecked = (
-                self.view.table.cellWidget(rowIdx, colIdx)
-                .layout()
-                .itemAt(0)
-                .widget()
-                .isChecked()
-            )
-            if isChecked:
-                result.append(
-                    self.view.table.verticalHeaderItem(rowIdx).text()
-                )
+        for param in list(self.model.optimizationParams.keys()):
+            if self.model.optimizationParams[param][COLUMN_LABEL_OPTIMIZE]:
+                result.append(param)
         return result
 
     def onCellChanged(self, row, col):
@@ -408,6 +445,11 @@ class MaterialOptimizerController:
     def onOptimizationParamChanged(self, row, col):
         paramRow = self.getRowLabelText()
         paramCol = self.getColumnLabelText()
+
+        # make sure the column refers to optimization parameter
+        if paramCol not in self.model.optimizationParams[paramRow]:
+            return False, None, None, None
+
         try:
             # special case: vertex positions
             if VERTEX_POSITIONS_PATTERN.search(paramRow):
@@ -606,14 +648,27 @@ class MaterialOptimizerController:
             # output: filled dictionary
             json.dump(outputDict, outfile, indent=4)
 
+            # prepare figure content and output each element
+            sensorToOptimizedImage = {}
+            self.prepareFigureAndOutputEachElem(
+                lossHist,
+                sensorToInitImg,
+                outputFileDir,
+                sensorToOptimizedImage,
+                selectedIteration,
+            )
+
             # output: resulting figure
+            figuresDir = outputFileDir + f"/figures_it_{selectedIteration}"
+            Path(figuresDir).mkdir(parents=True, exist_ok=True)
             for sensorIdx in range(len(self.model.scene.sensors())):
                 self.outputFigure(
                     selectedIteration,
-                    outputFileDir,
+                    figuresDir,
                     sensorIdx,
                     lossHist,
                     sensorToInitImg,
+                    sensorToOptimizedImage,
                 )
 
             # output: optimization log file
@@ -627,6 +682,66 @@ class MaterialOptimizerController:
                 f"The output can be found at: '{absPath}'"
             )
 
+    def prepareFigureAndOutputEachElem(
+        self,
+        lossHist,
+        sensorToInitImg,
+        outputFileDir,
+        sensorToOptimizedImage,
+        selectedIteration,
+    ):
+        refImgsDir = outputFileDir + "/ref_imgs"
+        Path(refImgsDir).mkdir(parents=True, exist_ok=True)
+        initImgsDir = outputFileDir + "/init_imgs"
+        Path(initImgsDir).mkdir(parents=True, exist_ok=True)
+        optImgsDir = outputFileDir + f"/opt_imgs_it_{selectedIteration}"
+        Path(optImgsDir).mkdir(parents=True, exist_ok=True)
+        absErrImgs = outputFileDir + f"/abs_err_imgs_it_{selectedIteration}"
+        Path(absErrImgs).mkdir(parents=True, exist_ok=True)
+
+        for sensorIdx in range(len(self.model.scene.sensors())):
+            currentSensor = self.model.scene.sensors()[sensorIdx]
+
+            # output: reference image
+            refImgName = refImgsDir + f"/ref_img_s{sensorIdx}.png"
+            mi.util.write_bitmap(
+                refImgName,
+                self.model.sensorToReferenceImageDict[currentSensor],
+            )
+
+            # output: init image
+            initImgName = initImgsDir + f"/init_img_s{sensorIdx}.png"
+            mi.util.write_bitmap(initImgName, sensorToInitImg[currentSensor])
+
+            sensorToOptimizedImage[
+                sensorIdx
+            ] = MaterialOptimizerModel.convertToBitmap(
+                MaterialOptimizerModel.render(
+                    self.model.scene,
+                    currentSensor,
+                    512,
+                )
+            )
+            # output: opt image
+            optImageName = optImgsDir + f"/opt_img_s{sensorIdx}.png"
+            mi.util.write_bitmap(
+                optImageName,
+                sensorToOptimizedImage[sensorIdx],
+            )
+
+            # output: abs error image
+            refBmp = MaterialOptimizerModel.convertToBitmap(
+                self.model.sensorToReferenceImageDict[currentSensor]
+            )
+            absErrImg = self.getAbsoluteErrImage(
+                sensorToOptimizedImage[sensorIdx], refBmp
+            )
+            absErrImageName = absErrImgs + f"/abs_err_img_s{sensorIdx}.png"
+            plt.imsave(absErrImageName, absErrImg, cmap="inferno")
+
+        # output: loss history
+        np.save((outputFileDir + "/loss_histroy.npy"), np.array(lossHist))
+
     def outputFigure(
         self,
         selectedIteration,
@@ -634,6 +749,7 @@ class MaterialOptimizerController:
         sensorIdx,
         lossHist,
         sensorToInitImg,
+        sensorToOptimizedImage,
     ):
         outputFileName = outputFileDir + f"/figure-sensor{sensorIdx}.png"
         canvas = MplCanvas()
@@ -642,13 +758,7 @@ class MaterialOptimizerController:
             canvas,
             self.model.sensorToReferenceImageDict[currentSensor],
             sensorToInitImg[currentSensor],
-            MaterialOptimizerModel.convertToBitmap(
-                MaterialOptimizerModel.render(
-                    self.model.scene,
-                    currentSensor,
-                    512,
-                )
-            ),
+            sensorToOptimizedImage[sensorIdx],
             {self.model.lossFunction: lossHist},
             selectedIteration,
             lossHist[selectedIteration],
@@ -755,9 +865,7 @@ class MaterialOptimizerController:
         canvas.axes[3].axis(OFF_STRING)
         canvas.axes[3].set_title(REFERENCE_IMAGE_STRING)
 
-        refPilImg = Image.fromarray(np.uint8(refBmp))
-        finalPilImg = Image.fromarray(np.uint8(finalImg))
-        diff_np = self.normalized_absolute_error(refPilImg, finalPilImg)
+        diff_np = self.getAbsoluteErrImage(finalImg, refBmp)
         im4 = canvas.axes[4].imshow(diff_np, cmap="inferno")
         divider = make_axes_locatable(canvas.axes[4])
         cax4 = divider.append_axes("right", size="5%", pad=0.05)
@@ -766,6 +874,15 @@ class MaterialOptimizerController:
         canvas.axes[4].set_title(r"Absolute Error: |$y_{ref} - y_{opt}$|")
 
         plt.tight_layout()
+
+    @staticmethod
+    def getAbsoluteErrImage(finalImg, refBmp):
+        refPilImg = Image.fromarray(np.uint8(refBmp))
+        finalPilImg = Image.fromarray(np.uint8(finalImg))
+        diff_np = MaterialOptimizerController.normalized_absolute_error(
+            refPilImg, finalPilImg
+        )
+        return diff_np
 
     @staticmethod
     def normalized_absolute_error(ref: Image, opt: Image):

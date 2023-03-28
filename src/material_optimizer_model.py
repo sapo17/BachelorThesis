@@ -483,7 +483,7 @@ class MaterialOptimizerModel:
                     self.updateAfterStep(opts, self.sceneParams)
                 else:
                     sensorLossOnPriorIt = tmpLossTracker[sensorIdx][-1]
-                    margin = sensorLossOnPriorIt * self.marginPercentage
+                    margin = self.computeMargin(sensorLossOnPriorIt)
                     if currentLoss[0] < sensorLossOnPriorIt + margin:
                         dr.backward(currentLoss)
                         self.updateAfterStep(opts, self.sceneParams)
@@ -509,10 +509,16 @@ class MaterialOptimizerModel:
             if totalLoss < self.minError:
                 break
 
-        showDiffRender(diffRender=None, plotStatus=CLOSE_STATUS_STR)
-        self.endOptimizationLog(sceneParamsHist, startTime, optLog)
+        if showDiffRender:
+            showDiffRender(diffRender=None, plotStatus=CLOSE_STATUS_STR)
+        optLog = self.endOptimizationLog(sceneParamsHist, startTime, optLog)
 
         return lossHist, sceneParamsHist, optLog
+
+    def computeMargin(self, sensorLossOnPriorIt):
+        if self.marginPercentage == float("inf"):
+            return self.marginPercentage
+        return sensorLossOnPriorIt * self.marginPercentage
 
     def increaseFailAndResetOptIfNecessary(self, opts, tmpFailTracker):
         tmpFailTracker += 1
@@ -560,29 +566,35 @@ class MaterialOptimizerModel:
     def endOptimizationLog(self, sceneParamsHist, startTime, optLog):
         endTime = time.time()
         elapsedTime = endTime - startTime
-        optLog += f"Optimization loop end. Elapsed time: {elapsedTime:.3f}s\n"
-        optLog += f"Initial scene parameters:\n {sceneParamsHist[0]}\n"
-        optLog += f"End scene parameters:\n {sceneParamsHist[-1]}\n"
-        optLog += "Hyperparameters:\n"
-        optLog += f"\tminimum error:{self.minError},\n"
-        optLog += f"\tspp:{self.samplesPerPixel},\n"
-        optLog += f"\toptimization func.:{self.lossFunction},\n"
-        optLog += f"\titeraration count:{self.iterationCount}\n"
-        optLog += f"Optimization parameters:\n \t{self.optimizationParams}"
+        optLog.append(
+            f"Optimization loop end. Elapsed time: {elapsedTime:.3f}s\n"
+        )
+        optLog.append(f"Initial scene parameters:\n {sceneParamsHist[0]}\n")
+        optLog.append(f"End scene parameters:\n {sceneParamsHist[-1]}\n")
+        optLog.append(f"Mitsuba version:\n {mi.__version__}\n")
+        optLog.append("Hyperparameters:\n")
+        optLog.append(f"\tminimum error:{self.minError},\n")
+        optLog.append(f"\tspp:{self.samplesPerPixel},\n")
+        optLog.append(f"\toptimization func.:{self.lossFunction},\n")
+        optLog.append(f"\titeraration count:{self.iterationCount}\n")
+        optLog.append(
+            f"Optimization parameters:\n \t{self.optimizationParams}"
+        )
+        return "".join(optLog)
 
     def startOptimizationLog(self):
         startTime = time.time()
-        optLog = "Optimization loop begin\n"
+        optLog = ["Optimization loop begin\n"]
         return startTime, optLog
 
     def updateOptimizationLog(self, sceneParamsHist, optLog, it, totalLoss):
         currentItStr = f"Iteration {it:02d}"
         logging.info(currentItStr)
-        optLog += currentItStr + "\n"
+        optLog.append(currentItStr + "\n")
         currentTotalLossStr = f"\ttotal loss= {totalLoss:6f}"
         logging.info(currentTotalLossStr)
-        optLog += currentTotalLossStr + "\n"
-        optLog += f"Current scene parameters:\n \t{sceneParamsHist[it]}\n"
+        optLog.append(currentTotalLossStr + "\n")
+        optLog.append(f"Current scene parameters:\n \t{sceneParamsHist[it]}\n")
 
     def updateProgressBar(self, setProgressValue, itPercent):
         if setProgressValue is not None:

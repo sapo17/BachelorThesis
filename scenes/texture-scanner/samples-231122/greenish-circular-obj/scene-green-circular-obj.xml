@@ -49,13 +49,12 @@
 		</bsdf>
 	</bsdf>
 	<bsdf type="principled" id="mat-material-bsdf">
-		<!-- <rgb value="0.1 0.1 0.1" name="base_color"/> -->
 		<texture name="base_color" type="bitmap">
-			<string name="filename" value="scenes\texture-scanner\textures\init-texture-512.png"/>
+			<string name="filename" value="scenes\texture-scanner\textures\init-texture-green-it-34-res-512.png"/>
 		</texture>
-		<float name="roughness" value="0.7"/>
-		<float name="spec_trans" value="0.1"/>
-		<float name="eta" value="1.54"/>
+		<float name="roughness" value="0.699999988079071"/>
+		<float name="spec_trans" value="0.4042862057685852"/>
+		<float name="eta" value="1.470804214477539"/>
 	</bsdf>
 	<bsdf type="diffuse" id="empty-emitter-bsdf">
 		<rgb value="0.000000" name="reflectance"/>
