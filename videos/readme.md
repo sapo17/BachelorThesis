@@ -1,0 +1,6 @@
+### Videos
+This directory contains example videos using our tool.
+
+- cbox_simple_optimization.mp4: Simple optimization example for the Cornel box scene. Using our tool, we change one of the colors of the walls and reconstruct the color by providing a reference image. Similar to Mitsuba 3 [tutorial](https://mitsuba.readthedocs.io/en/stable/src/inverse_rendering/gradient_based_opt.html).
+- dragon-principled-bsdf.mp4: A synthethic data example from CESCG 2023. We upload a scene that contains a dragon object with four sensors. Next, we provide four reference images that corresponds to the provided sensors. Beware that the order of the images matters. For more details, see our CESCG 2023 paper.
+- green-alginate-example.mp4: A real-world data example (green-alginate) from CESCG 2023. We show an example of multiple stage optimization. For multiple stage optimization, make sure that at each stage the initial scene parameter values are the optimized values from the previous stage. For simplicity reason, we avoided this in this video. For more details, see our CESCG 2023 paper.

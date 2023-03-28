@@ -50,9 +50,6 @@
 	</bsdf>
 	<bsdf type="principled" id="mat-material-bsdf">
 		<rgb value="0.1 0.1 0.1" name="base_color"/>
-		<!-- <texture name="base_color" type="bitmap">
-			<string name="filename" value="scenes\texture-scanner\textures\init-texture-1024.png"/>
-		</texture> -->
 		<float name="roughness" value="0.6999"/>
 		<float name="spec_trans" value="0.4000"/>
 		<float name="eta" value="1.54"/>
