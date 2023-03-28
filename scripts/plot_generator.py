@@ -105,7 +105,7 @@ for rowIdx, plot, color, linestyle in zip(
     range(nrows), plots, colors, linestyles
 ):
     axs[rowIdx].plot(plot, color=color, linestyle=linestyle, linewidth=2)
-    axs[rowIdx].yaxis.set_major_locator(plt.MaxNLocator(3))
+    axs[rowIdx].yaxis.set_major_locator(plt.MaxNLocator(4))
     axs[rowIdx].xaxis.set_major_locator(plt.MaxNLocator(5))
 
 
@@ -188,7 +188,7 @@ fig.legend(
 )
 
 # synthethic
-axs[0].set_title("Successful")
+# axs[0].set_title("Successful")
 
 # real-world
 # axs[0, 0].set_title("Successful")
@@ -202,10 +202,7 @@ fig.supylabel("Loss")
 # )
 # real-world
 fig.subplots_adjust(
-    top=0.9,
-    bottom=0.085,
-    left=0.085,
-    right=1.0,
+top=0.935,bottom=0.085,left=0.085,right=1.0,
 )  # this
 # plt.savefig("plot-successful-unsuccessful-synthethic.png", pad_inches=0.0, dpi=300, transparent=True)
 plt.savefig("plot-real-world.png", pad_inches=0.0, dpi=300, transparent=True)
