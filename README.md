@@ -26,7 +26,7 @@ Saip Can Hasbay, 01428723, University of Vienna, [saipcanhasbay@gmail.com](saipc
 3. Install dependencies
    
    0. (optional): Make sure pip is updated
-      - `pip install --upgrade pip`
+      - `python -m pip install --upgrade pip`
    - `pip install -r requirements.txt`
 
 ### Run
