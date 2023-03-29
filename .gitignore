@@ -4,3 +4,14 @@ output/*
 !output/README.md
 __pycache__
 material-optimizer.log
+scenes/metashape/*
+!scenes/metashape/mini-birdy-statue
+
+# additional projects do not commit
+mitsuba-data
+project-independent/**
+test.ipynb
+*.zip
+todo.md
+__init__.py
+*.psd
