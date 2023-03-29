@@ -3,3 +3,5 @@ mat-opt-venv
 output
 __pycache__
 material-optimizer.log
+scenes/metashape/*
+!scenes/metashape/mini-birdy-statue

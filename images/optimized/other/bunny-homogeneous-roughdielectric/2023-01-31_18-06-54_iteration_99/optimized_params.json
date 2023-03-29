@@ -1,0 +1,16 @@
+{
+    "emitter-envmap.scale": [
+        3.0
+    ],
+    "bsdf-diffuse.reflectance.value": "[[0.18000000715255737, 0.18000000715255737, 0.18000000715255737]]",
+    "object_bsdf.eta": [
+        1.4806865453720093
+    ],
+    "object_bsdf.alpha.value": [
+        0.01528790220618248
+    ],
+    "medium1.albedo.value.value": "[[0.473238468170166, 0.847354531288147, 0.9990000128746033]]",
+    "medium1.sigma_t.value.value": [
+        0.5024071931838989
+    ]
+}
