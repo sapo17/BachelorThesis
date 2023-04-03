@@ -451,8 +451,10 @@ class MaterialOptimizerController:
             return False, None, None, None
 
         try:
-            # special case: vertex positions
-            if VERTEX_POSITIONS_PATTERN.search(paramRow):
+            # special case: vertex_
+            if VERTEX_POSITIONS_PATTERN.search(
+                paramRow
+            ) or VERTEX_NORMALS_PATTERN.search(paramRow):
                 if (
                     paramCol == COLUMN_LABEL_MIN_CLAMP_LABEL
                     or paramCol == COLUMN_LABEL_MAX_CLAMP_LABEL
@@ -650,7 +652,13 @@ class MaterialOptimizerController:
                         mi.util.write_bitmap(outputTextureFileName, v)
                 elif type(v) is mi.Float:
                     floatArray = [f for f in v]
-                    if len(v) > 1:
+                    if VERTEX_POSITIONS_PATTERN.search(k):
+                        if any(
+                            k in checkedRow
+                            for checkedRow in self.getCheckedRows()
+                        ):
+                            self.outputPlyMesh(outputFileDir, k)
+                    elif len(v) > 1:
                         # special output: multi dimensional mi.Float as numpy array
                         outputNDimArrayFileName = (
                             outputFileDir
@@ -700,6 +708,30 @@ class MaterialOptimizerController:
             self.view.showInfoMessageBox(
                 f"The output can be found at: '{absPath}'"
             )
+
+    def outputPlyMesh(self, outputFileDir, k):
+        if ".vertex_positions" not in k:
+            return
+
+        parentStr = k.replace(".vertex_positions", "")
+        mesh = mi.Mesh(
+            "optimized_mesh",
+            vertex_count=self.model.sceneParams[parentStr + ".vertex_count"],
+            face_count=self.model.sceneParams[parentStr + ".face_count"],
+            has_vertex_normals=True,
+            has_vertex_texcoords=False,
+        )
+        mesh_params = mi.traverse(mesh)
+        mesh_params["vertex_positions"] = dr.ravel(self.model.sceneParams[k])
+        mesh_params["vertex_normals"] = dr.ravel(
+            self.model.sceneParams[parentStr + ".vertex_normals"]
+        )
+        mesh_params["faces"] = dr.ravel(
+            self.model.sceneParams[parentStr + ".faces"]
+        )
+        print(mesh_params.update())
+        outputMeshName = outputFileDir + f"//optimized_mesh_{k}.ply"
+        mesh.write_ply(outputMeshName)
 
     def prepareFigureAndOutputEachElem(
         self,

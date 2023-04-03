@@ -71,7 +71,7 @@ INF_STR = "inf"
 CLOSE_STATUS_STR = "CLOSE"
 INITIAL_STATUS_STR = "INITIAL"
 RENDER_STATUS_STR = "RENDER"
-MARGIN_PERCENTAGE_LABEL = "Margin per update"
+MARGIN_PERCENTAGE_LABEL = "Margin per penalty"
 MARGIN_PENALTY_LABEL = "Margin Penalty"
 NONE_STR = "None"
 EXPONENTIAL_DECAY_STR = "Exponential Decay"
@@ -119,7 +119,10 @@ CLEARCOAT_PATTERN: re.Pattern = re.compile(r".*\.clearcoat")
 CLEARCOAT_GLOSS_PATTERN: re.Pattern = re.compile(r".*\.clearcoat_gloss")
 
 # special pattern: activates custom optimizer
-GRID_VOLUME_TO_OPTIMIZER_PATTERN: re.Pattern = re.compile(r"grid_volume_data.sigma_t.data")
+GRID_VOLUME_DATA_SIGMA_T_STR: str = "grid_volume_data.sigma_t.data"
+GRID_VOLUME_TO_OPTIMIZER_PATTERN: re.Pattern = re.compile(
+    GRID_VOLUME_DATA_SIGMA_T_STR
+)
 
 # max Index of refraction value is taken from
 # https://en.wikipedia.org/wiki/List_of_refractive_indices
@@ -196,8 +199,9 @@ Shapes Constants
 See also: https://mitsuba.readthedocs.io/en/stable/src/generated/plugins_shapes.html#
 """
 VERTEX_POSITIONS_PATTERN: re.Pattern = re.compile(r".*\.vertex_positions")
-# TODO: what can be the min/max vertex position value?
 MAX_VERTEX_POSITION_VALUE: mi.Point3f = mi.Point3f(100.0, 100.0, 100.0)
+VERTEX_NORMALS_PATTERN: re.Pattern = re.compile(r".*\.vertex_normals")
+MAX_VERTEX_NORMALS_VALUE: mi.Point3f = mi.Point3f(100.0, 100.0, 100.0)
 
 """ Combine Patterns """
 SUPPORTED_MITSUBA_PARAMETER_PATTERNS: list = [
@@ -236,6 +240,7 @@ SUPPORTED_MITSUBA_PARAMETER_PATTERNS: list = [
     VERTEX_COLOR_PATTERN,
     ALBEDO_DATA_PATTERN,
     VERTEX_POSITIONS_PATTERN,
+    VERTEX_NORMALS_PATTERN,
 ]
 PATTERNS_INTRODUCE_DISCONTINUITIES: list = [
     # see also parameter 'D' flags https://mitsuba.readthedocs.io/en/stable/src/generated/plugins_bsdfs.html#technical-details
@@ -252,10 +257,11 @@ PATTERNS_INTRODUCE_DISCONTINUITIES: list = [
     CLEARCOAT_GLOSS_PATTERN,
     PHASE_G_PATTERN,
     VERTEX_POSITIONS_PATTERN,
+    VERTEX_NORMALS_PATTERN,
 ]
 PATTERNS_REQUIRE_VOLUMETRIC_INTEGRATOR = [ALBEDO_PATTERN, SIGMA_T_PATTERN]
 
-OPTIMIZER_PATTERNS: list =  [GRID_VOLUME_TO_OPTIMIZER_PATTERN]
+OPTIMIZER_PATTERNS: list = [GRID_VOLUME_TO_OPTIMIZER_PATTERN]
 
 ### Constant dictionary: key: Pattern, value: default min and max clamp value
 def getDefaultLegalValues(pattern: re.Pattern) -> tuple([int, int]):
@@ -277,7 +283,10 @@ def getDefaultLegalValues(pattern: re.Pattern) -> tuple([int, int]):
         result = (DEFAULT_MIN_CLAMP_VALUE, MAX_SCALE_VALUE)
     elif pattern is RADIANCE_PATTERN:
         result = (DEFAULT_MIN_CLAMP_VALUE, MAX_RADIANCE_VALUE)
-    elif pattern is VERTEX_POSITIONS_PATTERN:
+    elif (
+        pattern is VERTEX_POSITIONS_PATTERN
+        or pattern is VERTEX_NORMALS_PATTERN
+    ):
         # currently arbitrary: more or less user responsibility
         result = (-MAX_VERTEX_POSITION_VALUE, MAX_VERTEX_POSITION_VALUE)
 
