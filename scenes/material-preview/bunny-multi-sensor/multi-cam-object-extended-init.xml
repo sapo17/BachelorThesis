@@ -1,0 +1,232 @@
+<scene version="2.1.0">
+
+<!-- Defaults, these can be set via the command line: -Darg=value -->
+
+<default name="spp" value="4096" />
+<default name="integrator" value="path"/>
+<default name="rr_depth" value="5"/>
+<default name="resx" value="512"/>
+<default name="resy" value="512"/>
+<default name="max_depth" value="-1"/>
+<default name="sample_border" value="true"/>
+
+
+<integrator type="$integrator">
+	<integer name="max_depth" value="$max_depth"/>
+</integrator>
+<sensor type="perspective">
+	<string name="fov_axis" value="x"/>
+	<float name="fov" value="28.841546"/>
+	<float name="principal_point_offset_x" value="0.000000"/>
+	<float name="principal_point_offset_y" value="-0.000000"/>
+	<float name="near_clip" value="0.100000"/>
+	<float name="far_clip" value="1000.000000"/>
+	<transform name="to_world">
+		<rotate x="1" angle="179.999991348578"/>
+		<rotate y="1" angle="5.008956130975331e-06"/>
+		<rotate z="1" angle="180.00000500895632"/>
+		<translate value="0.000000 2.000000 10.000000"/>
+	</transform>
+	<sampler type="independent">
+		<integer name="sample_count" value="$spp"/>
+	</sampler>
+	<film type="hdrfilm">
+		<integer name="width" value="$resx"/>
+		<integer name="height" value="$resy"/>
+		<boolean name="sample_border" value="$sample_border"/>
+	</film>
+</sensor>
+<sensor type="perspective">
+	<string name="fov_axis" value="x"/>
+	<float name="fov" value="39.597755"/>
+	<float name="principal_point_offset_x" value="0.000000"/>
+	<float name="principal_point_offset_y" value="-0.000000"/>
+	<float name="near_clip" value="0.100000"/>
+	<float name="far_clip" value="1000.000000"/>
+	<transform name="to_world">
+		<rotate x="1" angle="-2.5044780654876655e-06"/>
+		<rotate y="1" angle="4.785270367996859e-21"/>
+		<rotate z="1" angle="2.1894845052756264e-13"/>
+		<translate value="0.000000 2.000000 -10.000000"/>
+	</transform>
+	<sampler type="independent">
+		<integer name="sample_count" value="$spp"/>
+	</sampler>
+	<film type="hdrfilm">
+		<integer name="width" value="$resx"/>
+		<integer name="height" value="$resy"/>
+		<boolean name="sample_border" value="$sample_border"/>
+	</film>
+</sensor>
+<sensor type="perspective">
+	<string name="fov_axis" value="x"/>
+	<float name="fov" value="39.597755"/>
+	<float name="principal_point_offset_x" value="0.000000"/>
+	<float name="principal_point_offset_y" value="-0.000000"/>
+	<float name="near_clip" value="0.100000"/>
+	<float name="far_clip" value="1000.000000"/>
+	<transform name="to_world">
+		<rotate x="1" angle="360.00001001791264"/>
+		<rotate y="1" angle="-90.00000250447816"/>
+		<translate value="10.000000 2.000000 0.000000"/>
+	</transform>
+	<sampler type="independent">
+		<integer name="sample_count" value="$spp"/>
+	</sampler>
+	<film type="hdrfilm">
+		<integer name="width" value="$resx"/>
+		<integer name="height" value="$resy"/>
+		<boolean name="sample_border" value="$sample_border"/>
+	</film>
+</sensor>
+<sensor type="perspective">
+	<string name="fov_axis" value="x"/>
+	<float name="fov" value="39.597755"/>
+	<float name="principal_point_offset_x" value="0.000000"/>
+	<float name="principal_point_offset_y" value="-0.000000"/>
+	<float name="near_clip" value="0.100000"/>
+	<float name="far_clip" value="1000.000000"/>
+	<transform name="to_world">
+		<rotate x="1" angle="-2.504477861932166e-06"/>
+		<rotate y="1" angle="90.00000250447816"/>
+		<translate value="-10.000000 2.000000 0.000000"/>
+	</transform>
+	<sampler type="independent">
+		<integer name="sample_count" value="$spp"/>
+	</sampler>
+	<film type="hdrfilm">
+		<integer name="width" value="$resx"/>
+		<integer name="height" value="$resy"/>
+		<boolean name="sample_border" value="$sample_border"/>
+	</film>
+</sensor>
+<sensor type="perspective">
+	<string name="fov_axis" value="x"/>
+	<float name="fov" value="39.597755"/>
+	<float name="principal_point_offset_x" value="0.000000"/>
+	<float name="principal_point_offset_y" value="-0.000000"/>
+	<float name="near_clip" value="0.100000"/>
+	<float name="far_clip" value="1000.000000"/>
+	<transform name="to_world">
+		<rotate x="1" angle="179.999991348578"/>
+		<rotate y="1" angle="45.00000125223908"/>
+		<rotate z="1" angle="180.00000500895632"/>
+		<translate value="-7.071068 2.000000 7.071068"/>
+	</transform>
+	<sampler type="independent">
+		<integer name="sample_count" value="$spp"/>
+	</sampler>
+	<film type="hdrfilm">
+		<integer name="width" value="$resx"/>
+		<integer name="height" value="$resy"/>
+		<boolean name="sample_border" value="$sample_border"/>
+	</film>
+</sensor>
+<sensor type="perspective">
+	<string name="fov_axis" value="x"/>
+	<float name="fov" value="39.597755"/>
+	<float name="principal_point_offset_x" value="0.000000"/>
+	<float name="principal_point_offset_y" value="-0.000000"/>
+	<float name="near_clip" value="0.100000"/>
+	<float name="far_clip" value="1000.000000"/>
+	<transform name="to_world">
+		<rotate x="1" angle="179.999991348578"/>
+		<rotate y="1" angle="-44.9999978371445"/>
+		<rotate z="1" angle="180.00000500895632"/>
+		<translate value="7.071068 2.000000 7.071068"/>
+	</transform>
+	<sampler type="independent">
+		<integer name="sample_count" value="$spp"/>
+	</sampler>
+	<film type="hdrfilm">
+		<integer name="width" value="$resx"/>
+		<integer name="height" value="$resy"/>
+		<boolean name="sample_border" value="$sample_border"/>
+	</film>
+</sensor>
+<sensor type="perspective">
+	<string name="fov_axis" value="x"/>
+	<float name="fov" value="43.602821"/>
+	<float name="principal_point_offset_x" value="0.000000"/>
+	<float name="principal_point_offset_y" value="-0.000000"/>
+	<float name="near_clip" value="0.100000"/>
+	<float name="far_clip" value="1000.000000"/>
+	<transform name="to_world">
+		<rotate x="1" angle="-2.504478472598665e-06"/>
+		<rotate y="1" angle="-45.00000125223908"/>
+		<rotate z="1" angle="2.8649197175398515e-13"/>
+		<translate value="7.071068 2.000000 -7.071068"/>
+	</transform>
+	<sampler type="independent">
+		<integer name="sample_count" value="$spp"/>
+	</sampler>
+	<film type="hdrfilm">
+		<integer name="width" value="$resx"/>
+		<integer name="height" value="$resy"/>
+		<boolean name="sample_border" value="$sample_border"/>
+	</film>
+</sensor>
+<sensor type="perspective">
+	<string name="fov_axis" value="x"/>
+	<float name="fov" value="43.602821"/>
+	<float name="principal_point_offset_x" value="0.000000"/>
+	<float name="principal_point_offset_y" value="-0.000000"/>
+	<float name="near_clip" value="0.100000"/>
+	<float name="far_clip" value="1000.000000"/>
+	<transform name="to_world">
+		<rotate x="1" angle="-2.504477861932166e-06"/>
+		<rotate y="1" angle="45.00000125223908"/>
+		<rotate z="1" angle="4.885666566289089e-13"/>
+		<translate value="-7.071068 2.000000 -7.071068"/>
+	</transform>
+	<sampler type="independent">
+		<integer name="sample_count" value="$spp"/>
+	</sampler>
+	<film type="hdrfilm">
+		<integer name="width" value="$resx"/>
+		<integer name="height" value="$resy"/>
+		<boolean name="sample_border" value="$sample_border"/>
+	</film>
+</sensor>
+
+<!-- Materials -->
+
+<bsdf type="twosided" id="mat-PlaneBsdf">
+	<bsdf type="diffuse">
+		<ref name="reflectance" id="texture-checkerboard" />
+	</bsdf>
+</bsdf>
+<bsdf type="principled" id="mat-ObjectBsdf">
+	<texture name="base_color" type="bitmap">
+		<string name="filename" value="scenes\material-preview\textures\init-texture-720x480.png"/>
+	</texture>
+	<float name="roughness" value="0.7"/>
+	<float name="spec_trans" value="0.1"/>
+	<float name="eta" value="1.64"/>
+</bsdf>
+<texture type="checkerboard" id="texture-checkerboard">
+	<rgb name="color0" value="0.4" />
+	<rgb name="color1" value="0.2" />
+	<transform name="to_uv">
+		<scale x="8.000000" y="8.000000" />
+	</transform>
+</texture>
+
+<!-- Emitters -->
+<emitter type="envmap" id="emitter-envmap">
+	<string name="filename" value="scenes\material-preview\textures\envmap.exr" />
+</emitter>
+
+<!-- Shapes -->
+
+	<shape type="ply">
+		<string name="filename" value="meshes/Plane.ply"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-PlaneBsdf" name="bsdf"/>
+	</shape>
+	<shape type="obj" id="cube">
+		<string name="filename" value="meshes/cube.obj"/>
+		<boolean name="face_normals" value="true"/>
+		<ref id="mat-ObjectBsdf" name="bsdf"/>
+	</shape>
+</scene>

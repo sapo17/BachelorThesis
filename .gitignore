@@ -1,7 +1,17 @@
 # what to not commit: e.g. venv, output directory, pycache. Modify as you like.
 mat-opt-venv 
-output
+output/*
+!output/README.md
 __pycache__
 material-optimizer.log
 scenes/metashape/*
 !scenes/metashape/mini-birdy-statue
+
+# additional projects do not commit
+mitsuba-data
+project-independent/**
+test.ipynb
+*.zip
+todo.md
+__init__.py
+*.psd

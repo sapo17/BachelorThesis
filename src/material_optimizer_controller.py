@@ -451,8 +451,10 @@ class MaterialOptimizerController:
             return False, None, None, None
 
         try:
-            # special case: vertex positions
-            if VERTEX_POSITIONS_PATTERN.search(paramRow):
+            # special case: vertex_
+            if VERTEX_POSITIONS_PATTERN.search(
+                paramRow
+            ) or VERTEX_NORMALS_PATTERN.search(paramRow):
                 if (
                     paramCol == COLUMN_LABEL_MIN_CLAMP_LABEL
                     or paramCol == COLUMN_LABEL_MAX_CLAMP_LABEL
@@ -619,10 +621,29 @@ class MaterialOptimizerController:
                 if type(v) is mi.TensorXf:
                     # special output: volume
                     if ALBEDO_DATA_PATTERN.search(k):
-                        outputVolumeFileName = (
-                            outputFileDir + f"//optimized_volume_{k}.vol"
+                        self.outputVolume(outputFileDir, k, v)
+                    elif GRID_VOLUME_TO_OPTIMIZER_PATTERN.search(k):
+                        self.outputVolume(outputFileDir, k, v)
+
+                        # apply marching cubes
+                        from skimage import measure
+
+                        valNpy = np.array(v)[:, :, :, 0]
+                        verts, faces, normals, values = measure.marching_cubes(
+                            valNpy,
+                            0.005,
+                            allow_degenerate=False,
                         )
-                        mi.VolumeGrid(v).write(outputVolumeFileName)
+
+                        verts, faces = self.convert_obj_to_br(
+                            verts, faces, valNpy.shape[0]
+                        )
+                        outputObjName = (
+                            outputFileDir + f"//optimized_volume_{k}.obj"
+                        )
+                        self.marching_cubes_to_obj(
+                            (verts, faces, normals, values), outputObjName
+                        )
                     else:
                         # special output: bitmap texture
                         outputTextureFileName = (
@@ -631,7 +652,13 @@ class MaterialOptimizerController:
                         mi.util.write_bitmap(outputTextureFileName, v)
                 elif type(v) is mi.Float:
                     floatArray = [f for f in v]
-                    if len(v) > 1:
+                    if VERTEX_POSITIONS_PATTERN.search(k):
+                        if any(
+                            k in checkedRow
+                            for checkedRow in self.getCheckedRows()
+                        ):
+                            self.outputPlyMesh(outputFileDir, k)
+                    elif len(v) > 1:
                         # special output: multi dimensional mi.Float as numpy array
                         outputNDimArrayFileName = (
                             outputFileDir
@@ -681,6 +708,30 @@ class MaterialOptimizerController:
             self.view.showInfoMessageBox(
                 f"The output can be found at: '{absPath}'"
             )
+
+    def outputPlyMesh(self, outputFileDir, k):
+        if ".vertex_positions" not in k:
+            return
+
+        parentStr = k.replace(".vertex_positions", "")
+        mesh = mi.Mesh(
+            "optimized_mesh",
+            vertex_count=self.model.sceneParams[parentStr + ".vertex_count"],
+            face_count=self.model.sceneParams[parentStr + ".face_count"],
+            has_vertex_normals=True,
+            has_vertex_texcoords=False,
+        )
+        mesh_params = mi.traverse(mesh)
+        mesh_params["vertex_positions"] = dr.ravel(self.model.sceneParams[k])
+        mesh_params["vertex_normals"] = dr.ravel(
+            self.model.sceneParams[parentStr + ".vertex_normals"]
+        )
+        mesh_params["faces"] = dr.ravel(
+            self.model.sceneParams[parentStr + ".faces"]
+        )
+        print(mesh_params.update())
+        outputMeshName = outputFileDir + f"//optimized_mesh_{k}.ply"
+        mesh.write_ply(outputMeshName)
 
     def prepareFigureAndOutputEachElem(
         self,
@@ -741,6 +792,10 @@ class MaterialOptimizerController:
 
         # output: loss history
         np.save((outputFileDir + "/loss_histroy.npy"), np.array(lossHist))
+
+    def outputVolume(self, outputFileDir, k, v):
+        outputVolumeFileName = outputFileDir + f"//optimized_volume_{k}.vol"
+        mi.VolumeGrid(v).write(outputVolumeFileName)
 
     def outputFigure(
         self,
@@ -891,3 +946,38 @@ class MaterialOptimizerController:
         diff_np = np.array(diff, dtype="float64")
         diff_np *= 1.0 / diff_np.max()
         return diff_np
+
+    @staticmethod
+    def convert_obj_to_br(verts, faces, voxel_size):
+        """
+        Note from Hasbay: Code taken from:
+        https://programtalk.com/vs4/python/brainglobe/brainreg-segment/brainreg_segment/regions/IO.py/
+        """
+        if voxel_size != 1:
+            verts = verts * voxel_size
+
+        faces = faces + 1
+        return verts, faces
+
+    @staticmethod
+    def marching_cubes_to_obj(marching_cubes_out, output_file):
+        """
+        Note from Hasbay: Code taken from:
+        https://programtalk.com/vs4/python/brainglobe/brainreg-segment/brainreg_segment/regions/IO.py/
+        Saves the output of skimage.measure.marching_cubes as an .obj file
+        :param marching_cubes_out: tuple
+        :param output_file: str
+        """
+
+        verts, faces, normals, _ = marching_cubes_out
+        with open(output_file, "w") as f:
+            for item in verts:
+                f.write(f"v {item[0]} {item[1]} {item[2]}\n")
+            for item in normals:
+                f.write(f"vn {item[0]} {item[1]} {item[2]}\n")
+            for item in faces:
+                f.write(
+                    f"f {item[0]}//{item[0]} {item[1]}//{item[1]} "
+                    f"{item[2]}//{item[2]}\n"
+                )
+            f.close()
