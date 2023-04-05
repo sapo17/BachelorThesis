@@ -2,12 +2,14 @@
 Author: Can Hasbay
 """
 
+from __future__ import annotations
 import os
 import mitsuba as mi
 import drjit as dr
 import logging
 from src.constants import *
 import time
+from abc import ABC, abstractmethod
 
 
 class MaterialOptimizerModel:
@@ -16,6 +18,7 @@ class MaterialOptimizerModel:
     def __init__(self) -> None:
         self.sensorToReferenceImageDict = None
         self.sceneRes = (256, 256)
+        self.setOptimizerStrategy(DefaultOptimizerStrategy(self))
         self.loadMitsubaScene()
         self.setSceneParams(self.scene)
         self.setInitialSceneParams(self.sceneParams)
@@ -24,6 +27,15 @@ class MaterialOptimizerModel:
         self.setLossFunction(LOSS_FUNCTION_STRINGS[0])
         self.setMarginPercentage(INF_STR)
         self.setMarginPenalty(NONE_STR)
+
+    @property
+    def getOptimizerStrategy(self) -> OptimizerStrategy:
+        return self.optimizerStrategy
+
+    def setOptimizerStrategy(
+        self, optimizerStrategy: OptimizerStrategy
+    ) -> None:
+        self.optimizerStrategy = optimizerStrategy
 
     def setScene(self, fileName: str, sceneRes: tuple, integratorType: str):
         self.scene = mi.load_file(
@@ -39,6 +51,7 @@ class MaterialOptimizerModel:
             self.handleMissingCboxFile(fileName)
 
         self.integratorType = self.findPossibleIntegratorType(fileName)
+        self.setOptimizerStrategy(self.findPossibleOptimizerStrategy(fileName))
         self.setScene(fileName, self.sceneRes, self.integratorType)
         self.fileName = fileName
 
@@ -110,6 +123,17 @@ class MaterialOptimizerModel:
         logging.info(f"Integrator type: {integratorType}")
         return integratorType
 
+    def findPossibleOptimizerStrategy(self, fileName) -> OptimizerStrategy:
+        tmpScene: mi.Scene = mi.load_file(fileName)
+        tmpParams = mi.traverse(tmpScene)
+
+        result = DefaultOptimizerStrategy(self)
+        if self.anyInPatterns(tmpParams, OPTIMIZER_PATTERNS):
+            result = CustomOptimizerStrategy(self)
+            logging.info(f"Optimizer type: custom")
+
+        return result
+
     def anyInPatterns(self, tmpParams, patterns: list):
         return any(
             pattern.search(k)
@@ -176,19 +200,34 @@ class MaterialOptimizerModel:
         elif vType is mi.TensorXf:
             result[k] = mi.TensorXf(v)
 
-    def updateAfterStep(self, opts, params):
+    def updateAfterStep(self, opts, params, it=0):
         for opt in opts:
             # Optimizer: take a gradient descent step
             opt.step()
             for key in opt.keys():
-                self.ensureLegalParamValues(opt, key)
+                self.ensureLegalParamValues(opt, key, it)
             # Update the scene state to the new optimized values
             params.update(opt)
 
-    def ensureLegalParamValues(self, opt, key):
+    def ensureLegalParamValues(self, opt, key, it):
         # Post-process the optimized parameters to ensure legal values
-        if VERTEX_POSITIONS_PATTERN.search(key):
+        if VERTEX_POSITIONS_PATTERN.search(
+            key
+        ) or VERTEX_NORMALS_PATTERN.search(key):
             self.ensureLegalVertexPositions(opt, key)
+        elif GRID_VOLUME_TO_OPTIMIZER_PATTERN.search(key):
+            if it > 32:
+                opt[key] = dr.select(
+                    opt[key] <= dr.min(opt[key])[0] + 0.3 * np.std(opt[key]),
+                    0.0,
+                    1.0,
+                )
+            else:
+                opt[key] = dr.clamp(
+                    opt[key],
+                    0.0,
+                    self.optimizationParams[key][COLUMN_LABEL_MAX_CLAMP_LABEL],
+                )
         else:
             opt[key] = dr.clamp(
                 opt[key],
@@ -359,12 +398,12 @@ class MaterialOptimizerModel:
         minValue = dr.min(lis)
         return lis.index(minValue)
 
-    def computeLoss(self, sensor: mi.Sensor, seed: int = 0):
+    def computeLoss(self, sensor: mi.Sensor, spp: int, seed: int = 0):
         # Perform a (noisy) differentiable rendering of the scene
         image = self.render(
             self.scene,
             sensor=sensor,
-            spp=self.samplesPerPixel,
+            spp=spp,
             params=self.sceneParams,
             seed=seed,
         )
@@ -381,7 +420,7 @@ class MaterialOptimizerModel:
             image2 = self.render(
                 self.scene,
                 sensor=sensor,
-                spp=self.samplesPerPixel,
+                spp=spp,
                 params=self.sceneParams,
                 seed=seed + 1,
             )
@@ -457,83 +496,21 @@ class MaterialOptimizerModel:
         setProgressValue: callable = None,
         showDiffRender: callable = None,
     ):
-        lossHist = []
-        sceneParamsHist = []
-        sensors = self.scene.sensors()
-        tmpLossTracker = {sensorIdx: [] for sensorIdx in range(len(sensors))}
-        tmpFailTracker = 0
-
-        startTime, optLog = self.startOptimizationLog()
-        self.initPlotProgress(showDiffRender)
-        for it in range(self.iterationCount):
-
-            itPercent = int(it / self.iterationCount * 100)
-            self.updateProgressBar(setProgressValue, itPercent)
-
-            totalLoss = 0.0
-            for sensorIdx, sensor in enumerate(sensors):
-                currentLoss, diffRender = self.computeLoss(
-                    sensor=sensor, seed=it
-                )
-                totalLoss += currentLoss[0]
-
-                if it == 0:
-                    dr.backward(currentLoss)
-                    tmpLossTracker[sensorIdx].append(currentLoss[0])
-                    self.updateAfterStep(opts, self.sceneParams)
-                else:
-                    sensorLossOnPriorIt = tmpLossTracker[sensorIdx][-1]
-                    margin = self.computeMargin(sensorLossOnPriorIt)
-                    if currentLoss[0] < sensorLossOnPriorIt + margin:
-                        dr.backward(currentLoss)
-                        self.updateAfterStep(opts, self.sceneParams)
-                        tmpLossTracker[sensorIdx].append(currentLoss[0])
-                    else:
-                        # no changes if total loss exceeds the prior loss + margin
-                        self.increaseFailAndResetOptIfNecessary(
-                            opts, tmpFailTracker
-                        )
-                        self.penalizeLearningRates(opts, it)
-                        totalLoss = lossHist[-1]
-                        msg = "Skipped backpropopagation and scene update for"
-                        msg += f" sensor index {sensorIdx} at iteration {it}."
-                        logging.info(msg)
-
-            self.updatePlotProgress(
-                showDiffRender, it, itPercent, diffRender, totalLoss
-            )
-            self.updateLossAndSceneParamsHist(
-                lossHist, sceneParamsHist, totalLoss
-            )
-            self.updateOptimizationLog(sceneParamsHist, optLog, it, totalLoss)
-            if totalLoss < self.minError:
-                break
-
-        if showDiffRender:
-            showDiffRender(diffRender=None, plotStatus=CLOSE_STATUS_STR)
-        optLog = self.endOptimizationLog(sceneParamsHist, startTime, optLog)
-
-        return lossHist, sceneParamsHist, optLog
+        return self.optimizerStrategy.optimizationLoop(
+            opts, setProgressValue, showDiffRender
+        )
 
     def computeMargin(self, sensorLossOnPriorIt):
         if self.marginPercentage == float("inf"):
             return self.marginPercentage
         return sensorLossOnPriorIt * self.marginPercentage
 
-    def increaseFailAndResetOptIfNecessary(self, opts, tmpFailTracker):
-        tmpFailTracker += 1
-        if tmpFailTracker % 5 == 0:
-            for opt in opts:
-                for param in opt.variables.keys():
-                    logging.info(f"Reset optimization for {param}")
-                    opt.reset(param)
-
     def penalizeLearningRates(self, opts, it):
         if self.marginPenalty == EXPONENTIAL_DECAY_STR:
             for opt in opts:
                 newLearningRateDict = {
                     param: max(
-                        0.00001,
+                        0.0001,
                         self.exponentialDecay(
                             self.optimizationParams[param][
                                 COLUMN_LABEL_LEARNING_RATE
@@ -632,3 +609,186 @@ class MaterialOptimizerModel:
         self.sensorToReferenceImageDict = {
             sensors[idx]: readImg for idx, readImg in enumerate(readImages)
         }
+
+
+class OptimizerStrategy(ABC):
+    @abstractmethod
+    def optimizationLoop(
+        self,
+        opts: list,
+        setProgressValue: callable = None,
+        showDiffRender: callable = None,
+    ):
+        pass
+
+
+class DefaultOptimizerStrategy(OptimizerStrategy):
+    def __init__(self, model: MaterialOptimizerModel) -> None:
+        self.model = model
+
+    def optimizationLoop(
+        self,
+        opts: list,
+        setProgressValue: callable = None,
+        showDiffRender: callable = None,
+    ):
+        lossHist = []
+        sceneParamsHist = []
+        sensors = self.model.scene.sensors()
+        tmpLossTracker = {sensorIdx: [] for sensorIdx in range(len(sensors))}
+        tmpFailTracker = 0
+
+        startTime, optLog = self.model.startOptimizationLog()
+        self.model.initPlotProgress(showDiffRender)
+        for it in range(self.model.iterationCount):
+
+            itPercent = int(it / self.model.iterationCount * 100)
+            self.model.updateProgressBar(setProgressValue, itPercent)
+
+            totalLoss = 0.0
+            for sensorIdx, sensor in enumerate(sensors):
+                currentLoss, diffRender = self.model.computeLoss(
+                    sensor=sensor, spp=self.model.samplesPerPixel, seed=it
+                )
+                totalLoss += currentLoss[0]
+
+                dr.backward(currentLoss)
+                self.model.updateAfterStep(opts, self.model.sceneParams)
+                if it > 0:
+                    sensorLossOnPriorIt = tmpLossTracker[sensorIdx][-1]
+                    margin = self.model.computeMargin(sensorLossOnPriorIt)
+                    if currentLoss[0] > sensorLossOnPriorIt + margin:
+                        msg = f"Current loss ({currentLoss[0]:.3f}) is larger"
+                        msg += f" than loss on prior iteration plus some"
+                        msg += (
+                            f" margin ({(sensorLossOnPriorIt + margin):.3f})"
+                        )
+                        msg += f" on sensor index {sensorIdx}."
+                        logging.info(msg)
+                        tmpFailTracker += 1
+                        if tmpFailTracker % 3 == 0:
+                            self.model.penalizeLearningRates(opts, it)
+                tmpLossTracker[sensorIdx].append(currentLoss[0])
+
+            self.model.updatePlotProgress(
+                showDiffRender, it, itPercent, diffRender, totalLoss
+            )
+            self.model.updateLossAndSceneParamsHist(
+                lossHist, sceneParamsHist, totalLoss
+            )
+            self.model.updateOptimizationLog(
+                sceneParamsHist, optLog, it, totalLoss
+            )
+            if totalLoss < self.model.minError:
+                break
+
+        if showDiffRender:
+            showDiffRender(diffRender=None, plotStatus=CLOSE_STATUS_STR)
+        optLog = self.model.endOptimizationLog(
+            sceneParamsHist, startTime, optLog
+        )
+
+        return lossHist, sceneParamsHist, optLog
+
+
+class CustomOptimizerStrategy(OptimizerStrategy):
+    def __init__(self, model: MaterialOptimizerModel) -> None:
+        self.model = model
+
+    def optimizationLoop(
+        self,
+        opts: list,
+        setProgressValue: callable = None,
+        showDiffRender: callable = None,
+    ):
+        lossHist = []
+        sceneParamsHist = []
+        sensors = self.model.scene.sensors()
+        tmpLossTracker = {sensorIdx: [] for sensorIdx in range(len(sensors))}
+        tmpFailTracker = 0
+
+        startTime, optLog = self.model.startOptimizationLog()
+        self.model.initPlotProgress(showDiffRender)
+        step_size = 16
+        it = 0
+        spp = self.model.samplesPerPixel
+
+        while it < self.model.iterationCount:
+            for step in range(step_size):
+
+                itPercent = int(it / self.model.iterationCount * 100)
+                self.model.updateProgressBar(setProgressValue, itPercent)
+
+                totalLoss = 0.0
+                for sensorIdx, sensor in enumerate(sensors):
+                    currentLoss, diffRender = self.model.computeLoss(
+                        sensor=sensor, spp=spp, seed=it
+                    )
+                    totalLoss += currentLoss[0]
+
+                    dr.backward(currentLoss)
+                    self.model.updateAfterStep(
+                        opts, self.model.sceneParams, it
+                    )
+                    if it > 0:
+                        sensorLossOnPriorIt = tmpLossTracker[sensorIdx][-1]
+                        margin = self.model.computeMargin(sensorLossOnPriorIt)
+                        if currentLoss[0] > sensorLossOnPriorIt + margin:
+                            msg = f"Current loss ({currentLoss[0]}) is larger"
+                            msg += f" than loss on prior iteration plus some"
+                            msg += f" margin ({sensorLossOnPriorIt + margin})"
+                            msg += f" on sensor index {sensorIdx}."
+                            logging.info(msg)
+                            tmpFailTracker += 1
+                            if tmpFailTracker % 3 == 0:
+                                self.model.penalizeLearningRates(opts, it)
+                    tmpLossTracker[sensorIdx].append(currentLoss[0])
+
+                self.model.updatePlotProgress(
+                    showDiffRender, it, itPercent, diffRender, totalLoss
+                )
+                self.model.updateLossAndSceneParamsHist(
+                    lossHist, sceneParamsHist, totalLoss
+                )
+                self.model.updateOptimizationLog(
+                    sceneParamsHist, optLog, it, totalLoss
+                )
+
+                it += 1
+                if (
+                    it > self.model.iterationCount
+                    or totalLoss < self.model.minError
+                ):
+                    if showDiffRender:
+                        showDiffRender(
+                            diffRender=None, plotStatus=CLOSE_STATUS_STR
+                        )
+                    optLog = self.model.endOptimizationLog(
+                        sceneParamsHist, startTime, optLog
+                    )
+                    return lossHist, sceneParamsHist, optLog
+
+            grid_res = min(
+                128,
+                self.model.sceneParams[GRID_VOLUME_DATA_SIGMA_T_STR].shape[0]
+                * 2,
+            )
+            step_size = min(64, step_size * 2)
+            spp = min(2, spp * 2)
+            logging.info(
+                f"New configuration: ic={step_size}, res={grid_res}, spp={spp}"
+            )
+            for opt in opts:
+                opt[GRID_VOLUME_DATA_SIGMA_T_STR] = dr.upsample(
+                    opt[GRID_VOLUME_DATA_SIGMA_T_STR],
+                    shape=(grid_res, grid_res, grid_res),
+                )
+                self.model.sceneParams.update(opt)
+
+        if showDiffRender:
+            showDiffRender(diffRender=None, plotStatus=CLOSE_STATUS_STR)
+        optLog = self.model.endOptimizationLog(
+            sceneParamsHist, startTime, optLog
+        )
+
+        return lossHist, sceneParamsHist, optLog

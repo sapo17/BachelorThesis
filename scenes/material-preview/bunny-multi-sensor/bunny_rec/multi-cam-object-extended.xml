@@ -36,7 +36,7 @@
 		<integer name="height" value="$resy"/>
 		<boolean name="sample_border" value="$sample_border"/>
 		<rfilter type="gaussian">
-			<float name="stddev" value="3"/>
+			<float name="stddev" value="1"/>
 		</rfilter>
 	</film>
 </sensor>
@@ -61,7 +61,7 @@
 		<integer name="height" value="$resy"/>
 		<boolean name="sample_border" value="$sample_border"/>
 		<rfilter type="gaussian">
-			<float name="stddev" value="3"/>
+			<float name="stddev" value="1"/>
 		</rfilter>
 	</film>
 </sensor>
@@ -85,7 +85,7 @@
 		<integer name="height" value="$resy"/>
 		<boolean name="sample_border" value="$sample_border"/>
 		<rfilter type="gaussian">
-			<float name="stddev" value="3"/>
+			<float name="stddev" value="1"/>
 		</rfilter>
 	</film>
 </sensor>
@@ -109,7 +109,7 @@
 		<integer name="height" value="$resy"/>
 		<boolean name="sample_border" value="$sample_border"/>
 		<rfilter type="gaussian">
-			<float name="stddev" value="3"/>
+			<float name="stddev" value="1"/>
 		</rfilter>
 	</film>
 </sensor>
@@ -134,7 +134,7 @@
 		<integer name="height" value="$resy"/>
 		<boolean name="sample_border" value="$sample_border"/>
 		<rfilter type="gaussian">
-			<float name="stddev" value="3"/>
+			<float name="stddev" value="1"/>
 		</rfilter>
 	</film>
 </sensor>
@@ -158,6 +158,9 @@
 		<integer name="width" value="$resx"/>
 		<integer name="height" value="$resy"/>
 		<boolean name="sample_border" value="$sample_border"/>
+		<rfilter type="gaussian">
+			<float name="stddev" value="1"/>
+		</rfilter>
 	</film>
 </sensor>
 <sensor type="perspective">
@@ -181,7 +184,7 @@
 		<integer name="height" value="$resy"/>
 		<boolean name="sample_border" value="$sample_border"/>
 		<rfilter type="gaussian">
-			<float name="stddev" value="3"/>
+			<float name="stddev" value="1"/>
 		</rfilter>
 	</film>
 </sensor>
@@ -206,7 +209,7 @@
 		<integer name="height" value="$resy"/>
 		<boolean name="sample_border" value="$sample_border"/>
 		<rfilter type="gaussian">
-			<float name="stddev" value="3"/>
+			<float name="stddev" value="1"/>
 		</rfilter>
 	</film>
 </sensor>
@@ -219,9 +222,7 @@
 	</bsdf>
 </bsdf>
 <bsdf type="principled" id="mat-ObjectBsdf">
-	<texture name="base_color" type="bitmap">
-		<string name="filename" value="scenes\material-preview\textures\init-texture-720x480.png"/>
-	</texture>
+	<rgb name="base_color" value="0.1, 0.1, 0.1"/>
 	<float name="roughness" value="0.7"/>
 	<float name="spec_trans" value="0.1"/>
 	<float name="eta" value="1.64"/>
@@ -247,7 +248,7 @@
 		<ref id="mat-PlaneBsdf" name="bsdf"/>
 	</shape>
 	<shape type="ply" id="bunny-rec">
-		<string name="filename" value="meshes/bunny_rec_2.ply"/>
+		<string name="filename" value="meshes/bunny_rec_128.ply"/>
 		<ref id="mat-ObjectBsdf" name="bsdf"/>
 	</shape>
 </scene>

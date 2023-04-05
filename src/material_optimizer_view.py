@@ -228,8 +228,11 @@ class MaterialOptimizerView(QMainWindow):
                     else:
                         item = QTableWidgetItem(NOT_IMPLEMENTED_STRING)
                 else:
-                    # special case: mi.Point3f for max/min clamp value of vertex pos.
-                    if VERTEX_POSITIONS_PATTERN.search(param):
+                    # special case: mi.Point3f for max/min clamp value
+                    isVertexPosOrNormal = VERTEX_POSITIONS_PATTERN.search(
+                        param
+                    ) or VERTEX_NORMALS_PATTERN.search(param)
+                    if isVertexPosOrNormal:
                         if (
                             label == COLUMN_LABEL_MIN_CLAMP_LABEL
                             or label == COLUMN_LABEL_MAX_CLAMP_LABEL
