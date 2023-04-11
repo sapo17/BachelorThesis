@@ -799,7 +799,7 @@ class CustomOptimizerStrategy(OptimizerStrategy):
                     optLog = self.model.endOptimizationLog(
                         sceneParamsHist, startTime, optLog
                     )
-                    return lossHist, sceneParamsHist, optLog
+                    return lossHist, sceneParamsHist, optLog, diffRenderHist
 
             grid_res = min(
                 128,
