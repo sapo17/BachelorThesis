@@ -582,14 +582,27 @@ class MaterialOptimizerModel:
             showDiffRender(
                 diffRender=list(self.sensorToReferenceImageDict.values())[0],
                 plotStatus=INITIAL_STATUS_STR,
+                iterationCount=self.iterationCount,
             )
 
     def updatePlotProgress(
-        self, showDiffRender, it, itPercent, diffRender, loss: float
+        self,
+        showDiffRender,
+        it,
+        itPercent,
+        diffRender,
+        loss: float,
+        lossHist,
+        elapsedTime,
     ):
         if showDiffRender is not None and (it == 1 or itPercent % 5 == 0):
             showDiffRender(
-                self.convertToBitmap(diffRender), it, loss, RENDER_STATUS_STR
+                self.convertToBitmap(diffRender),
+                it,
+                loss,
+                RENDER_STATUS_STR,
+                lossHist=lossHist,
+                elapsedTime=elapsedTime,
             )
 
     @staticmethod
@@ -635,7 +648,9 @@ class DefaultOptimizerStrategy(OptimizerStrategy):
         lossHist = []
         sceneParamsHist = []
         sensors = self.model.scene.sensors()
-        tmpLossTracker = {sensorIdx: [] for sensorIdx in range(len(sensors))}
+        sensorsSize = len(sensors)
+        diffRenderHist = {sensorIdx: [] for sensorIdx in range(sensorsSize)}
+        tmpLossTracker = {sensorIdx: [] for sensorIdx in range(sensorsSize)}
         tmpFailTracker = 0
 
         startTime, optLog = self.model.startOptimizationLog()
@@ -650,6 +665,7 @@ class DefaultOptimizerStrategy(OptimizerStrategy):
                 currentLoss, diffRender = self.model.computeLoss(
                     sensor=sensor, spp=self.model.samplesPerPixel, seed=it
                 )
+                diffRenderHist[sensorIdx].append(diffRender)
                 totalLoss += currentLoss[0]
 
                 dr.backward(currentLoss)
@@ -670,11 +686,18 @@ class DefaultOptimizerStrategy(OptimizerStrategy):
                             self.model.penalizeLearningRates(opts, it)
                 tmpLossTracker[sensorIdx].append(currentLoss[0])
 
-            self.model.updatePlotProgress(
-                showDiffRender, it, itPercent, diffRender, totalLoss
-            )
             self.model.updateLossAndSceneParamsHist(
                 lossHist, sceneParamsHist, totalLoss
+            )
+            elapsedTime = time.time() - startTime
+            self.model.updatePlotProgress(
+                showDiffRender,
+                it,
+                itPercent,
+                diffRenderHist[it % sensorsSize][-1],
+                totalLoss,
+                lossHist,
+                f"{elapsedTime:.3f}s",
             )
             self.model.updateOptimizationLog(
                 sceneParamsHist, optLog, it, totalLoss
@@ -688,7 +711,7 @@ class DefaultOptimizerStrategy(OptimizerStrategy):
             sceneParamsHist, startTime, optLog
         )
 
-        return lossHist, sceneParamsHist, optLog
+        return lossHist, sceneParamsHist, optLog, diffRenderHist
 
 
 class CustomOptimizerStrategy(OptimizerStrategy):
@@ -704,7 +727,9 @@ class CustomOptimizerStrategy(OptimizerStrategy):
         lossHist = []
         sceneParamsHist = []
         sensors = self.model.scene.sensors()
-        tmpLossTracker = {sensorIdx: [] for sensorIdx in range(len(sensors))}
+        sensorsSize = len(sensors)
+        diffRenderHist = {sensorIdx: [] for sensorIdx in range(sensorsSize)}
+        tmpLossTracker = {sensorIdx: [] for sensorIdx in range(sensorsSize)}
         tmpFailTracker = 0
 
         startTime, optLog = self.model.startOptimizationLog()
@@ -724,6 +749,7 @@ class CustomOptimizerStrategy(OptimizerStrategy):
                     currentLoss, diffRender = self.model.computeLoss(
                         sensor=sensor, spp=spp, seed=it
                     )
+                    diffRenderHist[sensorIdx].append(diffRender)
                     totalLoss += currentLoss[0]
 
                     dr.backward(currentLoss)
@@ -744,11 +770,18 @@ class CustomOptimizerStrategy(OptimizerStrategy):
                                 self.model.penalizeLearningRates(opts, it)
                     tmpLossTracker[sensorIdx].append(currentLoss[0])
 
-                self.model.updatePlotProgress(
-                    showDiffRender, it, itPercent, diffRender, totalLoss
-                )
                 self.model.updateLossAndSceneParamsHist(
                     lossHist, sceneParamsHist, totalLoss
+                )
+                elapsedTime = time.time() - startTime
+                self.model.updatePlotProgress(
+                    showDiffRender,
+                    it,
+                    itPercent,
+                    diffRenderHist[it % sensorsSize][-1],
+                    totalLoss,
+                    lossHist,
+                    f"{elapsedTime:.3f}s",
                 )
                 self.model.updateOptimizationLog(
                     sceneParamsHist, optLog, it, totalLoss
@@ -791,4 +824,4 @@ class CustomOptimizerStrategy(OptimizerStrategy):
             sceneParamsHist, startTime, optLog
         )
 
-        return lossHist, sceneParamsHist, optLog
+        return lossHist, sceneParamsHist, optLog, diffRenderHist

@@ -169,7 +169,12 @@ class MaterialOptimizerController:
         self.view.progressBar.reset()
 
         # initiate the optimization loop
-        lossHist, sceneParamsHist, optLog = self.model.optimizationLoop(
+        (
+            lossHist,
+            sceneParamsHist,
+            optLog,
+            diffRenderHist,
+        ) = self.model.optimizationLoop(
             opts,
             lambda x: self.view.progressBar.setValue(x),
             self.view.showDiffRender,
@@ -183,7 +188,12 @@ class MaterialOptimizerController:
         else:
             popUp = PopUpWindow(self.view)
             self.initOptimizedSceneSelector(
-                popUp, sensorToInitImg, lossHist, sceneParamsHist, optLog
+                popUp,
+                sensorToInitImg,
+                lossHist,
+                sceneParamsHist,
+                optLog,
+                diffRenderHist,
             )
 
         self.view.optimizeButton.setDisabled(False)
@@ -528,6 +538,7 @@ class MaterialOptimizerController:
         lossHist,
         sceneParamsHist,
         optLog,
+        diffRenderHist,
     ):
 
         # central widget
@@ -568,7 +579,12 @@ class MaterialOptimizerController:
         outputBtn = QPushButton(text=OUTPUT_TO_JSON_STRING)
         outputBtn.clicked.connect(
             lambda: self.onOutputBtnPressed(
-                popUpWindow, lossHist, sceneParamsHist, sensorToInitImg, optLog
+                popUpWindow,
+                lossHist,
+                sceneParamsHist,
+                sensorToInitImg,
+                optLog,
+                diffRenderHist,
             )
         )
 
@@ -593,6 +609,7 @@ class MaterialOptimizerController:
         sceneParamsHist,
         sensorToInitImg,
         optLog,
+        diffRenderHist,
     ):
         selectedIteration = len(sceneParamsHist) - 1
         if (
@@ -683,6 +700,7 @@ class MaterialOptimizerController:
                 outputFileDir,
                 sensorToOptimizedImage,
                 selectedIteration,
+                diffRenderHist,
             )
 
             # output: resulting figure
@@ -740,6 +758,7 @@ class MaterialOptimizerController:
         outputFileDir,
         sensorToOptimizedImage,
         selectedIteration,
+        diffRenderHist,
     ):
         refImgsDir = outputFileDir + "/ref_imgs"
         Path(refImgsDir).mkdir(parents=True, exist_ok=True)
@@ -749,6 +768,8 @@ class MaterialOptimizerController:
         Path(optImgsDir).mkdir(parents=True, exist_ok=True)
         absErrImgs = outputFileDir + f"/abs_err_imgs_it_{selectedIteration}"
         Path(absErrImgs).mkdir(parents=True, exist_ok=True)
+        diffRenderImgs = outputFileDir + "/diff_render_history"
+        Path(diffRenderImgs).mkdir(parents=True, exist_ok=True)
 
         for sensorIdx in range(len(self.model.scene.sensors())):
             currentSensor = self.model.scene.sensors()[sensorIdx]
@@ -789,6 +810,16 @@ class MaterialOptimizerController:
             )
             absErrImageName = absErrImgs + f"/abs_err_img_s{sensorIdx}.png"
             plt.imsave(absErrImageName, absErrImg, cmap="inferno")
+
+            # output: diff render history
+            diffRenderSensor = diffRenderImgs + f"/sensor_{sensorIdx}"
+            Path(diffRenderSensor).mkdir(parents=True, exist_ok=True)
+            for it, diffRender in enumerate(diffRenderHist[sensorIdx]):
+                imgName = diffRenderSensor + f"/{it}.png"
+                mi.util.write_bitmap(
+                    imgName,
+                    diffRender,
+                )
 
         # output: loss history
         np.save((outputFileDir + "/loss_histroy.npy"), np.array(lossHist))

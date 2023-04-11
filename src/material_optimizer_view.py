@@ -2,6 +2,8 @@
 Author: Can Hasbay
 """
 
+import datetime
+import sys
 from PyQt6.QtWidgets import *
 from PyQt6.QtGui import QAction
 from pathlib import Path
@@ -278,6 +280,9 @@ class MaterialOptimizerView(QMainWindow):
         it: int = 0,
         loss: float = 0.0,
         plotStatus: str = CLOSE_STATUS_STR,
+        lossHist=[],
+        iterationCount=sys.maxsize,
+        elapsedTime="",
     ):
         try:
             if PlotStatusEnum[plotStatus] is PlotStatusEnum.CLOSE:
@@ -286,20 +291,43 @@ class MaterialOptimizerView(QMainWindow):
             elif PlotStatusEnum[plotStatus] is PlotStatusEnum.INITIAL:
                 if diffRender is not None:
                     self.diffRenderPlot = DifferentiableRenderCanvas(
-                        diffRender
+                        diffRender, iterationCount
                     )
-                    self.diffRenderPlot.axes.set_axis_off()
+                    self.diffRenderPlot.imageAxes.set_axis_off()
                     self.diffRenderPlot.show()
+
+                    # NOTE: uncomment or improve if necessary
+                    # self.createDirForDiffRenderFigures()
             elif PlotStatusEnum[plotStatus] is PlotStatusEnum.RENDER:
                 if diffRender is not None:
                     self.diffRenderPlot.axesImage.set_data(diffRender)
-                    self.diffRenderPlot.axes.set_title(
-                        f"Iteration: {it}, Loss: {loss:6f}"
+                    self.diffRenderPlot.imageAxes.set_title(
+                        f"Iteration: {it}, Loss: {loss:6f}, Elapsed time: {elapsedTime}",
+                        fontsize=14,
                     )
-                    self.diffRenderPlot.draw()
-                    QtCore.QCoreApplication.processEvents()
+                    self.diffRenderPlot.axesPlot.set_ydata(lossHist)
+                    self.diffRenderPlot.axesPlot.set_xdata(
+                        np.arange(len(lossHist))
+                    )
+                    self.diffRenderPlot.plotAxes.relim()
+                    self.diffRenderPlot.plotAxes.autoscale_view()
+                    self.diffRenderPlot.fig.canvas.draw()
+                    self.diffRenderPlot.flush_events()
+
+                    # NOTE: uncomment or improve if necessary
+                    # self.outputDiffRenderFig(it)
         except ValueError as err:
             logging.exception(f"Unexpected value in showDiffRender(): {err}")
+
+    def outputDiffRenderFig(self, it):
+        outputFileName = self.outputFileDir + f"/{it}.png"
+        self.diffRenderPlot.fig.savefig(outputFileName)
+
+    def createDirForDiffRenderFigures(self):
+        t = datetime.datetime.now().isoformat("_", "seconds")
+        self.outputFileDir = OUTPUT_DIR_PATH + f"diff_render_figures/opt_{t}"
+        self.outputFileDir = self.outputFileDir.replace(":", "-")
+        Path(self.outputFileDir).mkdir(parents=True, exist_ok=True)
 
 
 class PopUpWindow(QMainWindow):
@@ -324,8 +352,15 @@ class MplCanvas(FigureCanvasQTAgg):
 
 
 class DifferentiableRenderCanvas(FigureCanvasQTAgg):
-    def __init__(self, diffRender):
-        fig = Figure()
-        self.axes = fig.add_subplot()
-        super(DifferentiableRenderCanvas, self).__init__(fig)
-        self.axesImage = self.axes.imshow(diffRender)
+    def __init__(self, diffRender, iterationCount):
+        self.fig, (self.imageAxes, self.plotAxes) = plt.subplots(
+            2, 1, height_ratios=[5, 1]
+        )
+        plt.subplots_adjust(hspace=0.025, right=0.975, top=0.95)
+        plt.autoscale(tight=True)
+        self.plotAxes.set_xlabel(ITERATION_STRING, fontsize=14)
+        self.plotAxes.set_ylabel(LOSS_STRING, fontsize=14)
+        super(DifferentiableRenderCanvas, self).__init__(self.fig)
+        self.axesImage = self.imageAxes.imshow(diffRender, aspect="auto")
+        (self.axesPlot,) = self.plotAxes.plot([], [])
+        self.plotAxes.set_xlim([0, iterationCount])
