@@ -269,6 +269,8 @@ class MaterialOptimizerModel:
         return mi.render(scene, params, sensor=sensor, seed=seed, spp=spp)
 
     def updateSceneParam(self, key, value):
+        if type(self.sceneParams[key]) is not type(value):
+            return
         if self.sceneParams[key] == value:
             return
 
