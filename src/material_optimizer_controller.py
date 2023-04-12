@@ -203,7 +203,11 @@ class MaterialOptimizerController:
         currentSceneParams = {}
         for row in range(self.view.table.rowCount()):
             key = self.view.table.verticalHeaderItem(row).text()
+
             initValue = self.model.initialSceneParams[key]
+            if self.model.sceneParams[key] == initValue:
+                continue
+
             newValue = self.view.table.item(row, 0).text()
             valueType = type(initValue)
             if valueType is mi.Color3f:
