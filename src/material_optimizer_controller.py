@@ -426,6 +426,27 @@ class MaterialOptimizerController:
 
         return True
 
+    def isLegalBetaValue(
+        self, row: int, col: int, paramCol: str, newValue: float
+    ):
+        if paramCol == COLUMN_LABEL_BETA_1 or paramCol == COLUMN_LABEL_BETA_2:
+            if newValue > MAX_BETA_VALUE:
+                msg = "Optimization parameter is not changed. Please make"
+                msg += " sure that the beta value is not larger than"
+                msg += f" '{MAX_BETA_VALUE}'."
+                self.view.showInfoMessageBox(msg)
+                self.view.table.item(row, col).setText(str(MAX_BETA_VALUE))
+                return False
+            elif newValue < MIN_BETA_VALUE:
+                msg = "Optimization parameter is not changed. Please make"
+                msg += " sure that the beta value is not smaller than"
+                msg += f" '{MIN_BETA_VALUE}'."
+                self.view.showInfoMessageBox(msg)
+                self.view.table.item(row, col).setText(str(MIN_BETA_VALUE))
+                return False
+
+        return True
+
     def onMinOrMaxClampValueOfVertexPositionChanged(
         self, row, col, paramRow, paramCol
     ):
@@ -480,6 +501,8 @@ class MaterialOptimizerController:
             if not self.isLegalClampValue(
                 col, row, paramCol, paramRow, newValue
             ):
+                return False, None, None, None
+            if not self.isLegalBetaValue(row, col, paramCol, newValue):
                 return False, None, None, None
         except:
             self.view.table.item(row, col).setText(
