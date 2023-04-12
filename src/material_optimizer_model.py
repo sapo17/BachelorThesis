@@ -149,6 +149,8 @@ class MaterialOptimizerModel:
         return {
             param: {
                 COLUMN_LABEL_LEARNING_RATE: DEFAULT_LEARNING_RATE,
+                COLUMN_LABEL_BETA_1: DEFAULT_BETA_1,
+                COLUMN_LABEL_BETA_2: DEFAULT_BETA_2,
                 COLUMN_LABEL_MIN_CLAMP_LABEL: DEFAULT_MIN_CLAMP_VALUE,
                 COLUMN_LABEL_MAX_CLAMP_LABEL: DEFAULT_MAX_CLAMP_VALUE,
                 COLUMN_LABEL_OPTIMIZE: False,
@@ -249,18 +251,16 @@ class MaterialOptimizerModel:
         return EMPTY_PATTERN
 
     def initOptimizers(self, params: list) -> list:
-        opt = mi.ad.Adam(
-            lr=0.2,
-            params={k: self.sceneParams[k] for k in params},
-            mask_updates=True,
-        )
-        opt.set_learning_rate(
-            {
-                k: self.optimizationParams[k][COLUMN_LABEL_LEARNING_RATE]
-                for k in params
-            }
-        )
-        return [opt]
+        return [
+            mi.ad.Adam(
+                lr=self.optimizationParams[k][COLUMN_LABEL_LEARNING_RATE],
+                beta_1=self.optimizationParams[k][COLUMN_LABEL_BETA_1],
+                beta_2=self.optimizationParams[k][COLUMN_LABEL_BETA_2],
+                params={k: self.sceneParams[k]},
+                mask_updates=True,
+            )
+            for k in params
+        ]
 
     @staticmethod
     def render(
