@@ -14,7 +14,6 @@ from PyQt6 import QtGui, QtWidgets, QtCore
 from src.constants import *
 from enum import Enum
 import logging
-from matplotlib.figure import Figure
 
 
 class PlotStatusEnum(Enum):
@@ -328,6 +327,21 @@ class MaterialOptimizerView(QMainWindow):
         self.outputFileDir = OUTPUT_DIR_PATH + f"diff_render_figures/opt_{t}"
         self.outputFileDir = self.outputFileDir.replace(":", "-")
         Path(self.outputFileDir).mkdir(parents=True, exist_ok=True)
+
+    def getUserDecision(
+        self, title, question, defaultButton=QMessageBox.StandardButton.No
+    ):
+        reply = QMessageBox.question(
+            self,
+            title,
+            question,
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            defaultButton,
+        )
+        if reply == QMessageBox.StandardButton.Yes:
+            return True
+        else:
+            return False
 
 
 class PopUpWindow(QMainWindow):

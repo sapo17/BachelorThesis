@@ -211,12 +211,26 @@ class MaterialOptimizerController:
             elif valueType is mi.Float:
                 if len(initValue) == 1:
                     currentSceneParams[key] = mi.Float(float(newValue))
+                else:
+                    self.askUserToResetSceneParamToInitValue(
+                        currentSceneParams, key, initValue
+                    )
             elif valueType is mi.TensorXf:
-                currentSceneParams[key] = dr.zeros(
-                    mi.TensorXf, initValue.shape
+                self.askUserToResetSceneParamToInitValue(
+                    currentSceneParams, key, initValue
                 )
 
         return currentSceneParams
+
+    def askUserToResetSceneParamToInitValue(
+        self, currentSceneParams, key, initValue
+    ):
+        msg = "It seems this is not the first optimization. "
+        msg += f"Should we reset the parameter value of {key} to "
+        msg += "its initial value?"
+        isYes = self.view.getUserDecision("Question", msg)
+        if isYes:
+            currentSceneParams[key] = initValue
 
     def connectSignals(self):
         self.view.importFile.triggered.connect(self.loadMitsubaScene)
