@@ -184,7 +184,7 @@
 	<medium type="heterogeneous" id="grid_volume_data">
 		<volume name="sigma_t" type="gridvolume">
 			<string name="filename"
-				value="scenes\material-preview\bunny-multi-sensor\textures\empty_volume.vol" />
+				value="scenes\material-preview\bunny-multi-sensor\textures\empty.vol" />
 		<transform name="to_world">
 			<scale value="7"/>
 			<translate x="-3" y="-1.3" z="-4"/>
