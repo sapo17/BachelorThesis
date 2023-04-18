@@ -202,34 +202,27 @@ class MaterialOptimizerModel:
         elif vType is mi.TensorXf:
             result[k] = mi.TensorXf(v)
 
-    def updateAfterStep(self, opts, params, it=0):
+    def updateAfterStep(self, opts, params):
         for opt in opts:
             # Optimizer: take a gradient descent step
             opt.step()
             for key in opt.keys():
-                self.ensureLegalParamValues(opt, key, it)
+                self.ensureLegalParamValues(opt, key)
             # Update the scene state to the new optimized values
             params.update(opt)
 
-    def ensureLegalParamValues(self, opt, key, it):
+    def ensureLegalParamValues(self, opt, key):
         # Post-process the optimized parameters to ensure legal values
         if VERTEX_POSITIONS_PATTERN.search(
             key
         ) or VERTEX_NORMALS_PATTERN.search(key):
             self.ensureLegalVertexPositions(opt, key)
         elif GRID_VOLUME_TO_OPTIMIZER_PATTERN.search(key):
-            if it > 32:
-                opt[key] = dr.select(
-                    opt[key] <= dr.min(opt[key])[0] + 0.3 * np.std(opt[key]),
-                    0.0,
-                    1.0,
-                )
-            else:
-                opt[key] = dr.clamp(
-                    opt[key],
-                    0.0,
-                    self.optimizationParams[key][COLUMN_LABEL_MAX_CLAMP_LABEL],
-                )
+            opt[key] = dr.clamp(
+                opt[key],
+                0.0,
+                self.optimizationParams[key][COLUMN_LABEL_MAX_CLAMP_LABEL],
+            )
         else:
             opt[key] = dr.clamp(
                 opt[key],
@@ -264,9 +257,21 @@ class MaterialOptimizerModel:
 
     @staticmethod
     def render(
-        scene: mi.Scene, sensor: mi.Sensor, spp: int, params=None, seed=0
+        scene: mi.Scene,
+        sensor: mi.Sensor,
+        spp: int,
+        params=None,
+        seed=0,
+        seed_grad=0,
     ):
-        return mi.render(scene, params, sensor=sensor, seed=seed, spp=spp)
+        return mi.render(
+            scene,
+            params,
+            sensor=sensor,
+            seed=seed,
+            seed_grad=seed_grad,
+            spp=spp,
+        )
 
     def updateSceneParam(self, key, value):
         if type(self.sceneParams[key]) is not type(value):
@@ -400,6 +405,11 @@ class MaterialOptimizerModel:
         minValue = dr.min(lis)
         return lis.index(minValue)
 
+    def setSensorRes(self, sensor, res):
+        params = mi.traverse(sensor)
+        params["film.size"] = res
+        params.update()
+
     def computeLoss(self, sensor: mi.Sensor, spp: int, seed: int = 0):
         # Perform a (noisy) differentiable rendering of the scene
         image = self.render(
@@ -408,12 +418,15 @@ class MaterialOptimizerModel:
             spp=spp,
             params=self.sceneParams,
             seed=seed,
+            seed_grad=seed + 1 + len(self.scene.sensors()),
         )
         image = dr.clamp(image, 0.0, 1.0)
 
         # Evaluate the objective function from the current rendered image
         if self.lossFunction == MSE_STRING:
-            result = self.mse(image, self.sensorToReferenceImageDict[sensor])
+            result = self.multiscaleLoss(
+                image, self.sensorToReferenceImageDict[sensor], self.mse
+            )
         elif self.lossFunction == BRIGHTNESS_IDP_MSE_STRING:
             result = self.brightnessIndependentMSE(
                 image, self.sensorToReferenceImageDict[sensor]
@@ -431,13 +444,30 @@ class MaterialOptimizerModel:
                 image, image2, self.sensorToReferenceImageDict[sensor]
             )
         elif self.lossFunction == MAE_STRING:
-            result = self.mae(image, self.sensorToReferenceImageDict[sensor])
+            result = self.multiscaleLoss(
+                image, self.sensorToReferenceImageDict[sensor], self.mae
+            )
         elif self.lossFunction == MBE_STRING:
             result = self.mbe(image, self.sensorToReferenceImageDict[sensor])
         else:
             result = self.mse(image, self.sensorToReferenceImageDict[sensor])
 
         return result, image
+
+    def multiscaleLoss(self, image, refImage, lossFunc):
+        result = lossFunc(image, refImage)  # 1. level
+
+        img = self.downsample(image)
+        ref_img = self.downsample(refImage)
+        result += lossFunc(img, ref_img)  # 2. level
+
+        levels = 4
+        for _ in range(levels - 2):
+            img = self.downsample(img)
+            ref_img = self.downsample(ref_img)
+            result += lossFunc(img, ref_img)
+        result /= levels
+        return result
 
     def mse(self, image, refImage):
         """L2 Loss: Mean Squared Error"""
@@ -512,7 +542,7 @@ class MaterialOptimizerModel:
             for opt in opts:
                 newLearningRateDict = {
                     param: max(
-                        0.0001,
+                        0.00001,
                         self.exponentialDecay(
                             self.optimizationParams[param][
                                 COLUMN_LABEL_LEARNING_RATE
@@ -625,6 +655,77 @@ class MaterialOptimizerModel:
             sensors[idx]: readImg for idx, readImg in enumerate(readImages)
         }
 
+    @staticmethod
+    def downsample(img):
+        """Taken from Vicini et al. 2022, Differentiable SDF Rendering. Downsamples the given image."""
+        n_channels = img.shape[2]
+
+        def linear(x, y):
+            x = dr.clamp(x, 0, img.shape[0] - 1)
+            y = dr.clamp(y, 0, img.shape[1] - 1)
+            c_offset = dr.tile(
+                dr.arange(mi.Int32, n_channels), img.shape[0] * img.shape[1]
+            )
+            idx = y * img.shape[0] * n_channels + x * n_channels + c_offset
+            return idx
+
+        x, y = dr.meshgrid(
+            dr.arange(mi.Int32, img.shape[0]),
+            dr.arange(mi.Int32, img.shape[1]),
+        )
+        x = dr.repeat(x, n_channels)
+        y = dr.repeat(y, n_channels)
+        img_linear = img.array
+        r = 0.25 * (
+            dr.gather(mi.Float, img_linear, linear(x, y))
+            + dr.gather(mi.Float, img_linear, linear(x + 1, y))
+            + dr.gather(mi.Float, img_linear, linear(x, y + 1))
+            + dr.gather(mi.Float, img_linear, linear(x + 1, y + 1))
+        )
+        return mi.TensorXf(r, img.shape)
+
+    @staticmethod
+    def evalDiscreteLaplacianRegularazation(data, _=None):
+        """
+        Taken from Vicini et al. 2022, Differentiable SDF Rendering.
+        Simple discrete laplacian regularization to encourage smooth surfaces.
+        """
+
+        def linerIdx(p):
+            p.x = dr.clamp(p.x, 0, data.shape[0] - 1)
+            p.y = dr.clamp(p.y, 0, data.shape[1] - 1)
+            p.z = dr.clamp(p.z, 0, data.shape[2] - 1)
+            return (
+                p.z * data.shape[1] * data.shape[0] + p.y * data.shape[0] + p.x
+            )
+
+        shape = data.shape
+        z, y, x = dr.meshgrid(
+            *[dr.arange(mi.Float, shape[i]) for i in range(3)], indexing="ij"
+        )
+        p = mi.Point3i(x, y, z)
+        c = dr.gather(mi.Float, data.array, linerIdx(p))
+        vx0 = dr.gather(
+            mi.Float, data.array, linerIdx(p + mi.Vector3i(-1, 0, 0))
+        )
+        vx1 = dr.gather(
+            mi.Float, data.array, linerIdx(p + mi.Vector3i(1, 0, 0))
+        )
+        vy0 = dr.gather(
+            mi.Float, data.array, linerIdx(p + mi.Vector3i(0, -1, 0))
+        )
+        vy1 = dr.gather(
+            mi.Float, data.array, linerIdx(p + mi.Vector3i(0, 1, 0))
+        )
+        vz0 = dr.gather(
+            mi.Float, data.array, linerIdx(p + mi.Vector3i(0, 0, -1))
+        )
+        vz1 = dr.gather(
+            mi.Float, data.array, linerIdx(p + mi.Vector3i(0, 0, 1))
+        )
+        laplacian = dr.sqr(c - (vx0 + vx1 + vy0 + vy1 + vz0 + vz1) / 6)
+        return dr.sum(laplacian)
+
 
 class OptimizerStrategy(ABC):
     @abstractmethod
@@ -654,6 +755,7 @@ class DefaultOptimizerStrategy(OptimizerStrategy):
         diffRenderHist = {sensorIdx: [] for sensorIdx in range(sensorsSize)}
         tmpLossTracker = {sensorIdx: [] for sensorIdx in range(sensorsSize)}
         tmpFailTracker = 0
+        seed = 0
 
         startTime, optLog = self.model.startOptimizationLog()
         self.model.initPlotProgress(showDiffRender)
@@ -665,8 +767,9 @@ class DefaultOptimizerStrategy(OptimizerStrategy):
             totalLoss = 0.0
             for sensorIdx, sensor in enumerate(sensors):
                 currentLoss, diffRender = self.model.computeLoss(
-                    sensor=sensor, spp=self.model.samplesPerPixel, seed=it
+                    sensor=sensor, spp=self.model.samplesPerPixel, seed=seed
                 )
+                seed += 1 + sensorsSize
                 diffRenderHist[sensorIdx].append(diffRender)
                 totalLoss += currentLoss[0]
 
@@ -676,13 +779,6 @@ class DefaultOptimizerStrategy(OptimizerStrategy):
                     sensorLossOnPriorIt = tmpLossTracker[sensorIdx][-1]
                     margin = self.model.computeMargin(sensorLossOnPriorIt)
                     if currentLoss[0] > sensorLossOnPriorIt + margin:
-                        msg = f"Current loss ({currentLoss[0]:.3f}) is larger"
-                        msg += f" than loss on prior iteration plus some"
-                        msg += (
-                            f" margin ({(sensorLossOnPriorIt + margin):.3f})"
-                        )
-                        msg += f" on sensor index {sensorIdx}."
-                        logging.info(msg)
                         tmpFailTracker += 1
                         if tmpFailTracker % 3 == 0:
                             self.model.penalizeLearningRates(opts, it)
@@ -720,6 +816,16 @@ class CustomOptimizerStrategy(OptimizerStrategy):
     def __init__(self, model: MaterialOptimizerModel) -> None:
         self.model = model
 
+    def updateOptimizationLog(
+        self, optLog, sensorIdx, currentLoss, regularizationLoss
+    ):
+        lossStr = f"Sensor: {sensorIdx:02d}, "
+        lossStr += f"Loss: {currentLoss[0]:.4f}"
+        if dr.grad_enabled(regularizationLoss):
+            lossStr += f" (reg (avg. x 1e4): {1e4*regularizationLoss[0] / dr.prod(self.model.sceneParams[GRID_VOLUME_DATA_SIGMA_T_STR].shape):.4f})"
+        logging.info(lossStr)
+        optLog.append(lossStr + "\n")
+
     def optimizationLoop(
         self,
         opts: list,
@@ -730,6 +836,7 @@ class CustomOptimizerStrategy(OptimizerStrategy):
         sceneParamsHist = []
         sensors = self.model.scene.sensors()
         sensorsSize = len(sensors)
+        sensorWeight = 1 / sensorsSize
         diffRenderHist = {sensorIdx: [] for sensorIdx in range(sensorsSize)}
         tmpLossTracker = {sensorIdx: [] for sensorIdx in range(sensorsSize)}
         tmpFailTracker = 0
@@ -738,35 +845,47 @@ class CustomOptimizerStrategy(OptimizerStrategy):
         self.model.initPlotProgress(showDiffRender)
         step_size = 16
         it = 0
-        spp = self.model.samplesPerPixel
+        spp = 1
+        seed = 0
 
         while it < self.model.iterationCount:
-            for step in range(step_size):
+            for _ in range(step_size):
 
                 itPercent = int(it / self.model.iterationCount * 100)
                 self.model.updateProgressBar(setProgressValue, itPercent)
 
                 totalLoss = 0.0
                 for sensorIdx, sensor in enumerate(sensors):
+                    # Evaluate image loss
                     currentLoss, diffRender = self.model.computeLoss(
-                        sensor=sensor, spp=spp, seed=it
+                        sensor=sensor, spp=spp, seed=seed
                     )
+                    seed += 1 + sensorsSize
                     diffRenderHist[sensorIdx].append(diffRender)
+                    dr.backward(currentLoss)
+
+                    # Evaluate regularization loss
+                    regularizationLoss = (
+                        self.model.evalDiscreteLaplacianRegularazation(
+                            self.model.sceneParams[
+                                GRID_VOLUME_DATA_SIGMA_T_STR
+                            ]
+                        )
+                    )
+                    regularizationLoss *= sensorWeight
+                    if dr.grad_enabled(regularizationLoss):
+                        dr.backward(regularizationLoss)
+                    currentLoss += dr.detach(regularizationLoss)
                     totalLoss += currentLoss[0]
 
-                    dr.backward(currentLoss)
-                    self.model.updateAfterStep(
-                        opts, self.model.sceneParams, it
+                    self.updateOptimizationLog(
+                        optLog, sensorIdx, currentLoss, regularizationLoss
                     )
+                    self.model.updateAfterStep(opts, self.model.sceneParams)
                     if it > 0:
                         sensorLossOnPriorIt = tmpLossTracker[sensorIdx][-1]
                         margin = self.model.computeMargin(sensorLossOnPriorIt)
                         if currentLoss[0] > sensorLossOnPriorIt + margin:
-                            msg = f"Current loss ({currentLoss[0]}) is larger"
-                            msg += f" than loss on prior iteration plus some"
-                            msg += f" margin ({sensorLossOnPriorIt + margin})"
-                            msg += f" on sensor index {sensorIdx}."
-                            logging.info(msg)
                             tmpFailTracker += 1
                             if tmpFailTracker % 3 == 0:
                                 self.model.penalizeLearningRates(opts, it)
@@ -804,12 +923,15 @@ class CustomOptimizerStrategy(OptimizerStrategy):
                     return lossHist, sceneParamsHist, optLog, diffRenderHist
 
             grid_res = min(
-                128,
+                self.model.initialSceneParams[
+                    GRID_VOLUME_DATA_SIGMA_T_STR
+                ].shape[0]
+                * 2**4,
                 self.model.sceneParams[GRID_VOLUME_DATA_SIGMA_T_STR].shape[0]
                 * 2,
             )
-            step_size = min(64, step_size * 2)
-            spp = min(2, spp * 2)
+            step_size = min(32, step_size * 2)
+            spp = min(self.model.samplesPerPixel, spp * 2)
             logging.info(
                 f"New configuration: ic={step_size}, res={grid_res}, spp={spp}"
             )
