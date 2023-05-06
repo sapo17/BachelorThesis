@@ -222,7 +222,7 @@
 	</bsdf>
 </bsdf>
 <bsdf type="principled" id="mat-ObjectBsdf">
-	<rgb name="base_color" value="0.1, 0.1, 0.1"/>
+	<rgb name="base_color" value="0 0 0"/>
 	<float name="roughness" value="0.7"/>
 	<float name="spec_trans" value="0.1"/>
 	<float name="eta" value="1.64"/>
@@ -247,8 +247,9 @@
 		<boolean name="face_normals" value="true"/>
 		<ref id="mat-PlaneBsdf" name="bsdf"/>
 	</shape>
-	<shape type="ply" id="bunny-rec">
-		<string name="filename" value="meshes/bunny_rec_128.ply"/>
+	<shape type="ply" id="bunny_rec">
+		<string name="filename" value="meshes/bunny_rec_512_3.ply"/>
+		<boolean name="face_normals" value="true"/>
 		<ref id="mat-ObjectBsdf" name="bsdf"/>
 	</shape>
 </scene>

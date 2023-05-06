@@ -203,13 +203,19 @@ class MaterialOptimizerController:
         currentSceneParams = {}
         for row in range(self.view.table.rowCount()):
             key = self.view.table.verticalHeaderItem(row).text()
-
+            valueType = type(initValue)
             initValue = self.model.initialSceneParams[key]
-            if self.model.sceneParams[key] == initValue:
+
+            if (
+                valueType is mi.TensorXf
+                and initValue.shape == self.model.sceneParams[key].shape
+            ):
+                if self.model.sceneParams[key] == initValue:
+                    continue
+            elif self.model.sceneParams[key] == initValue:
                 continue
 
             newValue = self.view.table.item(row, 0).text()
-            valueType = type(initValue)
             if valueType is mi.Color3f:
                 currentSceneParams[key] = self.model.stringToColor3f(newValue)
             elif valueType is mi.Float:
@@ -689,7 +695,7 @@ class MaterialOptimizerController:
                         valNpy = np.array(v)[:, :, :, 0]
                         verts, faces, normals, values = measure.marching_cubes(
                             valNpy,
-                            0.005,
+                            dr.min(v)[0] + 0.2 * np.std(v),
                             allow_degenerate=False,
                         )
 
