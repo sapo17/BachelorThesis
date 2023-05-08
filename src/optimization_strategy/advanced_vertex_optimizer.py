@@ -1,9 +1,14 @@
 import logging
 import time
+from typing import Union
 
 import mitsuba as mi
 import drjit as dr
-from src.constants import CLOSE_STATUS_STR
+from src.constants import (
+    ADVANCED_VERTEX_OPTIMIZATION_STRATEGY_LABEL,
+    CLOSE_STATUS_STR,
+    VERTEX_POSITIONS_PATTERN,
+)
 import src.material_optimizer_model as model
 import torch
 
@@ -19,10 +24,11 @@ class AdvancedVertexOptimizer(model.OptimizerStrategy):
 
     def __init__(self, model: model.MaterialOptimizerModel) -> None:
         self.model = model
+        self.label = ADVANCED_VERTEX_OPTIMIZATION_STRATEGY_LABEL
 
     def updateOptimizationLog(
         self, optLog, sensorIdx, currentLoss, regularizationLoss
-    ):
+    ) -> Union[list, list, str, dict]:
         lossStr = f"Sensor: {sensorIdx:02d}, "
         lossStr += f"Loss: {currentLoss[0]:.4f}"
         if dr.grad_enabled(regularizationLoss):
@@ -97,13 +103,14 @@ class AdvancedVertexOptimizer(model.OptimizerStrategy):
         tmpFailTracker = 0
         seed = 0
 
-        # prepare for regularization loss TODO make generic - let user select only one obj
-        vp = "bunny.vertex_positions"
-        bf = "bunny.faces"
+        # prepare for regularization loss
+        vertexPosParamLabel, facesParamLabel = self.getParamLabels(opts)
         M = self.getParameterizationMatrix(
-            self.model.sceneParams[vp], self.model.sceneParams[bf], lambda_=19
+            self.model.sceneParams[vertexPosParamLabel],
+            self.model.sceneParams[facesParamLabel],
+            lambda_=19,
         )
-        u = self.toDiff(M, self.model.sceneParams[vp])
+        u = self.toDiff(M, self.model.sceneParams[vertexPosParamLabel])
         dr.set_grad_enabled(u, True)
 
         startTime, optLog = self.model.startOptimizationLog()
@@ -125,7 +132,9 @@ class AdvancedVertexOptimizer(model.OptimizerStrategy):
 
                 # Evaluate regularization loss
                 v = self.fromDiff(M, u)
-                regLoss = dr.mean(dr.abs(v - self.model.sceneParams[vp]))
+                regLoss = dr.mean(
+                    dr.abs(v - self.model.sceneParams[vertexPosParamLabel])
+                )
                 if dr.grad_enabled(regLoss):
                     dr.backward(regLoss)
                 currentLoss += dr.detach(regLoss)
@@ -170,3 +179,38 @@ class AdvancedVertexOptimizer(model.OptimizerStrategy):
         )
 
         return lossHist, sceneParamsHist, optLog, diffRenderHist
+
+    def getParamLabels(self, opts):
+        vertexPosParamLabel = self.model.getParamLabel(
+            VERTEX_POSITIONS_PATTERN, opts
+        )
+        if vertexPosParamLabel is None:
+            raise RuntimeError(
+                "Unexpected behavior during advanced vertex pos. optimization."
+            )
+        parentStr = vertexPosParamLabel.replace(".vertex_positions", "")
+        facesParamLabel = parentStr + ".faces"
+        return vertexPosParamLabel, facesParamLabel
+
+    def checkOptimizationPreconditions(
+        self, checkedRows: list
+    ) -> Union[bool, str]:
+        """
+        Return True, if preconditions are fulfilled. Otherwise, return False
+        and an error message.
+
+        Precondition: User must select only one scene parameter label
+        with '*.vertex_positions'.
+        """
+        if (
+            self.model.countPatternInList(
+                VERTEX_POSITIONS_PATTERN, checkedRows
+            )
+            == 1
+        ):
+            return True, ""
+
+        msg = "For advanced vertex pos. optimization only one occurance of"
+        msg += " '*.vertex_positions' is allowed in the selected"
+        msg += " scene parameters."
+        return False, msg

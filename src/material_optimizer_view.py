@@ -174,11 +174,24 @@ class MaterialOptimizerView(QMainWindow):
         self.marginPercentageContainerLayout.addWidget(penaltyLabel)
         self.marginPercentageContainerLayout.addWidget(self.marginPenalty)
 
+        # optimization strategy dropdown
+        self.optStrategyContainer = QWidget(self.configContainer)
+        self.optStrategyContainerLayout = QHBoxLayout(
+            self.optStrategyContainer
+        )
+        optStrategyLabel = QLabel(text=OPTIMIZATION_STRATEGY_LABEL)
+        self.optStrategyBox = QComboBox()
+        self.optStrategyBox.addItems(OPT_STRATEGY_STRINGS)
+        self.optStrategyContainerLayout.addWidget(optStrategyLabel)
+        self.optStrategyContainerLayout.addWidget(self.optStrategyBox)
+
+        # add to the configuration layout
         self.configContainerLayout.addWidget(self.minErrContainer)
         self.configContainerLayout.addWidget(self.sppContainer)
         self.configContainerLayout.addWidget(self.lossFunctionContainer)
         self.configContainerLayout.addWidget(self.iterationContainer)
         self.configContainerLayout.addWidget(self.marginPercentageContainer)
+        self.configContainerLayout.addWidget(self.optStrategyContainer)
 
     def initProgessContainer(self, centralWidget):
         self.progressContainer = QWidget(self.bottomContainer)

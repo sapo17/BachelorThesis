@@ -60,11 +60,19 @@ LOSS_FUNCTION_STRINGS: list = [
     MAE_STRING,
     MBE_STRING,
 ]
+DEFAULT_OPTIMIZATION_STRATEGY_LABEL = "Default: Generic Optimization Strategy"
+GRID_VOLUME_OPTIMIZATION_STRATEGY_LABEL = "Grid Volume Optimization for Shape Reconstruction"
+ADVANCED_VERTEX_OPTIMIZATION_STRATEGY_LABEL = "Advanced Vertex Position Optimization for Shape Reconstruction"
+OPT_STRATEGY_STRINGS: list = [
+    DEFAULT_OPTIMIZATION_STRATEGY_LABEL,
+    GRID_VOLUME_OPTIMIZATION_STRATEGY_LABEL,
+    ADVANCED_VERTEX_OPTIMIZATION_STRATEGY_LABEL
+]
 LOSS_FUNCTION_STRING: str = "Loss function"
 SPP_DURING_OPT_STRING: str = "Samples per pixel"
 DEFAULT_MIN_CLAMP_VALUE: float = 0.001
 DEFAULT_MAX_CLAMP_VALUE: float = 0.999
-LOAD_REF_IMG_LABEL: str = "Load reference image/s"
+LOAD_REF_IMG_LABEL: str = "Load a (set of) reference image(s)"
 DEFAULT_LEARNING_RATE: float = 0.03
 DEFAULT_BETA_1: float = 0.9
 DEFAULT_BETA_2: float = 0.999
@@ -81,6 +89,7 @@ MARGIN_PERCENTAGE_LABEL = "Margin per penalty"
 MARGIN_PENALTY_LABEL = "Margin Penalty"
 NONE_STR = "None"
 EXPONENTIAL_DECAY_STR = "Exponential Decay"
+OPTIMIZATION_STRATEGY_LABEL = "Optimization Strategy"
 
 # Color Blind friendly colors: https://davidmathlogic.com/colorblind/#%23332288-%23117733-%2344AA99-%2388CCEE-%23DDCC77-%23CC6677-%23AA4499-%23882255
 TOL_GOLD_COLOR = "#DDCC77"
@@ -123,12 +132,6 @@ SHEEN_TINT_PATTERN: re.Pattern = re.compile(r".*\.sheen_tint")
 FLATNESS_PATTERN: re.Pattern = re.compile(r".*\.flatness")
 CLEARCOAT_PATTERN: re.Pattern = re.compile(r".*\.clearcoat")
 CLEARCOAT_GLOSS_PATTERN: re.Pattern = re.compile(r".*\.clearcoat_gloss")
-
-# special pattern: activates custom optimizer
-GRID_VOLUME_DATA_SIGMA_T_STR: str = "grid_volume_data.sigma_t.data"
-GRID_VOLUME_TO_OPTIMIZER_PATTERN: re.Pattern = re.compile(
-    GRID_VOLUME_DATA_SIGMA_T_STR
-)
 
 # max Index of refraction value is taken from
 # https://en.wikipedia.org/wiki/List_of_refractive_indices
@@ -266,8 +269,6 @@ PATTERNS_INTRODUCE_DISCONTINUITIES: list = [
     VERTEX_NORMALS_PATTERN,
 ]
 PATTERNS_REQUIRE_VOLUMETRIC_INTEGRATOR = [ALBEDO_PATTERN, SIGMA_T_PATTERN]
-
-OPTIMIZER_PATTERNS: list = [GRID_VOLUME_TO_OPTIMIZER_PATTERN]
 
 ### Constant dictionary: key: Pattern, value: default min and max clamp value
 def getDefaultLegalValues(pattern: re.Pattern) -> tuple([int, int]):
