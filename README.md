@@ -13,6 +13,11 @@ Saip Can Hasbay, 01428723, University of Vienna, [saipcanhasbay@gmail.com](saipc
 ### Dependencies:
 
 - Please refer to _requirements.txt_ for required python packages
+- For using the _AdvancedVertexOptimizer_ please install following dependencies **manually**:
+  - [PyTorch](https://pytorch.org/get-started/locally/)
+  - [Large Steps in Inverse Rendering of Geometry, Nicolet et al. 2021](https://github.com/rgl-epfl/large-steps-pytorch)
+    - `pip install largesteps`
+    - Please also refer to the README file provided in the above link.
 
 ### Installation
 

@@ -131,7 +131,17 @@ class MaterialOptimizerController:
     def onOptimizeBtnClicked(self):
         try:
             self.view.setDisabled(True)
-            self.optimizeMaterials()
+
+            checkedRows = self.getCheckedRows()
+            preconditionsOK, msg = self.model.checkOptimizationPreconditions(
+                checkedRows
+            )
+
+            if preconditionsOK:
+                self.startOptimization(checkedRows)
+            else:
+                self.view.showInfoMessageBox(msg)
+
             self.view.setDisabled(False)
         except Exception as err:
             msg = f"Exiting program. Runtime error during optimiztion: {err}"
@@ -139,20 +149,7 @@ class MaterialOptimizerController:
             self.view.showInfoMessageBox(msg)
             sys.exit()
 
-    def optimizeMaterials(self):
-
-        # Precondition: (1) reference image/s is/are loaded, and
-        #               (2) at least one checked scene parameter
-        checkedRows = self.getCheckedRows()
-        if (
-            self.model.sensorToReferenceImageDict is None
-            or len(checkedRows) <= 0
-        ):
-            msg = "Please make sure to load a reference image/s and to check "
-            msg += "at least one scene parameter for the optimization."
-            self.view.showInfoMessageBox(msg)
-            return
-
+    def startOptimization(self, checkedRows):
         # If the optimization being restarted: refresh progress bar and,
         # update scene parameters according to the view
         if self.view.progressBar.value() is self.view.progressBar.maximum():
@@ -271,6 +268,9 @@ class MaterialOptimizerController:
         self.view.table.verticalHeader().sectionPressed.connect(
             self.onVerticalHeaderSectionPressed
         )
+        self.view.optStrategyBox.currentTextChanged.connect(
+            self.onOptimizationStrategyChanged
+        )
 
     def onVerticalHeaderSectionDoubleClicked(self, rowIndex):
         rowLabel = self.getRowLabelText()
@@ -353,6 +353,16 @@ class MaterialOptimizerController:
 
     def onLossFunctionChanged(self, text: str):
         self.model.setLossFunction(text)
+
+    def onOptimizationStrategyChanged(self, text: str):
+        try:
+            self.model.setOptimizerStrategy(text)
+        except Exception as err:
+            self.view.optStrategyBox.setCurrentText(
+                DEFAULT_OPTIMIZATION_STRATEGY_LABEL
+            )
+            msg = f"Error: {str(err)}. Set default optimization strategy."
+            self.view.showInfoMessageBox(msg)
 
     def onLoadReferenceImageBtnClicked(self):
         self.model.setMinError(self.view.minErrLine.text())
@@ -683,37 +693,15 @@ class MaterialOptimizerController:
             outputDict = {}
             for k, v in sceneParamsHist[selectedIteration].items():
                 if type(v) is mi.TensorXf:
-                    # special output: volume
-                    if ALBEDO_DATA_PATTERN.search(k):
-                        self.outputVolume(outputFileDir, k, v)
-                    elif GRID_VOLUME_TO_OPTIMIZER_PATTERN.search(k):
-                        self.outputVolume(outputFileDir, k, v)
-
-                        # apply marching cubes
-                        from skimage import measure
-
-                        valNpy = np.array(v)[:, :, :, 0]
-                        verts, faces, normals, values = measure.marching_cubes(
-                            valNpy,
-                            dr.min(v)[0] + 0.2 * np.std(v),
-                            allow_degenerate=False,
-                        )
-
-                        verts, faces = self.convert_obj_to_br(
-                            verts, faces, valNpy.shape[0]
-                        )
-                        outputObjName = (
-                            outputFileDir + f"//optimized_volume_{k}.obj"
-                        )
-                        self.marching_cubes_to_obj(
-                            (verts, faces, normals, values), outputObjName
-                        )
-                    else:
-                        # special output: bitmap texture
+                    if len(v.shape) == 3:
+                        # assume texture (width, height, channels)
                         outputTextureFileName = (
                             outputFileDir + f"/optimized_texture_{k}.png"
                         )
                         mi.util.write_bitmap(outputTextureFileName, v)
+                    elif len(v.shape) == 4:
+                        # assume volume (width, height, depth, channels)
+                        self.outputVolume(outputFileDir, k, v)
                 elif type(v) is mi.Float:
                     floatArray = [f for f in v]
                     if VERTEX_POSITIONS_PATTERN.search(k):
@@ -735,6 +723,9 @@ class MaterialOptimizerController:
                 else:
                     # default case: fill the dictionary
                     outputDict[k] = str(v)
+
+                # optimization strategy specific output
+                self.model.outputTask(k, v, outputFileDir)
 
             # output: filled dictionary
             json.dump(outputDict, outfile, indent=4)
@@ -1024,38 +1015,3 @@ class MaterialOptimizerController:
         diff_np = np.array(diff, dtype="float64")
         diff_np *= 1.0 / diff_np.max()
         return diff_np
-
-    @staticmethod
-    def convert_obj_to_br(verts, faces, voxel_size):
-        """
-        Note from Hasbay: Code taken from:
-        https://programtalk.com/vs4/python/brainglobe/brainreg-segment/brainreg_segment/regions/IO.py/
-        """
-        if voxel_size != 1:
-            verts = verts * voxel_size
-
-        faces = faces + 1
-        return verts, faces
-
-    @staticmethod
-    def marching_cubes_to_obj(marching_cubes_out, output_file):
-        """
-        Note from Hasbay: Code taken from:
-        https://programtalk.com/vs4/python/brainglobe/brainreg-segment/brainreg_segment/regions/IO.py/
-        Saves the output of skimage.measure.marching_cubes as an .obj file
-        :param marching_cubes_out: tuple
-        :param output_file: str
-        """
-
-        verts, faces, normals, _ = marching_cubes_out
-        with open(output_file, "w") as f:
-            for item in verts:
-                f.write(f"v {item[0]} {item[1]} {item[2]}\n")
-            for item in normals:
-                f.write(f"vn {item[0]} {item[1]} {item[2]}\n")
-            for item in faces:
-                f.write(
-                    f"f {item[0]}//{item[0]} {item[1]}//{item[1]} "
-                    f"{item[2]}//{item[2]}\n"
-                )
-            f.close()

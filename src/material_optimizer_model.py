@@ -10,6 +10,7 @@ import logging
 from src.constants import *
 import time
 from abc import ABC, abstractmethod
+from typing import Union
 
 
 class MaterialOptimizerModel:
@@ -18,12 +19,7 @@ class MaterialOptimizerModel:
     def __init__(self) -> None:
         self.sensorToReferenceImageDict = None
         self.sceneRes = (256, 256)
-
-        from src.optimization_strategy.default_optimizer import (
-            DefaultOptimizerStrategy,
-        )
-
-        self.setOptimizerStrategy(DefaultOptimizerStrategy(self))
+        self.setOptimizerStrategy(DEFAULT_OPTIMIZATION_STRATEGY_LABEL)
         self.loadMitsubaScene()
         self.setSceneParams(self.scene)
         self.setInitialSceneParams(self.sceneParams)
@@ -37,10 +33,40 @@ class MaterialOptimizerModel:
     def getOptimizerStrategy(self) -> OptimizerStrategy:
         return self.optimizerStrategy
 
-    def setOptimizerStrategy(
-        self, optimizerStrategy: OptimizerStrategy
-    ) -> None:
-        self.optimizerStrategy = optimizerStrategy
+    def setOptimizerStrategy(self, optimizerStrategyStr: str) -> None:
+        """
+        Sets the optimization strategy. If the provided string is not found,
+        the default optimization strategy will be used.
+        """
+        if optimizerStrategyStr == DEFAULT_OPTIMIZATION_STRATEGY_LABEL:
+            from src.optimization_strategy.default_optimizer import (
+                DefaultOptimizerStrategy,
+            )
+
+            self.optimizerStrategy = DefaultOptimizerStrategy(self)
+        elif optimizerStrategyStr == GRID_VOLUME_OPTIMIZATION_STRATEGY_LABEL:
+            from src.optimization_strategy.grid_volume_optimizer import (
+                GridVolumeOptimizer,
+            )
+
+            self.optimizerStrategy = GridVolumeOptimizer(self)
+        elif (
+            optimizerStrategyStr == ADVANCED_VERTEX_OPTIMIZATION_STRATEGY_LABEL
+        ):
+            from src.optimization_strategy.advanced_vertex_optimizer import (
+                AdvancedVertexOptimizer,
+            )
+
+            self.optimizerStrategy = AdvancedVertexOptimizer(self)
+        else:
+            from src.optimization_strategy.default_optimizer import (
+                DefaultOptimizerStrategy,
+            )
+
+            self.optimizerStrategy = DefaultOptimizerStrategy(self)
+            optimizerStrategyStr = DEFAULT_OPTIMIZATION_STRATEGY_LABEL
+
+        logging.info(f"Optimization Strategy: {optimizerStrategyStr}")
 
     def setScene(self, fileName: str, sceneRes: tuple, integratorType: str):
         self.scene = mi.load_file(
@@ -56,7 +82,6 @@ class MaterialOptimizerModel:
             self.handleMissingCboxFile(fileName)
 
         self.integratorType = self.findPossibleIntegratorType(fileName)
-        self.setOptimizerStrategy(self.findPossibleOptimizerStrategy(fileName))
         self.setScene(fileName, self.sceneRes, self.integratorType)
         self.fileName = fileName
 
@@ -128,30 +153,21 @@ class MaterialOptimizerModel:
         logging.info(f"Integrator type: {integratorType}")
         return integratorType
 
-    def findPossibleOptimizerStrategy(self, fileName) -> OptimizerStrategy:
-        from src.optimization_strategy.default_optimizer import (
-            DefaultOptimizerStrategy,
-        )
-
-        tmpScene: mi.Scene = mi.load_file(fileName)
-        tmpParams = mi.traverse(tmpScene)
-
-        result = DefaultOptimizerStrategy(self)
-        if self.anyInPatterns(tmpParams, OPTIMIZER_PATTERNS):
-            from src.optimization_strategy.grid_volume_optimizer import (
-                GridVolumeOptimizer,
-            )
-
-            result = GridVolumeOptimizer(self)
-            logging.info(f"Optimizer type: GridVolumeOptimizer")
-
-        return result
-
     def anyInPatterns(self, tmpParams, patterns: list):
         return any(
             pattern.search(k)
             for k in tmpParams.properties
             for pattern in patterns
+        )
+
+    @staticmethod
+    def countPatternInList(pattern: re.Pattern, l: list):
+        return len(
+            list(
+                filter(
+                    lambda elem: elem != None, [pattern.search(s) for s in l]
+                )
+            )
         )
 
     def resetSensorToReferenceImageDict(self):
@@ -230,12 +246,6 @@ class MaterialOptimizerModel:
             key
         ) or VERTEX_NORMALS_PATTERN.search(key):
             self.ensureLegalVertexPositions(opt, key)
-        elif GRID_VOLUME_TO_OPTIMIZER_PATTERN.search(key):
-            opt[key] = dr.clamp(
-                opt[key],
-                0.0,
-                self.optimizationParams[key][COLUMN_LABEL_MAX_CLAMP_LABEL],
-            )
         else:
             opt[key] = dr.clamp(
                 opt[key],
@@ -697,55 +707,95 @@ class MaterialOptimizerModel:
         )
         return mi.TensorXf(r, img.shape)
 
+    def checkOptimizationPreconditions(
+        self, checkedRows: list
+    ) -> Union[bool, str]:
+        """
+        Return True, if preconditions are fulfilled. Otherwise, return False
+        and an error message.
+
+        Precondition:
+            - reference image/s is/are loaded, and
+            - at least one checked scene parameter
+            - Optimization strategy: See OptimizerStrategy implementations.
+        """
+        msg = ""
+        if self.sensorToReferenceImageDict is None or len(checkedRows) <= 0:
+            msg += "Please make sure to load a reference image/s and to check "
+            msg += "at least one scene parameter for the optimization."
+            return False, msg
+
+        # strategy specific preconditions
+        return self.optimizerStrategy.checkOptimizationPreconditions(
+            checkedRows
+        )
+
     @staticmethod
-    def evalDiscreteLaplacianRegularazation(data, _=None):
-        """
-        Taken from Vicini et al. 2022, Differentiable SDF Rendering.
-        Simple discrete laplacian regularization to encourage smooth surfaces.
-        """
+    def getParamLabel(pattern: re.Pattern, opts: list):
+        for opt in opts:
+            for param in opt.variables.keys():
+                if pattern.match(param):
+                    return param
+        return None
 
-        def linerIdx(p):
-            p.x = dr.clamp(p.x, 0, data.shape[0] - 1)
-            p.y = dr.clamp(p.y, 0, data.shape[1] - 1)
-            p.z = dr.clamp(p.z, 0, data.shape[2] - 1)
-            return (
-                p.z * data.shape[1] * data.shape[0] + p.y * data.shape[0] + p.x
-            )
-
-        shape = data.shape
-        z, y, x = dr.meshgrid(
-            *[dr.arange(mi.Float, shape[i]) for i in range(3)], indexing="ij"
+    def outputTask(self, paramLabel, paramValue, outputFileDir):
+        return self.optimizerStrategy.output(
+            paramLabel, paramValue, outputFileDir
         )
-        p = mi.Point3i(x, y, z)
-        c = dr.gather(mi.Float, data.array, linerIdx(p))
-        vx0 = dr.gather(
-            mi.Float, data.array, linerIdx(p + mi.Vector3i(-1, 0, 0))
-        )
-        vx1 = dr.gather(
-            mi.Float, data.array, linerIdx(p + mi.Vector3i(1, 0, 0))
-        )
-        vy0 = dr.gather(
-            mi.Float, data.array, linerIdx(p + mi.Vector3i(0, -1, 0))
-        )
-        vy1 = dr.gather(
-            mi.Float, data.array, linerIdx(p + mi.Vector3i(0, 1, 0))
-        )
-        vz0 = dr.gather(
-            mi.Float, data.array, linerIdx(p + mi.Vector3i(0, 0, -1))
-        )
-        vz1 = dr.gather(
-            mi.Float, data.array, linerIdx(p + mi.Vector3i(0, 0, 1))
-        )
-        laplacian = dr.sqr(c - (vx0 + vx1 + vy0 + vy1 + vz0 + vz1) / 6)
-        return dr.sum(laplacian)
 
 
 class OptimizerStrategy(ABC):
+    """
+    Interface for optimization strategies. Allows implementation of diverse
+    optimization procedures. A simple example can be found in
+    DefaultOptimizationStrategy.
+    Please make sure to to implement a 'label: str' for your strategy.
+    """
+
     @abstractmethod
     def optimizationLoop(
         self,
         opts: list,
         setProgressValue: callable = None,
         showDiffRender: callable = None,
-    ):
+    ) -> Union[list, list, str, dict]:
+        """
+        Each optimization strategy must implement this method. The method must
+        return the following values:
+
+            - lossHist: list = Returns a list of floats that refers to the
+              loss at each iteration during optimization.
+            - sceneParamsHist: list = Returns a list of dict entries. Each dict
+              has a key and value pairs, where the key refers to a label of a
+              scene parameter and value refers to the corresponding value. See
+              also MaterialOptimizerModel::updateLossAndSceneParamsHist().
+            - optLog: str = String that contains logging information. See also
+              MaterialOptimizerModel::updateOptimizationLog().
+            - diffRenderHist: dict = Returns a dict, where the key refers to a
+              sensor index defined in the scene, and value is a list that
+              contains rendered image (type: mitsuba.TensorXf).
+
+        A simple example
+        can be found in DefaultOptimizationStrategy.
+        """
         pass
+
+    def checkOptimizationPreconditions(
+        self,
+        checkedRows: list,
+    ) -> Union[bool, str]:
+        """
+        Return True, if preconditions are fulfilled. Otherwise, return False
+        and an error message.
+        """
+        return True, ""
+
+    def output(self, paramLabel, paramValue, outputFileDir):
+        """
+        Implements an output strategy for given parameters.
+
+        - paramLabel: scene parameter label
+        - paramLabel: scene parameter value
+        - outputFileDir: output directory for the output task
+        """
+        return

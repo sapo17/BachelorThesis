@@ -1,5 +1,6 @@
 import time
-from src.constants import CLOSE_STATUS_STR
+from typing import Union
+from src.constants import CLOSE_STATUS_STR, DEFAULT_OPTIMIZATION_STRATEGY_LABEL
 import drjit as dr
 import src.material_optimizer_model as model
 
@@ -10,6 +11,7 @@ class DefaultOptimizerStrategy(model.OptimizerStrategy):
     """
 
     def __init__(self, model: model.MaterialOptimizerModel) -> None:
+        self.label = DEFAULT_OPTIMIZATION_STRATEGY_LABEL
         self.model = model
 
     def optimizationLoop(
@@ -17,7 +19,7 @@ class DefaultOptimizerStrategy(model.OptimizerStrategy):
         opts: list,
         setProgressValue: callable = None,
         showDiffRender: callable = None,
-    ):
+    ) -> Union[list, list, str, dict]:
         lossHist = []
         sceneParamsHist = []
         sensors = self.model.scene.sensors()
@@ -80,3 +82,9 @@ class DefaultOptimizerStrategy(model.OptimizerStrategy):
         )
 
         return lossHist, sceneParamsHist, optLog, diffRenderHist
+
+    def checkOptimizationPreconditions(
+        self, checkedRows: list
+    ) -> Union[bool, str]:
+        """No specific constraints."""
+        return True, ""
