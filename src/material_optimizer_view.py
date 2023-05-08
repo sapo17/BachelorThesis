@@ -114,25 +114,6 @@ class MaterialOptimizerView(QMainWindow):
         self.configContainer = QWidget(self.bottomContainer)
         self.configContainerLayout = QVBoxLayout(self.configContainer)
 
-        # min error text input
-        self.minErrContainer = QWidget(self.configContainer)
-        self.minErrContainerLayout = QHBoxLayout(self.minErrContainer)
-        minErrLabel = QLabel(text=COLUMN_LABEL_MINIMUM_ERROR)
-        self.minErrLine = QLineEdit()
-        self.minErrLine.setText(str(DEFAULT_MIN_ERR))
-        self.minErrContainerLayout.addWidget(minErrLabel)
-        self.minErrContainerLayout.addWidget(self.minErrLine)
-
-        # samples per pixel dropdown
-        self.sppContainer = QWidget(self.configContainer)
-        self.sppContainerLayout = QHBoxLayout(self.sppContainer)
-        samplesPerPixelLabel = QLabel(text=SPP_DURING_OPT_STRING)
-        self.samplesPerPixelBox = QComboBox()
-        self.samplesPerPixelBox.addItems(SUPPORTED_SPP_VALUES)
-        self.samplesPerPixelBox.setCurrentText(SUPPORTED_SPP_VALUES[2])
-        self.sppContainerLayout.addWidget(samplesPerPixelLabel)
-        self.sppContainerLayout.addWidget(self.samplesPerPixelBox)
-
         # loss function dropdown
         self.lossFunctionContainer = QWidget(self.configContainer)
         self.lossFunctionContainerLayout = QHBoxLayout(
@@ -143,36 +124,6 @@ class MaterialOptimizerView(QMainWindow):
         self.lossFunctionBox.addItems(LOSS_FUNCTION_STRINGS)
         self.lossFunctionContainerLayout.addWidget(lossFunctionLabel)
         self.lossFunctionContainerLayout.addWidget(self.lossFunctionBox)
-
-        # iteration count input
-        self.iterationContainer = QWidget(self.configContainer)
-        self.iterationContainerLayout = QHBoxLayout(self.iterationContainer)
-        iterationCountLabel = QLabel(text=COLUMN_LABEL_ITERATION_COUNT)
-        self.iterationCountLine = QLineEdit()
-        self.iterationCountLine.setText(str(DEFAULT_ITERATION_COUNT))
-        self.iterationContainerLayout.addWidget(iterationCountLabel)
-        self.iterationContainerLayout.addWidget(self.iterationCountLine)
-
-        # margin container
-        self.marginPercentageContainer = QWidget(self.configContainer)
-        self.marginPercentageContainerLayout = QHBoxLayout(
-            self.marginPercentageContainer
-        )
-        # margin percentage input
-        marginPercentageLabel = QLabel(text=MARGIN_PERCENTAGE_LABEL)
-        self.marginPercentageLine = QLineEdit()
-        self.marginPercentageLine.setText(INF_STR)
-        self.marginPercentageContainerLayout.addWidget(marginPercentageLabel)
-        self.marginPercentageContainerLayout.addWidget(
-            self.marginPercentageLine
-        )
-        # margin percentage penalty
-        penaltyLabel = QLabel(text=MARGIN_PENALTY_LABEL)
-        self.marginPenalty = QComboBox()
-        self.marginPenalty.addItems([NONE_STR, EXPONENTIAL_DECAY_STR])
-        self.marginPenalty.setCurrentText(NONE_STR)
-        self.marginPercentageContainerLayout.addWidget(penaltyLabel)
-        self.marginPercentageContainerLayout.addWidget(self.marginPenalty)
 
         # optimization strategy dropdown
         self.optStrategyContainer = QWidget(self.configContainer)
@@ -185,13 +136,20 @@ class MaterialOptimizerView(QMainWindow):
         self.optStrategyContainerLayout.addWidget(optStrategyLabel)
         self.optStrategyContainerLayout.addWidget(self.optStrategyBox)
 
+        # advanced settings button
+        self.advancedSettingsBtnContainer = QWidget(self.configContainer)
+        self.advancedSettingsBtnContainerLayout = QHBoxLayout(
+            self.advancedSettingsBtnContainer
+        )
+        self.advancedSettingsBtn = QPushButton("Advanced Settings")
+        self.advancedSettingsBtnContainerLayout.addWidget(
+            self.advancedSettingsBtn
+        )
+
         # add to the configuration layout
-        self.configContainerLayout.addWidget(self.minErrContainer)
-        self.configContainerLayout.addWidget(self.sppContainer)
         self.configContainerLayout.addWidget(self.lossFunctionContainer)
-        self.configContainerLayout.addWidget(self.iterationContainer)
-        self.configContainerLayout.addWidget(self.marginPercentageContainer)
         self.configContainerLayout.addWidget(self.optStrategyContainer)
+        self.configContainerLayout.addWidget(self.advancedSettingsBtnContainer)
 
     def initProgessContainer(self, centralWidget):
         self.progressContainer = QWidget(self.bottomContainer)
@@ -370,6 +328,86 @@ class PopUpWindow(QMainWindow):
         self.parent().setDisabled(False)
         self.destroy()
         return super().closeEvent(a0)
+
+
+class AdvancedSettingsPopUp(PopUpWindow):
+    def __init__(self, parent: MaterialOptimizerView):
+        super(AdvancedSettingsPopUp, self).__init__(parent)
+        parent.setDisabled(False)
+        self.setWindowTitle("Advanced Settings")
+
+    def initComponents(self):
+        """
+        Important components are going to be assigned to the parent. These
+        are:
+            - minErrLine: QLineEdit
+            - samplesPerPixelBox: QComboBox
+            - iterationCountLine: QLineEdit
+            - marginPercentageLine = QLineEdit
+            - marginPenalty = QComboBox
+        """
+        # central widget
+        centralWidgetContainer = QWidget()
+        centralWidgetContainerLayout = QVBoxLayout(centralWidgetContainer)
+
+        # min error text input
+        minErrContainer = QWidget()
+        minErrContainerLayout = QHBoxLayout(minErrContainer)
+        minErrLabel = QLabel(text=COLUMN_LABEL_MINIMUM_ERROR)
+        self.parent().minErrLine = QLineEdit()
+        self.parent().minErrLine.setText(str(DEFAULT_MIN_ERR))
+        minErrContainerLayout.addWidget(minErrLabel)
+        minErrContainerLayout.addWidget(self.parent().minErrLine)
+
+        # samples per pixel dropdown
+        sppContainer = QWidget()
+        sppContainerLayout = QHBoxLayout(sppContainer)
+        samplesPerPixelLabel = QLabel(text=SPP_DURING_OPT_STRING)
+        self.parent().samplesPerPixelBox = QComboBox()
+        self.parent().samplesPerPixelBox.addItems(SUPPORTED_SPP_VALUES)
+        self.parent().samplesPerPixelBox.setCurrentText(
+            SUPPORTED_SPP_VALUES[2]
+        )
+        sppContainerLayout.addWidget(samplesPerPixelLabel)
+        sppContainerLayout.addWidget(self.parent().samplesPerPixelBox)
+
+        # iteration count input
+        iterationContainer = QWidget()
+        iterationContainerLayout = QHBoxLayout(iterationContainer)
+        iterationCountLabel = QLabel(text=COLUMN_LABEL_ITERATION_COUNT)
+        self.parent().iterationCountLine = QLineEdit()
+        self.parent().iterationCountLine.setText(str(DEFAULT_ITERATION_COUNT))
+        iterationContainerLayout.addWidget(iterationCountLabel)
+        iterationContainerLayout.addWidget(self.parent().iterationCountLine)
+
+        marginPercentageContainer = QWidget()
+        marginPercentageContainerLayout = QHBoxLayout(
+            marginPercentageContainer
+        )
+        # margin percentage input
+        marginPercentageLabel = QLabel(text=MARGIN_PERCENTAGE_LABEL)
+        self.parent().marginPercentageLine = QLineEdit()
+        self.parent().marginPercentageLine.setText(INF_STR)
+        marginPercentageContainerLayout.addWidget(marginPercentageLabel)
+        marginPercentageContainerLayout.addWidget(
+            self.parent().marginPercentageLine
+        )
+        # margin percentage penalty
+        penaltyLabel = QLabel(text=MARGIN_PENALTY_LABEL)
+        self.parent().marginPenalty = QComboBox()
+        self.parent().marginPenalty.addItems([NONE_STR, EXPONENTIAL_DECAY_STR])
+        self.parent().marginPenalty.setCurrentText(NONE_STR)
+        marginPercentageContainerLayout.addWidget(penaltyLabel)
+        marginPercentageContainerLayout.addWidget(self.parent().marginPenalty)
+
+        centralWidgetContainerLayout.addWidget(minErrContainer)
+        centralWidgetContainerLayout.addWidget(sppContainer)
+        centralWidgetContainerLayout.addWidget(iterationContainer)
+        centralWidgetContainerLayout.addWidget(marginPercentageContainer)
+        self.setCentralWidget(centralWidgetContainer)
+
+    def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
+        return  # nothing to do here...
 
 
 class MplCanvas(FigureCanvasQTAgg):

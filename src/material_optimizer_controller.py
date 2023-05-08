@@ -10,6 +10,7 @@ import numpy as np
 from src.constants import *
 from src.material_optimizer_model import MaterialOptimizerModel
 from src.material_optimizer_view import (
+    AdvancedSettingsPopUp,
     MaterialOptimizerView,
     MplCanvas,
     PopUpWindow,
@@ -246,21 +247,8 @@ class MaterialOptimizerController:
         self.view.loadRefImgBtn.clicked.connect(
             self.onLoadReferenceImageBtnClicked
         )
-        self.view.minErrLine.editingFinished.connect(self.onMinErrLineChanged)
-        self.view.iterationCountLine.editingFinished.connect(
-            self.onIterationCountLineChanged
-        )
-        self.view.samplesPerPixelBox.currentTextChanged.connect(
-            self.onSamplesPerPixelChanged
-        )
         self.view.lossFunctionBox.currentTextChanged.connect(
             self.onLossFunctionChanged
-        )
-        self.view.marginPercentageLine.editingFinished.connect(
-            self.onMarginPercentageChanged
-        )
-        self.view.marginPenalty.currentTextChanged.connect(
-            self.onMarginPenaltyChanged
         )
         self.view.table.verticalHeader().sectionDoubleClicked.connect(
             self.onVerticalHeaderSectionDoubleClicked
@@ -270,6 +258,9 @@ class MaterialOptimizerController:
         )
         self.view.optStrategyBox.currentTextChanged.connect(
             self.onOptimizationStrategyChanged
+        )
+        self.view.advancedSettingsBtn.clicked.connect(
+            self.onAdvancedSettingsBtnClicked
         )
 
     def onVerticalHeaderSectionDoubleClicked(self, rowIndex):
@@ -365,8 +356,6 @@ class MaterialOptimizerController:
             self.view.showInfoMessageBox(msg)
 
     def onLoadReferenceImageBtnClicked(self):
-        self.model.setMinError(self.view.minErrLine.text())
-        self.model.setIterationCount(self.view.iterationCountLine.text())
         self.loadReferenceImages()
 
     def getColumnIndex(self, columnLabel: str):
@@ -1015,3 +1004,25 @@ class MaterialOptimizerController:
         diff_np = np.array(diff, dtype="float64")
         diff_np *= 1.0 / diff_np.max()
         return diff_np
+
+    def onAdvancedSettingsBtnClicked(self):
+        if not hasattr(self.view, "advancedSettingsPopUp"):
+            self.view.advancedSettingsPopUp = AdvancedSettingsPopUp(self.view)
+            self.view.advancedSettingsPopUp.initComponents()
+            self.connectAdvancedSettingsSignals()
+        self.view.advancedSettingsPopUp.show()
+
+    def connectAdvancedSettingsSignals(self):
+        self.view.minErrLine.editingFinished.connect(self.onMinErrLineChanged)
+        self.view.iterationCountLine.editingFinished.connect(
+            self.onIterationCountLineChanged
+        )
+        self.view.samplesPerPixelBox.currentTextChanged.connect(
+            self.onSamplesPerPixelChanged
+        )
+        self.view.marginPercentageLine.editingFinished.connect(
+            self.onMarginPercentageChanged
+        )
+        self.view.marginPenalty.currentTextChanged.connect(
+            self.onMarginPenaltyChanged
+        )

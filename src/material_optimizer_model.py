@@ -25,6 +25,8 @@ class MaterialOptimizerModel:
         self.setInitialSceneParams(self.sceneParams)
         self.setDefaultOptimizationParams(self.initialSceneParams)
         self.setSamplesPerPixel(SUPPORTED_SPP_VALUES[2])
+        self.setIterationCount(DEFAULT_ITERATION_COUNT)
+        self.setMinError(DEFAULT_MIN_ERR)
         self.setLossFunction(LOSS_FUNCTION_STRINGS[0])
         self.setMarginPercentage(INF_STR)
         self.setMarginPenalty(NONE_STR)
