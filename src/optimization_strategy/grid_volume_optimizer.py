@@ -1,6 +1,7 @@
 import logging
 import time
 from typing import Union
+from typing_extensions import override
 
 import numpy as np
 import mitsuba as mi
@@ -41,6 +42,7 @@ class GridVolumeOptimizer(model.OptimizerStrategy):
         logging.info(lossStr)
         optLog.append(lossStr + "\n")
 
+    @override
     def optimizationLoop(
         self,
         opts: list,
@@ -62,7 +64,9 @@ class GridVolumeOptimizer(model.OptimizerStrategy):
         it = 0
         spp = 1
         seed = 0
-        gridVolumeParamLabel = self.model.getParamLabel(SIGMA_T_PATTERN, opts)
+        gridVolumeParamLabel = self.model.getParamLabelFromOpts(
+            SIGMA_T_PATTERN, opts
+        )
         if gridVolumeParamLabel is None:
             raise RuntimeError(
                 "Unexpected behavior during grid volume optimization."
@@ -170,6 +174,7 @@ class GridVolumeOptimizer(model.OptimizerStrategy):
 
         return lossHist, sceneParamsHist, optLog, diffRenderHist
 
+    @override
     def checkOptimizationPreconditions(
         self, checkedRows: list
     ) -> Union[bool, str]:
@@ -187,6 +192,7 @@ class GridVolumeOptimizer(model.OptimizerStrategy):
         msg += " '*.sigma_t.data' is allowed in the selected scene parameters."
         return False, msg
 
+    @override
     def output(self, paramLabel, paramValue, outputFileDir):
         """
         Implements an output strategy for given parameters.

@@ -269,16 +269,7 @@ class MaterialOptimizerModel:
         return EMPTY_PATTERN
 
     def initOptimizers(self, params: list) -> list:
-        return [
-            mi.ad.Adam(
-                lr=self.optimizationParams[k][COLUMN_LABEL_LEARNING_RATE],
-                beta_1=self.optimizationParams[k][COLUMN_LABEL_BETA_1],
-                beta_2=self.optimizationParams[k][COLUMN_LABEL_BETA_2],
-                params={k: self.sceneParams[k]},
-                mask_updates=True,
-            )
-            for k in params
-        ]
+        return self.optimizerStrategy.initOptimizers(params)
 
     @staticmethod
     def render(
@@ -539,13 +530,7 @@ class MaterialOptimizerModel:
         return dr.mean(refImage - image)
 
     def prepareOptimization(self, checkedRows: list):
-        opts = self.initOptimizers(checkedRows)
-        self.updateSceneParamsWithOptimizers(opts)
-        sensorToInitImg = {
-            sensor: self.render(self.scene, sensor, spp=256)
-            for sensor in self.scene.sensors()
-        }
-        return opts, sensorToInitImg
+        return self.optimizerStrategy.prepareOptimization(checkedRows)
 
     def optimizationLoop(
         self,
@@ -733,12 +718,19 @@ class MaterialOptimizerModel:
         )
 
     @staticmethod
-    def getParamLabel(pattern: re.Pattern, opts: list):
+    def getParamLabelFromOpts(pattern: re.Pattern, opts: list):
+        param, _ = MaterialOptimizerModel.getParamLabelAndOptFromOpts(
+            pattern, opts
+        )
+        return param
+
+    @staticmethod
+    def getParamLabelAndOptFromOpts(pattern: re.Pattern, opts: list):
         for opt in opts:
             for param in opt.variables.keys():
                 if pattern.match(param):
-                    return param
-        return None
+                    return param, opt
+        return None, None
 
     def outputTask(self, paramLabel, paramValue, outputFileDir):
         return self.optimizerStrategy.output(
@@ -801,3 +793,26 @@ class OptimizerStrategy(ABC):
         - outputFileDir: output directory for the output task
         """
         return
+
+    def initOptimizers(self, params: list) -> list:
+        return [
+            mi.ad.Adam(
+                lr=self.model.optimizationParams[k][
+                    COLUMN_LABEL_LEARNING_RATE
+                ],
+                beta_1=self.model.optimizationParams[k][COLUMN_LABEL_BETA_1],
+                beta_2=self.model.optimizationParams[k][COLUMN_LABEL_BETA_2],
+                params={k: self.model.sceneParams[k]},
+                mask_updates=True,
+            )
+            for k in params
+        ]
+
+    def prepareOptimization(self, checkedRows: list):
+        opts = self.model.initOptimizers(checkedRows)
+        self.model.updateSceneParamsWithOptimizers(opts)
+        sensorToInitImg = {
+            sensor: self.model.render(self.model.scene, sensor, spp=512)
+            for sensor in self.model.scene.sensors()
+        }
+        return opts, sensorToInitImg
