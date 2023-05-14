@@ -198,7 +198,7 @@
 </bsdf>
 <bsdf type="principled" id="mat-ObjectBsdf">
 	<texture name="base_color" type="bitmap">
-		<string name="filename" value="scenes\material-preview\textures\init-texture-720x480.png"/>
+		<string name="filename" value="scenes\material-preview\textures\init-texture-64.png"/>
 	</texture>
 	<float name="roughness" value="0.7"/>
 	<float name="spec_trans" value="0.1"/>
@@ -224,8 +224,8 @@
 		<boolean name="face_normals" value="true"/>
 		<ref id="mat-PlaneBsdf" name="bsdf"/>
 	</shape>
-	<shape type="obj" id="cube">
-		<string name="filename" value="meshes/cube.obj"/>
+	<shape type="ply" id="bunny">
+		<string name="filename" value="meshes/Icosphere.ply"/>
 		<boolean name="face_normals" value="true"/>
 		<ref id="mat-ObjectBsdf" name="bsdf"/>
 	</shape>

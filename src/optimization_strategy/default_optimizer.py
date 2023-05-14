@@ -1,5 +1,6 @@
 import time
 from typing import Union
+from typing_extensions import override
 from src.constants import CLOSE_STATUS_STR, DEFAULT_OPTIMIZATION_STRATEGY_LABEL
 import drjit as dr
 import src.material_optimizer_model as model
@@ -14,6 +15,7 @@ class DefaultOptimizerStrategy(model.OptimizerStrategy):
         self.label = DEFAULT_OPTIMIZATION_STRATEGY_LABEL
         self.model = model
 
+    @override
     def optimizationLoop(
         self,
         opts: list,
@@ -82,9 +84,3 @@ class DefaultOptimizerStrategy(model.OptimizerStrategy):
         )
 
         return lossHist, sceneParamsHist, optLog, diffRenderHist
-
-    def checkOptimizationPreconditions(
-        self, checkedRows: list
-    ) -> Union[bool, str]:
-        """No specific constraints."""
-        return True, ""

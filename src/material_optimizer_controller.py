@@ -201,18 +201,25 @@ class MaterialOptimizerController:
         currentSceneParams = {}
         for row in range(self.view.table.rowCount()):
             key = self.view.table.verticalHeaderItem(row).text()
-            valueType = type(initValue)
             initValue = self.model.initialSceneParams[key]
+            valueType = type(initValue)
 
+            # skip update, if init value is same as current value
             if (
                 valueType is mi.TensorXf
                 and initValue.shape == self.model.sceneParams[key].shape
             ):
                 if self.model.sceneParams[key] == initValue:
                     continue
-            elif self.model.sceneParams[key] == initValue:
+            elif (
+                valueType is mi.Float
+                and len(self.model.sceneParams[key]) == len(initValue)
+                and self.model.sceneParams[key] == initValue
+            ):
                 continue
+            #  NOTE: Add else case, if necessary
 
+            # try to update current values with init values
             newValue = self.view.table.item(row, 0).text()
             if valueType is mi.Color3f:
                 currentSceneParams[key] = self.model.stringToColor3f(newValue)
@@ -1010,7 +1017,21 @@ class MaterialOptimizerController:
             self.view.advancedSettingsPopUp = AdvancedSettingsPopUp(self.view)
             self.view.advancedSettingsPopUp.initComponents()
             self.connectAdvancedSettingsSignals()
+        self.toggleHiddenAdvancedSettings()
         self.view.advancedSettingsPopUp.show()
+
+    def toggleHiddenAdvancedSettings(self):
+        if (
+            self.model.optimizerStrategy.label
+            == ADVANCED_VERTEX_OPTIMIZATION_STRATEGY_LABEL
+        ):
+            self.view.useUniformAdamContainer.setHidden(False)
+            self.view.lambdaContainer.setHidden(False)
+            self.view.remeshContainer.setHidden(False)
+        else:
+            self.view.useUniformAdamContainer.setHidden(True)
+            self.view.lambdaContainer.setHidden(True)
+            self.view.remeshContainer.setHidden(True)
 
     def connectAdvancedSettingsSignals(self):
         self.view.minErrLine.editingFinished.connect(self.onMinErrLineChanged)
@@ -1026,3 +1047,46 @@ class MaterialOptimizerController:
         self.view.marginPenalty.currentTextChanged.connect(
             self.onMarginPenaltyChanged
         )
+        self.view.useUniformAdamBox.currentTextChanged.connect(
+            self.onUseUniformAdamChanged
+        )
+        self.view.lambdaLine.editingFinished.connect(
+            self.onParameterizationMatrixLambdaChanged
+        )
+        self.view.remeshBox.currentTextChanged.connect(
+            self.onRemeshStepSizeChanged
+        )
+
+    def onUseUniformAdamChanged(self, text: str):
+        if (
+            self.model.optimizerStrategy.label
+            != ADVANCED_VERTEX_OPTIMIZATION_STRATEGY_LABEL
+        ):
+            return
+        self.model.optimizerStrategy.toggleUseUniformAdam(text)
+
+    def onParameterizationMatrixLambdaChanged(self):
+        if (
+            self.model.optimizerStrategy.label
+            != ADVANCED_VERTEX_OPTIMIZATION_STRATEGY_LABEL
+        ):
+            return
+
+        try:
+            self.model.optimizerStrategy.setLambda(self.view.lambdaLine.text())
+        except Exception as err:
+            self.view.lambdaLine.setText(DEFAULT_LAMBDA_PARAM_MATRIX_VALUE)
+            self.view.showInfoMessageBox(str(err))
+
+    def onRemeshStepSizeChanged(self, text: str):
+        if (
+            self.model.optimizerStrategy.label
+            != ADVANCED_VERTEX_OPTIMIZATION_STRATEGY_LABEL
+        ):
+            return
+
+        try:
+            self.model.optimizerStrategy.setRemeshStepSize(text)
+        except Exception as err:
+            self.model.optimizerStrategy.setRemeshStepSize(NONE_STR)
+            self.view.showInfoMessageBox(str(err))

@@ -380,6 +380,7 @@ class AdvancedSettingsPopUp(PopUpWindow):
         iterationContainerLayout.addWidget(iterationCountLabel)
         iterationContainerLayout.addWidget(self.parent().iterationCountLine)
 
+        # margin percentage container
         marginPercentageContainer = QWidget()
         marginPercentageContainerLayout = QHBoxLayout(
             marginPercentageContainer
@@ -400,10 +401,47 @@ class AdvancedSettingsPopUp(PopUpWindow):
         marginPercentageContainerLayout.addWidget(penaltyLabel)
         marginPercentageContainerLayout.addWidget(self.parent().marginPenalty)
 
+        # use uniform adam (advanced vertex pos. opt.)
+        self.parent().useUniformAdamContainer = QWidget()
+        uniformAdamLayout = QHBoxLayout(self.parent().useUniformAdamContainer)
+        useUniformAdamLabel = QLabel(text=UNIFORM_ADAM_LABEL)
+        self.parent().useUniformAdamBox = QComboBox()
+        self.parent().useUniformAdamBox.addItems(FALSE_TRUE_IN_STR)
+        self.parent().useUniformAdamBox.setCurrentText(FALSE_TRUE_IN_STR[0])
+        uniformAdamLayout.addWidget(useUniformAdamLabel)
+        uniformAdamLayout.addWidget(self.parent().useUniformAdamBox)
+        self.parent().useUniformAdamContainer.setHidden(True)
+
+        # lambda (advanced vertex pos. opt.)
+        self.parent().lambdaContainer = QWidget()
+        lambdaContainerLayout = QHBoxLayout(self.parent().lambdaContainer)
+        lambdaLabel = QLabel(text=LAMBDA_PARAM_MATRIX_LABEL)
+        self.parent().lambdaLine = QLineEdit()
+        self.parent().lambdaLine.setText(DEFAULT_LAMBDA_PARAM_MATRIX_VALUE)
+        lambdaContainerLayout.addWidget(lambdaLabel)
+        lambdaContainerLayout.addWidget(self.parent().lambdaLine)
+        self.parent().lambdaContainer.setHidden(True)
+
+        # remesh step size (advanced vertex pos. opt.)
+        self.parent().remeshContainer = QWidget()
+        remeshContainerLayout = QHBoxLayout(self.parent().remeshContainer)
+        remeshStepSizeLabel = QLabel(text=REMESH_STEP_LABEL)
+        self.parent().remeshBox = QComboBox()
+        self.parent().remeshBox.addItems(REMESH_DROPDOWN_VALUES)
+        self.parent().remeshBox.setCurrentText(NONE_STR)
+        remeshContainerLayout.addWidget(remeshStepSizeLabel)
+        remeshContainerLayout.addWidget(self.parent().remeshBox)
+        self.parent().remeshContainer.setHidden(True)
+
         centralWidgetContainerLayout.addWidget(minErrContainer)
         centralWidgetContainerLayout.addWidget(sppContainer)
         centralWidgetContainerLayout.addWidget(iterationContainer)
         centralWidgetContainerLayout.addWidget(marginPercentageContainer)
+        centralWidgetContainerLayout.addWidget(
+            self.parent().useUniformAdamContainer
+        )
+        centralWidgetContainerLayout.addWidget(self.parent().lambdaContainer)
+        centralWidgetContainerLayout.addWidget(self.parent().remeshContainer)
         self.setCentralWidget(centralWidgetContainer)
 
     def closeEvent(self, a0: QtGui.QCloseEvent) -> None:

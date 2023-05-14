@@ -18,6 +18,8 @@ Saip Can Hasbay, 01428723, University of Vienna, [saipcanhasbay@gmail.com](saipc
   - [Large Steps in Inverse Rendering of Geometry, Nicolet et al. 2021](https://github.com/rgl-epfl/large-steps-pytorch)
     - `pip install largesteps`
     - Please also refer to the README file provided in the above link.
+  - [A Python Geometry Processing Toolbox](https://github.com/sgsellan/gpytoolbox)
+    - `python -m pip install gpytoolbox`
 
 ### Installation
 

@@ -61,12 +61,16 @@ LOSS_FUNCTION_STRINGS: list = [
     MBE_STRING,
 ]
 DEFAULT_OPTIMIZATION_STRATEGY_LABEL = "Default: Generic Optimization Strategy"
-GRID_VOLUME_OPTIMIZATION_STRATEGY_LABEL = "Grid Volume Optimization for Shape Reconstruction"
-ADVANCED_VERTEX_OPTIMIZATION_STRATEGY_LABEL = "Advanced Vertex Position Optimization for Shape Reconstruction"
+GRID_VOLUME_OPTIMIZATION_STRATEGY_LABEL = (
+    "Grid Volume Optimization for Shape Reconstruction"
+)
+ADVANCED_VERTEX_OPTIMIZATION_STRATEGY_LABEL = (
+    "Advanced Vertex Position Optimization for Shape Reconstruction"
+)
 OPT_STRATEGY_STRINGS: list = [
     DEFAULT_OPTIMIZATION_STRATEGY_LABEL,
     GRID_VOLUME_OPTIMIZATION_STRATEGY_LABEL,
-    ADVANCED_VERTEX_OPTIMIZATION_STRATEGY_LABEL
+    ADVANCED_VERTEX_OPTIMIZATION_STRATEGY_LABEL,
 ]
 LOSS_FUNCTION_STRING: str = "Loss function"
 SPP_DURING_OPT_STRING: str = "Samples per pixel"
@@ -90,6 +94,12 @@ MARGIN_PENALTY_LABEL = "Margin Penalty"
 NONE_STR = "None"
 EXPONENTIAL_DECAY_STR = "Exponential Decay"
 OPTIMIZATION_STRATEGY_LABEL = "Optimization Strategy"
+UNIFORM_ADAM_LABEL = "Use Uniform Adam"
+FALSE_TRUE_IN_STR = ["False", "True"]
+LAMBDA_PARAM_MATRIX_LABEL = "Lambda (Parameterization Matrix)"
+DEFAULT_LAMBDA_PARAM_MATRIX_VALUE = "19"
+REMESH_STEP_LABEL = "Remesh Step Size"
+REMESH_DROPDOWN_VALUES = ["None", "32", "64", "128", "256"]
 
 # Color Blind friendly colors: https://davidmathlogic.com/colorblind/#%23332288-%23117733-%2344AA99-%2388CCEE-%23DDCC77-%23CC6677-%23AA4499-%23882255
 TOL_GOLD_COLOR = "#DDCC77"
@@ -105,6 +115,7 @@ REFLECTANCE_PATTERN: re.Pattern = re.compile(r".*\.reflectance")
 ETA_PATTERN: re.Pattern = re.compile(r".*\.eta")
 ALPHA_PATTERN: re.Pattern = re.compile(r".*\.alpha")
 BASE_COLOR_PATTERN: re.Pattern = re.compile(r".*\.base_color")
+BASE_COLOR_DATA_PATTERN: re.Pattern = re.compile(r".*\.base_color.data")
 ROUGHNESS_PATTERN: re.Pattern = re.compile(r".*\.roughness")
 DIFF_TRANS_PATTERN: re.Pattern = re.compile(r".*\.diff_trans")
 SPECULAR_REFLECTANCE_PATTERN: re.Pattern = re.compile(
@@ -204,6 +215,13 @@ See also: https://mitsuba.readthedocs.io/en/stable/src/generated/plugins_volumes
 ALBEDO_DATA_PATTERN: re.Pattern = re.compile(r".*\.albedo.data")
 
 """ 
+Grid-based volume data source Constants
+See also: https://mitsuba.readthedocs.io/en/stable/src/generated/plugins_volumes.html#volumes
+"""
+SIGMA_T_DATA_PATTERN: re.Pattern = re.compile(r".*\.sigma_t.data")
+MIN_SIGMA_T_DATA_VALUE = 0.0
+
+""" 
 Shapes Constants
 See also: https://mitsuba.readthedocs.io/en/stable/src/generated/plugins_shapes.html#
 """
@@ -250,6 +268,7 @@ SUPPORTED_MITSUBA_PARAMETER_PATTERNS: list = [
     ALBEDO_DATA_PATTERN,
     VERTEX_POSITIONS_PATTERN,
     VERTEX_NORMALS_PATTERN,
+    SIGMA_T_DATA_PATTERN,
 ]
 PATTERNS_INTRODUCE_DISCONTINUITIES: list = [
     # see also parameter 'D' flags https://mitsuba.readthedocs.io/en/stable/src/generated/plugins_bsdfs.html#technical-details
@@ -268,7 +287,12 @@ PATTERNS_INTRODUCE_DISCONTINUITIES: list = [
     VERTEX_POSITIONS_PATTERN,
     VERTEX_NORMALS_PATTERN,
 ]
-PATTERNS_REQUIRE_VOLUMETRIC_INTEGRATOR = [ALBEDO_PATTERN, SIGMA_T_PATTERN]
+PATTERNS_REQUIRE_VOLUMETRIC_INTEGRATOR = [
+    ALBEDO_PATTERN,
+    SIGMA_T_PATTERN,
+    ALBEDO_DATA_PATTERN,
+    SIGMA_T_DATA_PATTERN,
+]
 
 ### Constant dictionary: key: Pattern, value: default min and max clamp value
 def getDefaultLegalValues(pattern: re.Pattern) -> tuple([int, int]):
@@ -290,6 +314,8 @@ def getDefaultLegalValues(pattern: re.Pattern) -> tuple([int, int]):
         result = (DEFAULT_MIN_CLAMP_VALUE, MAX_SCALE_VALUE)
     elif pattern is RADIANCE_PATTERN:
         result = (DEFAULT_MIN_CLAMP_VALUE, MAX_RADIANCE_VALUE)
+    elif pattern is SIGMA_T_DATA_PATTERN:
+        result = (MIN_SIGMA_T_DATA_VALUE, DEFAULT_MAX_CLAMP_VALUE)
     elif (
         pattern is VERTEX_POSITIONS_PATTERN
         or pattern is VERTEX_NORMALS_PATTERN
