@@ -226,7 +226,9 @@ class MaterialOptimizerModel:
         if vType is mi.Color3f:
             result[k] = mi.Color3f(v)
         elif vType is mi.Float:
-            if len(v) == 1:
+            if len(v) <= 0:
+                return
+            elif len(v) == 1:
                 result[k] = mi.Float(v[0])
             else:
                 result[k] = mi.Float(v)

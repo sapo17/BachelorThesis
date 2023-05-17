@@ -19,6 +19,7 @@ from src.constants import (
     FALSE_TRUE_IN_STR,
     NONE_STR,
     VERTEX_COLOR_PATTERN,
+    VERTEX_NORMALS_PATTERN,
     VERTEX_POSITIONS_PATTERN,
 )
 import src.material_optimizer_model as model
@@ -378,10 +379,15 @@ class AdvancedVertexOptimizer(model.OptimizerStrategy):
                 self.model.countPatternInList(
                     BASE_COLOR_DATA_PATTERN, checkedRows
                 )
-                == 1
+                >= 1
+                or self.model.countPatternInList(
+                    VERTEX_NORMALS_PATTERN, checkedRows
+                )
+                >= 1
             ):
-                msg = "Currently, texture and vertex pos. optimization isn't "
-                msg += "supported. Please unselect either one to continue."
+                msg = "Currently, texture, or vertex normal optimization isn't"
+                msg += " supported along with vertex position optimization. "
+                msg += "Please unselect either one to continue. "
                 msg += "Alternatively, vertex color optimization can be used "
                 msg += "along with vertex pos. optimization."
                 return False, msg
@@ -522,4 +528,3 @@ class AdvancedVertexOptimizer(model.OptimizerStrategy):
         opts, sensorToInitImg = super().prepareOptimization(checkedRows)
         torch.cuda.empty_cache()
         return opts, sensorToInitImg
-
