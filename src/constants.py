@@ -100,6 +100,8 @@ LAMBDA_PARAM_MATRIX_LABEL = "Lambda (Parameterization Matrix)"
 DEFAULT_LAMBDA_PARAM_MATRIX_VALUE = "19"
 REMESH_STEP_LABEL = "Remesh Step Size"
 REMESH_DROPDOWN_VALUES = ["None", "32", "64", "128", "256"]
+UPDATE_DIFF_RENDER_VALUES = ["None", "1", "5", "10", "25"]
+UPDATE_DIFF_RENDER_LABEL = "Update Diff. Render per Iteration (%)"
 
 # Color Blind friendly colors: https://davidmathlogic.com/colorblind/#%23332288-%23117733-%2344AA99-%2388CCEE-%23DDCC77-%23CC6677-%23AA4499-%23882255
 TOL_GOLD_COLOR = "#DDCC77"

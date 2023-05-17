@@ -350,6 +350,18 @@ class AdvancedSettingsPopUp(PopUpWindow):
         centralWidgetContainer = QWidget()
         centralWidgetContainerLayout = QVBoxLayout(centralWidgetContainer)
 
+        # update view per percent dropdown
+        updateViewContainer = QWidget()
+        updateViewContainerLayout = QHBoxLayout(updateViewContainer)
+        updateViewLabel = QLabel(text=UPDATE_DIFF_RENDER_LABEL)
+        self.parent().updateDiffRenderBox = QComboBox()
+        self.parent().updateDiffRenderBox.addItems(UPDATE_DIFF_RENDER_VALUES)
+        self.parent().updateDiffRenderBox.setCurrentText(
+            UPDATE_DIFF_RENDER_VALUES[1]
+        )
+        updateViewContainerLayout.addWidget(updateViewLabel)
+        updateViewContainerLayout.addWidget(self.parent().updateDiffRenderBox)
+
         # min error text input
         minErrContainer = QWidget()
         minErrContainerLayout = QHBoxLayout(minErrContainer)
@@ -433,6 +445,7 @@ class AdvancedSettingsPopUp(PopUpWindow):
         remeshContainerLayout.addWidget(self.parent().remeshBox)
         self.parent().remeshContainer.setHidden(True)
 
+        centralWidgetContainerLayout.addWidget(updateViewContainer)
         centralWidgetContainerLayout.addWidget(minErrContainer)
         centralWidgetContainerLayout.addWidget(sppContainer)
         centralWidgetContainerLayout.addWidget(iterationContainer)

@@ -30,6 +30,7 @@ class MaterialOptimizerModel:
         self.setLossFunction(LOSS_FUNCTION_STRINGS[0])
         self.setMarginPercentage(INF_STR)
         self.setMarginPenalty(NONE_STR)
+        self.setUpdateDiffRenderPerPercent(UPDATE_DIFF_RENDER_VALUES[1])
 
     @property
     def getOptimizerStrategy(self) -> OptimizerStrategy:
@@ -639,7 +640,9 @@ class MaterialOptimizerModel:
         lossHist,
         elapsedTime,
     ):
-        if showDiffRender is not None and (it == 1 or itPercent % 5 == 0):
+        if showDiffRender is not None and (
+            it == 1 or itPercent % self.updateDiffRenderPerPercent == 0
+        ):
             showDiffRender(
                 self.convertToBitmap(diffRender),
                 it,
@@ -738,6 +741,15 @@ class MaterialOptimizerModel:
         return self.optimizerStrategy.output(
             paramLabel, paramValue, outputFileDir
         )
+
+    def setUpdateDiffRenderPerPercent(self, value: str):
+        if value == NONE_STR:
+            self.updateDiffRenderPerPercent = None
+            return
+
+        if not MaterialOptimizerModel.is_int(value):
+            raise ValueError("Please provide a valid integer value (e.g. 1)")
+        self.updateDiffRenderPerPercent = int(value)
 
 
 class OptimizerStrategy(ABC):
