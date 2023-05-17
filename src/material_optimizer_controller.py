@@ -175,7 +175,7 @@ class MaterialOptimizerController:
         ) = self.model.optimizationLoop(
             opts,
             lambda x: self.view.progressBar.setValue(x),
-            self.view.showDiffRender,
+            self.getDiffRender(),
         )
 
         self.view.progressBar.setValue(self.view.progressBar.maximum())
@@ -196,6 +196,12 @@ class MaterialOptimizerController:
 
         self.view.optimizeButton.setDisabled(False)
         self.view.optimizeButton.setText(RESTART_OPTIMIZATION_STRING)
+
+    def getDiffRender(self):
+        result = None
+        if self.model.updateDiffRenderPerPercent:
+            result = self.view.showDiffRender
+        return result
 
     def getCurrentSceneParams(self):
         currentSceneParams = {}
@@ -1056,6 +1062,9 @@ class MaterialOptimizerController:
         self.view.remeshBox.currentTextChanged.connect(
             self.onRemeshStepSizeChanged
         )
+        self.view.updateDiffRenderBox.currentTextChanged.connect(
+            self.onUpdateDiffRenderBoxChanged
+        )
 
     def onUseUniformAdamChanged(self, text: str):
         if (
@@ -1089,4 +1098,13 @@ class MaterialOptimizerController:
             self.model.optimizerStrategy.setRemeshStepSize(text)
         except Exception as err:
             self.model.optimizerStrategy.setRemeshStepSize(NONE_STR)
+            self.view.showInfoMessageBox(str(err))
+
+    def onUpdateDiffRenderBoxChanged(self, text: str):
+        try:
+            self.model.setUpdateDiffRenderPerPercent(text)
+        except Exception as err:
+            self.model.setUpdateDiffRenderPerPercent(
+                UPDATE_DIFF_RENDER_VALUES[1]
+            )
             self.view.showInfoMessageBox(str(err))
